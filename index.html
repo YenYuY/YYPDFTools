@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="site_title">全能 PDF 工具箱 | 本地端安全處理</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 核心函式庫 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+    </script>
+
+    <style>
+        .loader {
+            border-top-color: #3b82f6;
+            -webkit-animation: spinner 1.5s linear infinite;
+            animation: spinner 1.5s linear infinite;
+        }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .tab-btn {
+            white-space: nowrap;
+            padding: 1rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+            color: #6b7280;
+        }
+        .tab-btn.active {
+            border-bottom-color: #2563eb;
+            color: #2563eb;
+            font-weight: 700;
+        }
+        .tab-btn:hover:not(.active) {
+            color: #374151;
+            background-color: #f9fafb;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col">
+
+    <!-- 導覽列 -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex h-16 items-center justify-between">
+                <!-- Logo -->
+                <div class="flex items-center gap-2">
+                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    <span class="font-bold text-xl tracking-tight hidden sm:block" data-i18n="nav_title">PDF 工具箱</span>
+                </div>
+
+                <!-- 右側選單 (語言 + 關於) -->
+                <div class="flex items-center gap-3">
+                    <button onclick="openAboutModal()" class="text-sm font-medium text-gray-600 hover:text-blue-600 flex items-center gap-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span data-i18n="nav_about">關於本站</span>
+                    </button>
+                    
+                    <select id="lang-selector" onchange="changeLanguage(this.value)" class="text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 py-1 pl-2 pr-6">
+                        <option value="zh-TW">繁體中文</option>
+                        <option value="en">English</option>
+                        <option value="ja">日本語</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 橫向滾動選單 -->
+    <div class="bg-white border-b shadow-sm">
+        <div class="max-w-5xl mx-auto px-2">
+            <div class="flex overflow-x-auto hide-scrollbar gap-2" id="tab-container">
+                <button onclick="switchTab('img')" class="tab-btn active" id="btn-tab-img" data-i18n="tab_img">PDF 轉圖片</button>
+                <button onclick="switchTab('merge')" class="tab-btn" id="btn-tab-merge" data-i18n="tab_merge">PDF 合併</button>
+                <button onclick="switchTab('split')" class="tab-btn" id="btn-tab-split" data-i18n="tab_split">PDF 分割</button>
+                <button onclick="switchTab('rotate')" class="tab-btn" id="btn-tab-rotate" data-i18n="tab_rotate">PDF 頁面旋轉</button>
+                <button onclick="switchTab('heic')" class="tab-btn text-purple-600" id="btn-tab-heic" data-i18n="tab_heic">HEIC 轉 JPG</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要內容區 -->
+    <main class="max-w-4xl mx-auto px-4 py-8 flex-grow w-full">
+
+        <!-- 1. PDF 轉圖片 -->
+        <section id="sec-img" class="block">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold" data-i18n="title_img">PDF 轉 JPG/PNG</h2>
+                <p class="text-gray-500" data-i18n="desc_img">將每一頁 PDF 轉換為圖片並打包下載</p>
+            </div>
+            <div class="bg-white rounded-xl shadow p-6">
+                <input type="file" id="file-img" class="hidden" accept="application/pdf">
+                <div onclick="document.getElementById('file-img').click()" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:bg-blue-50 hover:border-blue-400 transition">
+                    <p class="text-lg text-gray-600 font-medium" data-i18n="drop_pdf">點擊上傳 PDF</p>
+                </div>
+                <!-- 控制區 -->
+                <div id="ctrl-img" class="hidden mt-4 pt-4 border-t">
+                    <p id="name-img" class="mb-2 font-bold text-gray-700"></p>
+                    <div class="flex gap-2">
+                        <select id="fmt-img" class="border rounded px-2 py-2"><option value="jpeg">JPG</option><option value="png">PNG</option></select>
+                        <button id="do-img" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full" data-i18n="btn_convert">開始轉換</button>
+                    </div>
+                    <div id="prog-img" class="hidden mt-2 text-sm text-blue-600" data-i18n="processing">處理中...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. PDF 合併 -->
+        <section id="sec-merge" class="hidden">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold" data-i18n="title_merge">PDF 合併</h2>
+                <p class="text-gray-500" data-i18n="desc_merge">將多個 PDF 串接成一個檔案</p>
+            </div>
+            <div class="bg-white rounded-xl shadow p-6">
+                <input type="file" id="file-merge" class="hidden" accept="application/pdf" multiple>
+                <div onclick="document.getElementById('file-merge').click()" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:bg-blue-50 hover:border-blue-400 transition">
+                    <p class="text-lg text-gray-600 font-medium" data-i18n="drop_pdfs">點擊選擇多個 PDF</p>
+                </div>
+                <div id="list-merge" class="mt-4 space-y-2"></div>
+                <button id="do-merge" class="hidden mt-4 w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-bold" data-i18n="btn_merge_dl">合併並下載</button>
+            </div>
+        </section>
+
+        <!-- 3. PDF 分割 -->
+        <section id="sec-split" class="hidden">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold" data-i18n="title_split">PDF 分割</h2>
+                <p class="text-gray-500" data-i18n="desc_split">提取指定範圍的頁面存為新 PDF</p>
+            </div>
+            <div class="bg-white rounded-xl shadow p-6">
+                <input type="file" id="file-split" class="hidden" accept="application/pdf">
+                <div onclick="document.getElementById('file-split').click()" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:bg-blue-50 hover:border-blue-400 transition">
+                    <p class="text-lg text-gray-600 font-medium" data-i18n="drop_pdf">點擊上傳 PDF</p>
+                </div>
+                
+                <div id="ctrl-split" class="hidden mt-4 pt-4 border-t">
+                    <p id="name-split" class="mb-4 font-bold text-gray-700"></p>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700" data-i18n="lbl_start_page">起始頁</label>
+                            <input type="number" id="split-start" min="1" value="1" class="mt-1 block w-full border-gray-300 rounded-md border p-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700" data-i18n="lbl_end_page">結束頁</label>
+                            <input type="number" id="split-end" min="1" value="1" class="mt-1 block w-full border-gray-300 rounded-md border p-2">
+                        </div>
+                    </div>
+                    <button id="do-split" class="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-bold" data-i18n="btn_split_dl">分割並下載</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. PDF 旋轉 -->
+        <section id="sec-rotate" class="hidden">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold" data-i18n="title_rotate">PDF 頁面旋轉</h2>
+                <p class="text-gray-500" data-i18n="desc_rotate">將 PDF 所有頁面進行旋轉</p>
+            </div>
+            <div class="bg-white rounded-xl shadow p-6">
+                <input type="file" id="file-rotate" class="hidden" accept="application/pdf">
+                <div onclick="document.getElementById('file-rotate').click()" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:bg-blue-50 hover:border-blue-400 transition">
+                    <p class="text-lg text-gray-600 font-medium" data-i18n="drop_pdf">點擊上傳 PDF</p>
+                </div>
+
+                <div id="ctrl-rotate" class="hidden mt-4 pt-4 border-t">
+                    <p id="name-rotate" class="mb-4 font-bold text-gray-700"></p>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="lbl_rotate_deg">選擇旋轉角度 (順時針)</label>
+                    <div class="grid grid-cols-3 gap-2 mb-4">
+                        <button onclick="setRotate(90)" class="rotate-opt bg-gray-100 hover:bg-gray-200 py-2 rounded border border-gray-200" data-deg="90">90°</button>
+                        <button onclick="setRotate(180)" class="rotate-opt bg-gray-100 hover:bg-gray-200 py-2 rounded border border-gray-200" data-deg="180">180°</button>
+                        <button onclick="setRotate(270)" class="rotate-opt bg-gray-100 hover:bg-gray-200 py-2 rounded border border-gray-200" data-deg="270">270°</button>
+                    </div>
+                    <button id="do-rotate" class="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-bold" data-i18n="btn_rotate_dl">旋轉並下載</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. HEIC 轉 JPG -->
+        <section id="sec-heic" class="hidden">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-purple-700" data-i18n="title_heic">HEIC 轉 JPG</h2>
+                <p class="text-gray-500" data-i18n="desc_heic">iPhone 照片格式轉換為通用 JPG</p>
+            </div>
+            <div class="bg-white rounded-xl shadow p-6 border-t-4 border-purple-500">
+                <input type="file" id="file-heic" class="hidden" accept=".heic, .heif">
+                <div onclick="document.getElementById('file-heic').click()" class="border-2 border-dashed border-purple-200 bg-purple-50 rounded-lg p-8 text-center cursor-pointer hover:bg-purple-100 transition">
+                    <div class="flex flex-col items-center">
+                        <svg class="w-10 h-10 text-purple-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <p class="text-lg text-purple-900 font-medium" data-i18n="drop_heic">點擊上傳 HEIC 檔案</p>
+                    </div>
+                </div>
+                <div id="res-heic" class="hidden mt-6 text-center">
+                    <p id="status-heic" class="text-sm font-bold text-gray-700 mb-2" data-i18n="processing">轉換中...</p>
+                    <img id="preview-heic" class="max-w-full h-auto rounded shadow mx-auto mb-4" style="max-height: 300px;">
+                    <button id="dl-heic" class="bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700" data-i18n="btn_dl_jpg">下載 JPG</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 關於本站 模態框 (Modal) -->
+    <div id="about-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+        <div class="relative p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                    <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                </div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900" data-i18n="about_title">關於本站與隱私</h3>
+                <div class="mt-2 px-2 py-3">
+                    <p class="text-sm text-gray-500 text-left leading-relaxed bg-gray-50 p-3 rounded" data-i18n="about_content">
+                        本網站的所有 PDF 與圖片處理功能均完全在您的「瀏覽器端」運行。
+                        <br><br>
+                        <strong>這意味著：</strong><br>
+                        1. 您的檔案<b>絕不會</b>上傳到我們的伺服器。<br>
+                        2. 即使沒有網路，頁面載入後依然可以使用。<br>
+                        3. 您的隱私是 100% 安全的。
+                    </p>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button id="ok-btn" onclick="document.getElementById('about-modal').classList.add('hidden')" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300" data-i18n="btn_close">
+                        了解，關閉視窗
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-white border-t py-6 text-center text-gray-400 text-sm">
+        &copy; 2023 All-in-One PDF Tools. <span data-i18n="footer_note">Local Processing Only.</span>
+    </footer>
+
+    <!-- 邏輯腳本 -->
+    <script>
+        // === 多語言字典 ===
+        const translations = {
+            "zh-TW": {
+                site_title: "全能 PDF 工具箱 | 本地端安全處理",
+                nav_title: "PDF 工具箱",
+                nav_about: "關於本站",
+                tab_img: "PDF 轉圖片",
+                tab_merge: "PDF 合併",
+                tab_split: "PDF 分割",
+                tab_rotate: "PDF 頁面旋轉",
+                tab_heic: "HEIC 轉 JPG",
+                // PDF to IMG
+                title_img: "PDF 轉 JPG/PNG",
+                desc_img: "將每一頁 PDF 轉換為圖片並打包下載",
+                drop_pdf: "點擊上傳 PDF",
+                btn_convert: "開始轉換",
+                processing: "處理中...",
+                // Merge
+                title_merge: "PDF 合併",
+                desc_merge: "將多個 PDF 串接成一個檔案",
+                drop_pdfs: "點擊選擇多個 PDF",
+                btn_merge_dl: "合併並下載",
+                // Split
+                title_split: "PDF 分割",
+                desc_split: "提取指定範圍的頁面存為新 PDF",
+                lbl_start_page: "起始頁",
+                lbl_end_page: "結束頁",
+                btn_split_dl: "分割並下載",
+                // Rotate
+                title_rotate: "PDF 頁面旋轉",
+                desc_rotate: "將 PDF 所有頁面進行旋轉",
+                lbl_rotate_deg: "選擇旋轉角度 (順時針)",
+                btn_rotate_dl: "旋轉並下載",
+                // HEIC
+                title_heic: "HEIC 轉 JPG",
+                desc_heic: "iPhone 照片格式轉換為通用 JPG",
+                drop_heic: "點擊上傳 HEIC 檔案",
+                btn_dl_jpg: "下載 JPG",
+                // About Modal
+                about_title: "關於本站與隱私",
+                about_content: "本網站的所有 PDF 與圖片處理功能均完全在您的「瀏覽器端」運行。<br><br><strong>這意味著：</strong><br>1. 您的檔案<b>絕不會</b>上傳到我們的伺服器。<br>2. 即使沒有網路，頁面載入後依然可以使用。<br>3. 您的隱私是 100% 安全的。",
+                btn_close: "了解，關閉視窗",
+                footer_note: "僅在本地端運行，不儲存資料。"
+            },
+            "en": {
+                site_title: "All-in-One PDF Tools | Secure Local Processing",
+                nav_title: "PDF Tools",
+                nav_about: "About",
+                tab_img: "PDF to Image",
+                tab_merge: "Merge PDF",
+                tab_split: "Split PDF",
+                tab_rotate: "Rotate PDF",
+                tab_heic: "HEIC to JPG",
+                // PDF to IMG
+                title_img: "PDF to JPG/PNG",
+                desc_img: "Convert each PDF page to image and download",
+                drop_pdf: "Click to Upload PDF",
+                btn_convert: "Convert Now",
+                processing: "Processing...",
+                // Merge
+                title_merge: "Merge PDF",
+                desc_merge: "Combine multiple PDF files into one",
+                drop_pdfs: "Click to Select Multiple PDFs",
+                btn_merge_dl: "Merge & Download",
+                // Split
+                title_split: "Split PDF",
+                desc_split: "Extract range of pages to new PDF",
+                lbl_start_page: "Start Page",
+                lbl_end_page: "End Page",
+                btn_split_dl: "Split & Download",
+                // Rotate
+                title_rotate: "Rotate PDF Pages",
+                desc_rotate: "Rotate all pages in the PDF",
+                lbl_rotate_deg: "Rotation Angle (Clockwise)",
+                btn_rotate_dl: "Rotate & Download",
+                // HEIC
+                title_heic: "HEIC to JPG",
+                desc_heic: "Convert iPhone HEIC photos to JPG",
+                drop_heic: "Click to Upload HEIC File",
+                btn_dl_jpg: "Download JPG",
+                // About Modal
+                about_title: "About & Privacy",
+                about_content: "All PDF and image processing on this site runs entirely in your <b>Browser</b>.<br><br><strong>This means:</strong><br>1. Your files are <b>NEVER</b> uploaded to our servers.<br>2. It works even without internet after loading.<br>3. Your privacy is 100% secure.",
+                btn_close: "Got it, Close",
+                footer_note: "Local Processing Only. No Data Saved."
+            },
+            "ja": {
+                site_title: "PDF ツールボックス | 安全なローカル処理",
+                nav_title: "PDF ツール",
+                nav_about: "このサイトについて",
+                tab_img: "PDF 画像変換",
+                tab_merge: "PDF 結合",
+                tab_split: "PDF 分割",
+                tab_rotate: "PDF 回転",
+                tab_heic: "HEIC JPG 変換",
+                // PDF to IMG
+                title_img: "PDF を JPG/PNG に変換",
+                desc_img: "PDFの各ページを画像に変換してダウンロード",
+                drop_pdf: "クリックして PDF をアップロード",
+                btn_convert: "変換開始",
+                processing: "処理中...",
+                // Merge
+                title_merge: "PDF 結合",
+                desc_merge: "複数の PDF ファイルを1つに結合",
+                drop_pdfs: "クリックして複数の PDF を選択",
+                btn_merge_dl: "結合してダウンロード",
+                // Split
+                title_split: "PDF 分割",
+                desc_split: "指定した範囲のページを抽出",
+                lbl_start_page: "開始ページ",
+                lbl_end_page: "終了ページ",
+                btn_split_dl: "分割してダウンロード",
+                // Rotate
+                title_rotate: "PDF ページ回転",
+                desc_rotate: "PDF の全ページを回転",
+                lbl_rotate_deg: "回転角度 (時計回り)",
+                btn_rotate_dl: "回転してダウンロード",
+                // HEIC
+                title_heic: "HEIC JPG 変換",
+                desc_heic: "iPhone の HEIC 写真を JPG に変換",
+                drop_heic: "クリックして HEIC をアップロード",
+                btn_dl_jpg: "JPG をダウンロード",
+                // About Modal
+                about_title: "プライバシーとこのサイトについて",
+                about_content: "このサイトのすべての PDF および画像処理は、完全に<b>ブラウザ上</b>で実行されます。<br><br><strong>つまり：</strong><br>1. ファイルがサーバーにアップロードされることは<b>ありません</b>。<br>2. ページ読み込み後はオフラインでも使用できます。<br>3. プライバシーは 100% 安全です。",
+                btn_close: "閉じる",
+                footer_note: "ローカル処理のみ。データは保存されません。"
+            }
+        };
+
+        let currentLang = 'zh-TW';
+
+        // 語言切換邏輯
+        function changeLanguage(lang) {
+            currentLang = lang;
+            document.getElementById('lang-selector').value = lang;
+            
+            // 更新所有帶有 data-i18n 的元素
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    if (el.tagName === 'INPUT' && el.placeholder) {
+                        el.placeholder = translations[lang][key];
+                    } else {
+                        el.innerHTML = translations[lang][key]; // 使用 innerHTML 支援 <br> 標籤
+                    }
+                }
+            });
+        }
+
+        // 自動偵測語言
+        window.addEventListener('load', () => {
+            const userLang = navigator.language || navigator.userLanguage; 
+            if (userLang.startsWith('ja')) {
+                changeLanguage('ja');
+            } else if (userLang.startsWith('en')) {
+                changeLanguage('en');
+            } else {
+                changeLanguage('zh-TW'); // 預設繁中
+            }
+        });
+
+        function openAboutModal() {
+            document.getElementById('about-modal').classList.remove('hidden');
+        }
+
+        // === 既有的分頁與工具邏輯 ===
+        const tabs = ['img', 'merge', 'split', 'rotate', 'heic'];
+        function switchTab(target) {
+            tabs.forEach(t => {
+                document.getElementById(`sec-${t}`).classList.add('hidden');
+                document.getElementById(`btn-tab-${t}`).classList.remove('active');
+            });
+            document.getElementById(`sec-${target}`).classList.remove('hidden');
+            document.getElementById(`btn-tab-${target}`).classList.add('active');
+        }
+
+        // ... 以下為原有的 PDF 處理邏輯，保持不變但套用 i18n 文字 ...
+
+        // 1. PDF to Image
+        let pdfImgFile = null;
+        document.getElementById('file-img').addEventListener('change', (e) => {
+            if(e.target.files[0]) {
+                pdfImgFile = e.target.files[0];
+                document.getElementById('name-img').textContent = pdfImgFile.name;
+                document.getElementById('ctrl-img').classList.remove('hidden');
+            }
+        });
+        document.getElementById('do-img').addEventListener('click', async () => {
+            if(!pdfImgFile) return;
+            const btn = document.getElementById('do-img');
+            const prog = document.getElementById('prog-img');
+            btn.disabled = true; btn.textContent = translations[currentLang]['processing'];
+            prog.classList.remove('hidden');
+            try {
+                const pdf = await pdfjsLib.getDocument(await pdfImgFile.arrayBuffer()).promise;
+                const zip = new JSZip();
+                const fmt = document.getElementById('fmt-img').value;
+                for (let i=1; i<=pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const viewport = page.getViewport({scale: 2});
+                    const canvas = document.createElement('canvas');
+                    canvas.width = viewport.width; canvas.height = viewport.height;
+                    await page.render({canvasContext: canvas.getContext('2d'), viewport}).promise;
+                    const blob = await new Promise(r => canvas.toBlob(r, `image/${fmt}`, 0.8));
+                    zip.file(`page_${i}.${fmt === 'jpeg'?'jpg':'png'}`, blob);
+                    prog.textContent = `Processing: ${Math.round(i/pdf.numPages*100)}%`;
+                }
+                saveAs(await zip.generateAsync({type:"blob"}), `${pdfImgFile.name}_images.zip`);
+            } catch(e) { alert("Error: " + e.message); }
+            finally { 
+                btn.disabled = false; 
+                btn.textContent = translations[currentLang]['btn_convert']; 
+                prog.classList.add('hidden'); 
+            }
+        });
+
+        // 2. Merge
+        let mergeList = [];
+        document.getElementById('file-merge').addEventListener('change', (e) => {
+            if(e.target.files.length) {
+                mergeList = [...mergeList, ...Array.from(e.target.files)];
+                renderMergeList();
+            }
+        });
+        function renderMergeList() {
+            const div = document.getElementById('list-merge');
+            div.innerHTML = mergeList.map((f, i) => 
+                `<div class="flex justify-between bg-gray-50 p-2 rounded text-sm border"><span>${i+1}. ${f.name}</span> <span class="text-red-500 cursor-pointer font-bold" onclick="removeMerge(${i})">X</span></div>`
+            ).join('');
+            document.getElementById('do-merge').classList.toggle('hidden', mergeList.length < 2);
+        }
+        window.removeMerge = (i) => { mergeList.splice(i, 1); renderMergeList(); };
+        document.getElementById('do-merge').addEventListener('click', async () => {
+            const btn = document.getElementById('do-merge');
+            btn.textContent = translations[currentLang]['processing'];
+            try {
+                const { PDFDocument } = PDFLib;
+                const merged = await PDFDocument.create();
+                for (let file of mergeList) {
+                    const src = await PDFDocument.load(await file.arrayBuffer());
+                    const pages = await merged.copyPages(src, src.getPageIndices());
+                    pages.forEach(p => merged.addPage(p));
+                }
+                saveAs(new Blob([await merged.save()], {type:'application/pdf'}), 'merged.pdf');
+            } catch(e) { alert("Error"); }
+            finally { btn.textContent = translations[currentLang]['btn_merge_dl']; }
+        });
+
+        // 3. Split
+        let splitFile, splitPdfDoc;
+        document.getElementById('file-split').addEventListener('change', async (e) => {
+            if(e.target.files[0]) {
+                splitFile = e.target.files[0];
+                document.getElementById('name-split').textContent = splitFile.name;
+                const arr = await splitFile.arrayBuffer();
+                splitPdfDoc = await PDFLib.PDFDocument.load(arr);
+                const count = splitPdfDoc.getPageCount();
+                const endIn = document.getElementById('split-end');
+                endIn.value = count; endIn.max = count;
+                document.getElementById('split-start').max = count;
+                document.getElementById('ctrl-split').classList.remove('hidden');
+            }
+        });
+        document.getElementById('do-split').addEventListener('click', async () => {
+            if(!splitFile) return;
+            const start = parseInt(document.getElementById('split-start').value) - 1;
+            const end = parseInt(document.getElementById('split-end').value) - 1;
+            try {
+                const { PDFDocument } = PDFLib;
+                const newPdf = await PDFDocument.create();
+                const indices = Array.from({length: end - start + 1}, (_, i) => start + i);
+                const pages = await newPdf.copyPages(splitPdfDoc, indices);
+                pages.forEach(p => newPdf.addPage(p));
+                saveAs(new Blob([await newPdf.save()], {type:'application/pdf'}), `split_${start+1}-${end+1}.pdf`);
+            } catch(e) { alert("Error: " + e.message); }
+        });
+
+        // 4. Rotate
+        let rotateFile, rotateDeg = 90;
+        document.getElementById('file-rotate').addEventListener('change', (e) => {
+            if(e.target.files[0]) {
+                rotateFile = e.target.files[0];
+                document.getElementById('name-rotate').textContent = rotateFile.name;
+                document.getElementById('ctrl-rotate').classList.remove('hidden');
+            }
+        });
+        window.setRotate = (d) => {
+            rotateDeg = d;
+            document.querySelectorAll('.rotate-opt').forEach(b => {
+                const isActive = parseInt(b.dataset.deg) === d;
+                b.classList.toggle('bg-blue-100', isActive);
+                b.classList.toggle('border-blue-500', isActive);
+                b.classList.toggle('text-blue-700', isActive);
+                b.classList.toggle('bg-gray-100', !isActive);
+            });
+        };
+        setRotate(90);
+        document.getElementById('do-rotate').addEventListener('click', async () => {
+            if(!rotateFile) return;
+            try {
+                const { PDFDocument, degrees } = PDFLib;
+                const pdf = await PDFDocument.load(await rotateFile.arrayBuffer());
+                pdf.getPages().forEach(p => p.setRotation(degrees(p.getRotation().angle + rotateDeg)));
+                saveAs(new Blob([await pdf.save()], {type:'application/pdf'}), `rotated_${rotateDeg}.pdf`);
+            } catch(e) { alert("Error"); }
+        });
+
+        // 5. HEIC
+        document.getElementById('file-heic').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            document.getElementById('res-heic').classList.remove('hidden');
+            document.getElementById('dl-heic').classList.add('hidden');
+            document.getElementById('preview-heic').src = '';
+            document.getElementById('status-heic').textContent = translations[currentLang]['processing'];
+            
+            heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 })
+            .then((blob) => {
+                document.getElementById('preview-heic').src = URL.createObjectURL(blob);
+                document.getElementById('status-heic').textContent = "OK!";
+                const dlBtn = document.getElementById('dl-heic');
+                dlBtn.classList.remove('hidden');
+                dlBtn.onclick = () => saveAs(blob, file.name.replace(/\.(heic|heif)$/i, "") + ".jpg");
+            })
+            .catch(e => document.getElementById('status-heic').textContent = "Error: " + e.message);
+        });
+    </script>
+</body>
+</html>
