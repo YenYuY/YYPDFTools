@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="site_title">全能 PDF 工具箱 | 本地端安全處理</title>
+    <!-- 標題已更新為 3Y工具箱 -->
+    <title data-i18n="site_title">3Y工具箱 | 本地端安全處理</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -49,6 +50,15 @@
             color: #374151;
             background-color: #f9fafb;
         }
+        /* 拖曳時的樣式 */
+        .dragging {
+            opacity: 0.5;
+            background-color: #e5e7eb;
+            border: 2px dashed #9ca3af;
+        }
+        .drag-over {
+            border-top: 3px solid #3b82f6;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col">
@@ -60,7 +70,8 @@
                 <!-- Logo -->
                 <div class="flex items-center gap-2">
                     <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                    <span class="font-bold text-xl tracking-tight hidden sm:block" data-i18n="nav_title">PDF 工具箱</span>
+                    <!-- LOGO文字已更新 -->
+                    <span class="font-bold text-xl tracking-tight hidden sm:block" data-i18n="nav_title">3Y工具箱</span>
                 </div>
 
                 <!-- 右側選單 (語言 + 關於) -->
@@ -82,13 +93,16 @@
 
     <!-- 橫向滾動選單 -->
     <div class="bg-white border-b shadow-sm">
-        <div class="max-w-5xl mx-auto px-2">
+        <div class="max-w-6xl mx-auto px-2">
             <div class="flex overflow-x-auto hide-scrollbar gap-2" id="tab-container">
                 <button onclick="switchTab('img')" class="tab-btn active" id="btn-tab-img" data-i18n="tab_img">PDF 轉圖片</button>
                 <button onclick="switchTab('merge')" class="tab-btn" id="btn-tab-merge" data-i18n="tab_merge">PDF 合併</button>
                 <button onclick="switchTab('split')" class="tab-btn" id="btn-tab-split" data-i18n="tab_split">PDF 分割</button>
-                <button onclick="switchTab('rotate')" class="tab-btn" id="btn-tab-rotate" data-i18n="tab_rotate">PDF 頁面旋轉</button>
+                <button onclick="switchTab('compress')" class="tab-btn" id="btn-tab-compress" data-i18n="tab_compress">PDF 壓縮</button>
+                <button onclick="switchTab('protect')" class="tab-btn" id="btn-tab-protect" data-i18n="tab_protect">PDF 加密/解鎖</button>
+                <button onclick="switchTab('rotate')" class="tab-btn" id="btn-tab-rotate" data-i18n="tab_rotate">PDF 旋轉</button>
                 <button onclick="switchTab('heic')" class="tab-btn text-purple-600" id="btn-tab-heic" data-i18n="tab_heic">HEIC 轉 JPG</button>
+                <button onclick="switchTab('toai')" class="tab-btn text-orange-600" id="btn-tab-toai" data-i18n="tab_toai">JPG/PNG 轉 ai檔案(試用)</button>
             </div>
         </div>
     </div>
@@ -107,7 +121,6 @@
                 <div onclick="document.getElementById('file-img').click()" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:bg-blue-50 hover:border-blue-400 transition">
                     <p class="text-lg text-gray-600 font-medium" data-i18n="drop_pdf">點擊上傳 PDF</p>
                 </div>
-                <!-- 控制區 -->
                 <div id="ctrl-img" class="hidden mt-4 pt-4 border-t">
                     <p id="name-img" class="mb-2 font-bold text-gray-700"></p>
                     <div class="flex gap-2">
@@ -119,19 +132,26 @@
             </div>
         </section>
 
-        <!-- 2. PDF 合併 -->
+        <!-- 2. PDF 合併 (支援拖曳排序) -->
         <section id="sec-merge" class="hidden">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-bold" data-i18n="title_merge">PDF 合併</h2>
-                <p class="text-gray-500" data-i18n="desc_merge">將多個 PDF 串接成一個檔案</p>
+                <p class="text-gray-500" data-i18n="desc_merge">將多個 PDF 串接成一個檔案，可拖曳調整順序</p>
             </div>
             <div class="bg-white rounded-xl shadow p-6">
                 <input type="file" id="file-merge" class="hidden" accept="application/pdf" multiple>
                 <div onclick="document.getElementById('file-merge').click()" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:bg-blue-50 hover:border-blue-400 transition">
                     <p class="text-lg text-gray-600 font-medium" data-i18n="drop_pdfs">點擊選擇多個 PDF</p>
                 </div>
-                <div id="list-merge" class="mt-4 space-y-2"></div>
-                <button id="do-merge" class="hidden mt-4 w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-bold" data-i18n="btn_merge_dl">合併並下載</button>
+                
+                <!-- 拖曳列表區 -->
+                <div id="merge-container" class="mt-6 hidden">
+                    <p class="text-sm text-gray-500 mb-2 italic text-center" data-i18n="drag_hint">💡 提示：您可以拖曳下方的項目來調整合併順序</p>
+                    <ul id="list-merge" class="space-y-2">
+                        <!-- JS 動態生成 -->
+                    </ul>
+                    <button id="do-merge" class="mt-6 w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-bold" data-i18n="btn_merge_dl">合併並下載</button>
+                </div>
             </div>
         </section>
 
@@ -146,7 +166,6 @@
                 <div onclick="document.getElementById('file-split').click()" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:bg-blue-50 hover:border-blue-400 transition">
                     <p class="text-lg text-gray-600 font-medium" data-i18n="drop_pdf">點擊上傳 PDF</p>
                 </div>
-                
                 <div id="ctrl-split" class="hidden mt-4 pt-4 border-t">
                     <p id="name-split" class="mb-4 font-bold text-gray-700"></p>
                     <div class="grid grid-cols-2 gap-4 mb-4">
@@ -164,7 +183,69 @@
             </div>
         </section>
 
-        <!-- 4. PDF 旋轉 -->
+        <!-- 4. PDF 壓縮 (新功能) -->
+        <section id="sec-compress" class="hidden">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold" data-i18n="title_compress">PDF 壓縮 (重製)</h2>
+                <p class="text-gray-500" data-i18n="desc_compress">透過將 PDF 轉為圖片再重建來減少檔案大小</p>
+            </div>
+            <div class="bg-white rounded-xl shadow p-6">
+                <input type="file" id="file-compress" class="hidden" accept="application/pdf">
+                <div onclick="document.getElementById('file-compress').click()" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:bg-green-50 hover:border-green-400 transition">
+                    <p class="text-lg text-gray-600 font-medium" data-i18n="drop_pdf">點擊上傳 PDF</p>
+                </div>
+                <div id="ctrl-compress" class="hidden mt-4 pt-4 border-t">
+                    <p id="name-compress" class="mb-4 font-bold text-gray-700"></p>
+                    <div class="bg-yellow-50 border border-yellow-200 p-3 rounded mb-4 text-sm text-yellow-800">
+                        <strong data-i18n="note_title">注意：</strong> <span data-i18n="note_compress">此模式會將所有頁面轉為圖片。文字將無法選取，但可大幅減少掃描檔的大小。</span>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="lbl_quality">圖片品質 (越低檔案越小)</label>
+                        <select id="compress-quality" class="w-full border rounded p-2">
+                            <option value="0.5">低畫質 (高壓縮)</option>
+                            <option value="0.7" selected>中畫質 (推薦)</option>
+                            <option value="0.9">高畫質 (輕微壓縮)</option>
+                        </select>
+                    </div>
+                    <button id="do-compress" class="w-full bg-green-600 text-white py-3 rounded hover:bg-green-700 font-bold" data-i18n="btn_compress_dl">開始壓縮並下載</button>
+                    <div id="prog-compress" class="hidden mt-2 text-center text-sm text-green-600">0%</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. PDF 加密/解鎖 (新功能) -->
+        <section id="sec-protect" class="hidden">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold" data-i18n="title_protect">PDF 加密與解鎖</h2>
+                <p class="text-gray-500" data-i18n="desc_protect">為文件設定密碼，或移除已知密碼</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- 加密區 -->
+                <div class="bg-white rounded-xl shadow p-6 border-t-4 border-blue-500">
+                    <h3 class="font-bold text-lg mb-4" data-i18n="subtitle_encrypt">加密 (設定密碼)</h3>
+                    <input type="file" id="file-encrypt" class="hidden" accept="application/pdf">
+                    <button onclick="document.getElementById('file-encrypt').click()" class="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:bg-gray-50 mb-4">
+                        <span id="name-encrypt" class="text-gray-600 block truncate" data-i18n="select_file">選擇檔案</span>
+                    </button>
+                    <input type="password" id="pass-encrypt" class="w-full border rounded p-2 mb-4" placeholder="設定密碼" data-i18n="ph_set_pass">
+                    <button id="do-encrypt" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700" data-i18n="btn_encrypt">下載加密檔案</button>
+                </div>
+
+                <!-- 解鎖區 -->
+                <div class="bg-white rounded-xl shadow p-6 border-t-4 border-red-500">
+                    <h3 class="font-bold text-lg mb-4" data-i18n="subtitle_unlock">解鎖 (移除密碼)</h3>
+                    <input type="file" id="file-unlock" class="hidden" accept="application/pdf">
+                    <button onclick="document.getElementById('file-unlock').click()" class="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:bg-gray-50 mb-4">
+                        <span id="name-unlock" class="text-gray-600 block truncate" data-i18n="select_file">選擇檔案</span>
+                    </button>
+                    <input type="password" id="pass-unlock" class="w-full border rounded p-2 mb-4" placeholder="輸入原始密碼" data-i18n="ph_org_pass">
+                    <button id="do-unlock" class="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700" data-i18n="btn_unlock">下載解鎖檔案</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. PDF 旋轉 -->
         <section id="sec-rotate" class="hidden">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-bold" data-i18n="title_rotate">PDF 頁面旋轉</h2>
@@ -175,7 +256,6 @@
                 <div onclick="document.getElementById('file-rotate').click()" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:bg-blue-50 hover:border-blue-400 transition">
                     <p class="text-lg text-gray-600 font-medium" data-i18n="drop_pdf">點擊上傳 PDF</p>
                 </div>
-
                 <div id="ctrl-rotate" class="hidden mt-4 pt-4 border-t">
                     <p id="name-rotate" class="mb-4 font-bold text-gray-700"></p>
                     <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="lbl_rotate_deg">選擇旋轉角度 (順時針)</label>
@@ -189,7 +269,7 @@
             </div>
         </section>
 
-        <!-- 5. HEIC 轉 JPG -->
+        <!-- 7. HEIC 轉 JPG -->
         <section id="sec-heic" class="hidden">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-bold text-purple-700" data-i18n="title_heic">HEIC 轉 JPG</h2>
@@ -211,39 +291,51 @@
             </div>
         </section>
 
+        <!-- 8. JPG/PNG 轉 AI (試用) -->
+        <section id="sec-toai" class="hidden">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-orange-700" data-i18n="title_toai">JPG/PNG 轉 ai檔案(試用)</h2>
+                <p class="text-gray-500" data-i18n="desc_toai">將圖片轉換為 Adobe Illustrator 相容檔案 (.ai)</p>
+            </div>
+            <div class="bg-white rounded-xl shadow p-6 border-t-4 border-orange-500">
+                <input type="file" id="file-toai" class="hidden" accept="image/jpeg, image/png">
+                <div onclick="document.getElementById('file-toai').click()" class="border-2 border-dashed border-orange-200 bg-orange-50 rounded-lg p-8 text-center cursor-pointer hover:bg-orange-100 transition">
+                    <div class="flex flex-col items-center">
+                        <svg class="w-10 h-10 text-orange-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <p class="text-lg text-orange-900 font-medium" data-i18n="drop_img">點擊上傳 JPG 或 PNG 圖片</p>
+                    </div>
+                </div>
+                
+                <div id="ctrl-toai" class="hidden mt-6 pt-4 border-t text-center">
+                    <p id="name-toai" class="mb-4 font-bold text-gray-700"></p>
+                    <p class="text-sm text-gray-500 mb-4 bg-yellow-50 p-2 rounded border border-yellow-200" data-i18n="note_toai">
+                        注意：此功能會將圖片嵌入到 AI 檔中，並非轉為向量線條。但您可以直接用 Illustrator 開啟編輯。
+                    </p>
+                    <button id="do-toai" class="w-full sm:w-auto bg-orange-600 text-white px-8 py-3 rounded shadow hover:bg-orange-700 font-bold" data-i18n="btn_toai_dl">轉換並下載 .AI</button>
+                </div>
+            </div>
+        </section>
+
     </main>
 
-    <!-- 關於本站 模態框 (Modal) -->
+    <!-- 關於本站 Modal -->
     <div id="about-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50 flex items-center justify-center">
         <div class="relative p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
             <div class="mt-3 text-center">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-                    <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                </div>
-                <!-- 標題 -->
-                <h3 class="text-lg leading-6 font-bold text-gray-900" data-i18n="about_title">關於本站</h3>
-                
+                <h3 class="text-lg leading-6 font-bold text-gray-900 mb-4" data-i18n="about_title">關於本站</h3>
                 <div class="mt-2 px-2 py-3">
                     <p class="text-sm text-gray-500 text-left leading-relaxed bg-gray-50 p-3 rounded" data-i18n="about_content">
-                        本網站的所有 PDF 與圖片處理功能均完全在您的「瀏覽器端」運行。
-                        <br><br>
-                        <strong>這意味著：</strong><br>
-                        1. 您的檔案<b>絕不會</b>上傳到我們的伺服器。<br>
-                        2. 即使沒有網路，頁面載入後依然可以使用。<br>
-                        3. 您的隱私是 100% 安全的。
+                        內容...
                     </p>
                 </div>
-
-                <!-- GitHub 連結按鈕 -->
                 <div class="mb-4">
-                    <a href="https://github.com/YenYuY/YYPDFTools" target="_blank" class="inline-flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 hover:text-gray-900 w-full transition">
+                    <a href="https://github.com/YenYuY/YYPDFTools" target="_blank" class="inline-flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 w-full transition">
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" /></svg>
                         <span data-i18n="github_btn">前往 GitHub 專案</span>
                     </a>
                 </div>
-
                 <div class="items-center px-4 py-3">
-                    <button id="ok-btn" onclick="document.getElementById('about-modal').classList.add('hidden')" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300" data-i18n="btn_close">
+                    <button onclick="document.getElementById('about-modal').classList.add('hidden')" class="px-4 py-2 bg-blue-500 text-white font-medium rounded-md w-full hover:bg-blue-700" data-i18n="btn_close">
                         了解，關閉視窗
                     </button>
                 </div>
@@ -252,32 +344,38 @@
     </div>
 
     <footer class="bg-white border-t py-6 text-center text-gray-400 text-sm">
-        &copy; 2025 PDF Tools.
+        &copy; 2025 3Y Tools.
     </footer>
 
     <!-- 邏輯腳本 -->
     <script>
-        // === 多語言字典 ===
+        // === 多語言字典 (已更新為 3Y工具箱) ===
         const translations = {
             "zh-TW": {
-                site_title: "全能 PDF 工具箱 | 本地端安全處理",
-                nav_title: "PDF 工具箱",
+                site_title: "3Y工具箱 | 本地端安全處理",
+                nav_title: "3Y工具箱",
                 nav_about: "關於本站",
                 tab_img: "PDF 轉圖片",
                 tab_merge: "PDF 合併",
                 tab_split: "PDF 分割",
-                tab_rotate: "PDF 頁面旋轉",
+                tab_compress: "PDF 壓縮",
+                tab_protect: "加密/解鎖",
+                tab_rotate: "PDF 旋轉",
                 tab_heic: "HEIC 轉 JPG",
+                tab_toai: "JPG/PNG 轉 ai檔案(試用)",
+                // Common
+                processing: "處理中...",
+                drop_pdf: "點擊上傳 PDF",
+                select_file: "選擇檔案",
                 // PDF to IMG
                 title_img: "PDF 轉 JPG/PNG",
                 desc_img: "將每一頁 PDF 轉換為圖片並打包下載",
-                drop_pdf: "點擊上傳 PDF",
                 btn_convert: "開始轉換",
-                processing: "處理中...",
                 // Merge
                 title_merge: "PDF 合併",
-                desc_merge: "將多個 PDF 串接成一個檔案",
+                desc_merge: "將多個 PDF 串接成一個檔案，可拖曳調整順序",
                 drop_pdfs: "點擊選擇多個 PDF",
+                drag_hint: "💡 提示：您可以拖曳下方的項目來調整合併順序",
                 btn_merge_dl: "合併並下載",
                 // Split
                 title_split: "PDF 分割",
@@ -285,6 +383,22 @@
                 lbl_start_page: "起始頁",
                 lbl_end_page: "結束頁",
                 btn_split_dl: "分割並下載",
+                // Compress
+                title_compress: "PDF 壓縮 (重製)",
+                desc_compress: "透過將 PDF 轉為圖片再重建來減少檔案大小",
+                note_title: "注意：",
+                note_compress: "此模式會將所有頁面轉為圖片。文字將無法選取，但可大幅減少掃描檔的大小。",
+                lbl_quality: "圖片品質 (越低檔案越小)",
+                btn_compress_dl: "開始壓縮並下載",
+                // Protect
+                title_protect: "PDF 加密與解鎖",
+                desc_protect: "為文件設定密碼，或移除已知密碼",
+                subtitle_encrypt: "加密 (設定密碼)",
+                ph_set_pass: "設定密碼",
+                btn_encrypt: "下載加密檔案",
+                subtitle_unlock: "解鎖 (移除密碼)",
+                ph_org_pass: "輸入原始密碼",
+                btn_unlock: "下載解鎖檔案",
                 // Rotate
                 title_rotate: "PDF 頁面旋轉",
                 desc_rotate: "將 PDF 所有頁面進行旋轉",
@@ -295,150 +409,175 @@
                 desc_heic: "iPhone 照片格式轉換為通用 JPG",
                 drop_heic: "點擊上傳 HEIC 檔案",
                 btn_dl_jpg: "下載 JPG",
-                // About Modal
+                // IMG to AI
+                title_toai: "JPG/PNG 轉 ai檔案(試用)",
+                desc_toai: "將圖片轉換為 Adobe Illustrator 相容檔案 (.ai)",
+                drop_img: "點擊上傳 JPG 或 PNG 圖片",
+                note_toai: "注意：此功能會將圖片嵌入到 AI 檔中，並非轉為向量線條。但您可以直接用 Illustrator 開啟編輯。",
+                btn_toai_dl: "轉換並下載 .AI",
+                // About
                 about_title: "關於本站",
                 about_content: "本網站的所有 PDF 與圖片處理功能均完全在您的「瀏覽器端」運行。<br><br><strong>這意味著：</strong><br>1. 您的檔案<b>絕不會</b>上傳到我們的伺服器。<br>2. 即使沒有網路，頁面載入後依然可以使用。<br>3. 您的隱私是 100% 安全的。",
                 github_btn: "前往 GitHub 專案",
                 btn_close: "了解，關閉視窗"
             },
             "en": {
-                site_title: "All-in-One PDF Tools | Secure Local Processing",
-                nav_title: "PDF Tools",
+                site_title: "3Y Tools | Secure Local Processing",
+                nav_title: "3Y Tools",
                 nav_about: "About",
                 tab_img: "PDF to Image",
                 tab_merge: "Merge PDF",
                 tab_split: "Split PDF",
+                tab_compress: "Compress PDF",
+                tab_protect: "Protect/Unlock",
                 tab_rotate: "Rotate PDF",
                 tab_heic: "HEIC to JPG",
-                // PDF to IMG
-                title_img: "PDF to JPG/PNG",
-                desc_img: "Convert each PDF page to image and download",
-                drop_pdf: "Click to Upload PDF",
-                btn_convert: "Convert Now",
+                tab_toai: "JPG/PNG to .ai (Trial)",
                 processing: "Processing...",
-                // Merge
+                drop_pdf: "Click to Upload PDF",
+                select_file: "Select File",
+                title_img: "PDF to JPG/PNG",
+                desc_img: "Convert each PDF page to image",
+                btn_convert: "Convert",
                 title_merge: "Merge PDF",
-                desc_merge: "Combine multiple PDF files into one",
+                desc_merge: "Combine multiple PDFs into one, drag to reorder",
                 drop_pdfs: "Click to Select Multiple PDFs",
+                drag_hint: "💡 Tip: Drag items below to reorder",
                 btn_merge_dl: "Merge & Download",
-                // Split
                 title_split: "Split PDF",
-                desc_split: "Extract range of pages to new PDF",
-                lbl_start_page: "Start Page",
-                lbl_end_page: "End Page",
+                desc_split: "Extract pages to new PDF",
+                lbl_start_page: "Start",
+                lbl_end_page: "End",
                 btn_split_dl: "Split & Download",
-                // Rotate
-                title_rotate: "Rotate PDF Pages",
-                desc_rotate: "Rotate all pages in the PDF",
-                lbl_rotate_deg: "Rotation Angle (Clockwise)",
+                title_compress: "Compress PDF (Rasterize)",
+                desc_compress: "Reduce size by converting pages to images",
+                note_title: "Note:",
+                note_compress: "This converts pages to images. Text will not be selectable, but it reduces file size effectively for scans.",
+                lbl_quality: "Image Quality (Lower = Smaller)",
+                btn_compress_dl: "Compress & Download",
+                title_protect: "Encrypt & Unlock",
+                desc_protect: "Set password or remove password",
+                subtitle_encrypt: "Encrypt (Set Password)",
+                ph_set_pass: "Set Password",
+                btn_encrypt: "Download Encrypted",
+                subtitle_unlock: "Unlock (Remove Password)",
+                ph_org_pass: "Enter Original Password",
+                btn_unlock: "Download Unlocked",
+                title_rotate: "Rotate PDF",
+                desc_rotate: "Rotate all pages",
+                lbl_rotate_deg: "Angle (Clockwise)",
                 btn_rotate_dl: "Rotate & Download",
-                // HEIC
                 title_heic: "HEIC to JPG",
-                desc_heic: "Convert iPhone HEIC photos to JPG",
-                drop_heic: "Click to Upload HEIC File",
+                desc_heic: "Convert HEIC to JPG",
+                drop_heic: "Click to Upload HEIC",
                 btn_dl_jpg: "Download JPG",
-                // About Modal
+                title_toai: "JPG/PNG to .ai (Trial)",
+                desc_toai: "Convert image to .ai file",
+                drop_img: "Click to Upload JPG/PNG",
+                note_toai: "Note: Embeds image into AI file, not vectorization.",
+                btn_toai_dl: "Convert & Download",
                 about_title: "About",
-                about_content: "All PDF and image processing on this site runs entirely in your <b>Browser</b>.<br><br><strong>This means:</strong><br>1. Your files are <b>NEVER</b> uploaded to our servers.<br>2. It works even without internet after loading.<br>3. Your privacy is 100% secure.",
-                github_btn: "Visit GitHub Repo",
-                btn_close: "Got it, Close"
+                about_content: "All processing runs in your <b>Browser</b>.<br>Files are <b>NEVER</b> uploaded.",
+                github_btn: "Visit GitHub",
+                btn_close: "Close"
             },
             "ja": {
-                site_title: "PDF ツールボックス | 安全なローカル処理",
-                nav_title: "PDF ツール",
-                nav_about: "このサイトについて",
+                site_title: "3Y ツールボックス",
+                nav_title: "3Y ツール",
+                nav_about: "情報",
                 tab_img: "PDF 画像変換",
                 tab_merge: "PDF 結合",
                 tab_split: "PDF 分割",
+                tab_compress: "PDF 圧縮",
+                tab_protect: "暗号化/解除",
                 tab_rotate: "PDF 回転",
                 tab_heic: "HEIC JPG 変換",
-                // PDF to IMG
-                title_img: "PDF を JPG/PNG に変換",
-                desc_img: "PDFの各ページを画像に変換してダウンロード",
-                drop_pdf: "クリックして PDF をアップロード",
-                btn_convert: "変換開始",
+                tab_toai: "画像 .ai 変換(試用)",
                 processing: "処理中...",
-                // Merge
+                drop_pdf: "PDF をアップロード",
+                select_file: "ファイルを選択",
+                title_img: "PDF 画像変換",
+                desc_img: "各ページを画像に変換",
+                btn_convert: "変換開始",
                 title_merge: "PDF 結合",
-                desc_merge: "複数の PDF ファイルを1つに結合",
-                drop_pdfs: "クリックして複数の PDF を選択",
+                desc_merge: "複数のPDFを結合 (ドラッグで並び替え)",
+                drop_pdfs: "複数の PDF を選択",
+                drag_hint: "💡 ヒント：ドラッグして順序を変更できます",
                 btn_merge_dl: "結合してダウンロード",
-                // Split
                 title_split: "PDF 分割",
-                desc_split: "指定した範囲のページを抽出",
-                lbl_start_page: "開始ページ",
-                lbl_end_page: "終了ページ",
-                btn_split_dl: "分割してダウンロード",
-                // Rotate
-                title_rotate: "PDF ページ回転",
-                desc_rotate: "PDF の全ページを回転",
-                lbl_rotate_deg: "回転角度 (時計回り)",
-                btn_rotate_dl: "回転してダウンロード",
-                // HEIC
+                desc_split: "指定範囲を抽出",
+                lbl_start_page: "開始",
+                lbl_end_page: "終了",
+                btn_split_dl: "分割ダウンロード",
+                title_compress: "PDF 圧縮 (ラスタライズ)",
+                desc_compress: "画像を再構築してサイズを削減",
+                note_title: "注意：",
+                note_compress: "ページ全体が画像化されます。テキスト選択はできませんが、スキャンデータの圧縮に有効です。",
+                lbl_quality: "画質 (低いほど軽量)",
+                btn_compress_dl: "圧縮してダウンロード",
+                title_protect: "暗号化と解除",
+                desc_protect: "パスワード設定または解除",
+                subtitle_encrypt: "暗号化 (パスワード設定)",
+                ph_set_pass: "パスワードを設定",
+                btn_encrypt: "暗号化してDL",
+                subtitle_unlock: "解除 (パスワード削除)",
+                ph_org_pass: "元のパスワードを入力",
+                btn_unlock: "解除してDL",
+                title_rotate: "PDF 回転",
+                desc_rotate: "全ページを回転",
+                lbl_rotate_deg: "角度 (時計回り)",
+                btn_rotate_dl: "回転してDL",
                 title_heic: "HEIC JPG 変換",
-                desc_heic: "iPhone の HEIC 写真を JPG に変換",
-                drop_heic: "クリックして HEIC をアップロード",
-                btn_dl_jpg: "JPG をダウンロード",
-                // About Modal
+                desc_heic: "HEIC を JPG に変換",
+                drop_heic: "HEIC をアップロード",
+                btn_dl_jpg: "JPG DL",
+                title_toai: "画像 .ai 変換(試用)",
+                desc_toai: "画像を .ai 形式に変換",
+                drop_img: "画像をアップロード",
+                note_toai: "注：画像は埋め込まれます。ベクター化はされません。",
+                btn_toai_dl: "変換してDL",
                 about_title: "このサイトについて",
-                about_content: "このサイトのすべての PDF および画像処理は、完全に<b>ブラウザ上</b>で実行されます。<br><br><strong>つまり：</strong><br>1. ファイルがサーバーにアップロードされることは<b>ありません</b>。<br>2. ページ読み込み後はオフラインでも使用できます。<br>3. プライバシーは 100% 安全です。",
-                github_btn: "GitHub で見る",
+                about_content: "処理は全て<b>ブラウザ上</b>で行われます。<br>サーバーへのアップロードはありません。",
+                github_btn: "GitHub へ",
                 btn_close: "閉じる"
             }
         };
 
         let currentLang = 'zh-TW';
-
-        // 語言切換邏輯
         function changeLanguage(lang) {
             currentLang = lang;
             document.getElementById('lang-selector').value = lang;
-            
-            // 更新所有帶有 data-i18n 的元素
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (translations[lang][key]) {
-                    if (el.tagName === 'INPUT' && el.placeholder) {
-                        el.placeholder = translations[lang][key];
-                    } else {
-                        el.innerHTML = translations[lang][key]; // 使用 innerHTML 支援 <br> 標籤
-                    }
+                    if (el.placeholder) el.placeholder = translations[lang][key];
+                    else el.innerHTML = translations[lang][key];
                 }
             });
         }
-
-        // 自動偵測語言
         window.addEventListener('load', () => {
-            const userLang = navigator.language || navigator.userLanguage; 
-            if (userLang.startsWith('ja')) {
-                changeLanguage('ja');
-            } else if (userLang.startsWith('en')) {
-                changeLanguage('en');
-            } else {
-                changeLanguage('zh-TW'); // 預設繁中
-            }
+            const l = navigator.language || navigator.userLanguage;
+            if (l.startsWith('ja')) changeLanguage('ja');
+            else if (l.startsWith('en')) changeLanguage('en');
+            else changeLanguage('zh-TW');
         });
+        function openAboutModal() { document.getElementById('about-modal').classList.remove('hidden'); }
 
-        function openAboutModal() {
-            document.getElementById('about-modal').classList.remove('hidden');
-        }
-
-        // === 既有的分頁與工具邏輯 ===
-        const tabs = ['img', 'merge', 'split', 'rotate', 'heic'];
-        function switchTab(target) {
-            tabs.forEach(t => {
-                document.getElementById(`sec-${t}`).classList.add('hidden');
-                document.getElementById(`btn-tab-${t}`).classList.remove('active');
+        const tabs = ['img', 'merge', 'split', 'compress', 'protect', 'rotate', 'heic', 'toai'];
+        function switchTab(t) {
+            tabs.forEach(x => {
+                document.getElementById(`sec-${x}`).classList.add('hidden');
+                document.getElementById(`btn-tab-${x}`).classList.remove('active');
             });
-            document.getElementById(`sec-${target}`).classList.remove('hidden');
-            document.getElementById(`btn-tab-${target}`).classList.add('active');
+            document.getElementById(`sec-${t}`).classList.remove('hidden');
+            document.getElementById(`btn-tab-${t}`).classList.add('active');
         }
 
-        // ... 以下為原有的 PDF 處理邏輯 ...
+        // ================= 功能邏輯 =================
 
-        // 1. PDF to Image
+        // 1. PDF 轉圖片
         let pdfImgFile = null;
-        document.getElementById('file-img').addEventListener('change', (e) => {
+        document.getElementById('file-img').addEventListener('change', e => {
             if(e.target.files[0]) {
                 pdfImgFile = e.target.files[0];
                 document.getElementById('name-img').textContent = pdfImgFile.name;
@@ -455,103 +594,262 @@
                 const pdf = await pdfjsLib.getDocument(await pdfImgFile.arrayBuffer()).promise;
                 const zip = new JSZip();
                 const fmt = document.getElementById('fmt-img').value;
-                for (let i=1; i<=pdf.numPages; i++) {
+                for(let i=1; i<=pdf.numPages; i++){
                     const page = await pdf.getPage(i);
-                    const viewport = page.getViewport({scale: 2});
+                    const viewport = page.getViewport({scale:2});
                     const canvas = document.createElement('canvas');
                     canvas.width = viewport.width; canvas.height = viewport.height;
-                    await page.render({canvasContext: canvas.getContext('2d'), viewport}).promise;
-                    const blob = await new Promise(r => canvas.toBlob(r, `image/${fmt}`, 0.8));
-                    zip.file(`page_${i}.${fmt === 'jpeg'?'jpg':'png'}`, blob);
-                    prog.textContent = `Processing: ${Math.round(i/pdf.numPages*100)}%`;
+                    await page.render({canvasContext:canvas.getContext('2d'), viewport}).promise;
+                    const blob = await new Promise(r=>canvas.toBlob(r, `image/${fmt}`, 0.8));
+                    zip.file(`page_${i}.${fmt==='jpeg'?'jpg':'png'}`, blob);
+                    prog.textContent = `${Math.round(i/pdf.numPages*100)}%`;
                 }
                 saveAs(await zip.generateAsync({type:"blob"}), `${pdfImgFile.name}_images.zip`);
-            } catch(e) { alert("Error: " + e.message); }
-            finally { 
-                btn.disabled = false; 
-                btn.textContent = translations[currentLang]['btn_convert']; 
-                prog.classList.add('hidden'); 
-            }
+            } catch(e){ alert(e.message); }
+            finally { btn.disabled=false; btn.textContent=translations[currentLang]['btn_convert']; prog.classList.add('hidden'); }
         });
 
-        // 2. Merge
-        let mergeList = [];
-        document.getElementById('file-merge').addEventListener('change', (e) => {
+        // 2. PDF 合併 (含拖曳排序)
+        let mergeFiles = [];
+        const mergeContainer = document.getElementById('merge-container');
+        const listMerge = document.getElementById('list-merge');
+
+        document.getElementById('file-merge').addEventListener('change', e => {
             if(e.target.files.length) {
-                mergeList = [...mergeList, ...Array.from(e.target.files)];
+                mergeFiles = [...mergeFiles, ...Array.from(e.target.files)];
                 renderMergeList();
             }
         });
+
         function renderMergeList() {
-            const div = document.getElementById('list-merge');
-            div.innerHTML = mergeList.map((f, i) => 
-                `<div class="flex justify-between bg-gray-50 p-2 rounded text-sm border"><span>${i+1}. ${f.name}</span> <span class="text-red-500 cursor-pointer font-bold" onclick="removeMerge(${i})">X</span></div>`
-            ).join('');
-            document.getElementById('do-merge').classList.toggle('hidden', mergeList.length < 2);
+            if (mergeFiles.length > 0) mergeContainer.classList.remove('hidden');
+            else mergeContainer.classList.add('hidden');
+
+            listMerge.innerHTML = '';
+            mergeFiles.forEach((file, index) => {
+                const li = document.createElement('li');
+                li.className = 'flex justify-between items-center bg-gray-50 p-3 rounded border cursor-move select-none';
+                li.draggable = true;
+                li.dataset.index = index;
+                li.innerHTML = `
+                    <div class="flex items-center gap-2 overflow-hidden">
+                        <span class="text-gray-400">☰</span>
+                        <span class="truncate text-sm font-medium">${index + 1}. ${file.name}</span>
+                    </div>
+                    <button onclick="removeMerge(${index})" class="text-red-500 hover:text-red-700 font-bold px-2">✕</button>
+                `;
+                
+                // 拖曳事件
+                li.addEventListener('dragstart', handleDragStart);
+                li.addEventListener('dragover', handleDragOver);
+                li.addEventListener('drop', handleDrop);
+                li.addEventListener('dragenter', handleDragEnter);
+                li.addEventListener('dragleave', handleDragLeave);
+
+                listMerge.appendChild(li);
+            });
         }
-        window.removeMerge = (i) => { mergeList.splice(i, 1); renderMergeList(); };
+
+        window.removeMerge = (i) => {
+            mergeFiles.splice(i, 1);
+            renderMergeList();
+        };
+
+        // 拖曳邏輯
+        let dragSrcIndex = null;
+        function handleDragStart(e) {
+            this.classList.add('dragging');
+            dragSrcIndex = Number(this.dataset.index);
+            e.dataTransfer.effectAllowed = 'move';
+        }
+        function handleDragOver(e) {
+            if (e.preventDefault) e.preventDefault();
+            return false;
+        }
+        function handleDragEnter(e) { this.classList.add('drag-over'); }
+        function handleDragLeave(e) { this.classList.remove('drag-over'); }
+        function handleDrop(e) {
+            e.stopPropagation();
+            this.classList.remove('drag-over');
+            const dragTargetIndex = Number(this.dataset.index);
+            if (dragSrcIndex !== dragTargetIndex) {
+                const item = mergeFiles[dragSrcIndex];
+                mergeFiles.splice(dragSrcIndex, 1);
+                mergeFiles.splice(dragTargetIndex, 0, item);
+                renderMergeList();
+            }
+            return false;
+        }
+
         document.getElementById('do-merge').addEventListener('click', async () => {
+            if(mergeFiles.length < 2) return alert("Please select at least 2 files");
             const btn = document.getElementById('do-merge');
             btn.textContent = translations[currentLang]['processing'];
             try {
                 const { PDFDocument } = PDFLib;
                 const merged = await PDFDocument.create();
-                for (let file of mergeList) {
+                for (let file of mergeFiles) {
                     const src = await PDFDocument.load(await file.arrayBuffer());
                     const pages = await merged.copyPages(src, src.getPageIndices());
                     pages.forEach(p => merged.addPage(p));
                 }
                 saveAs(new Blob([await merged.save()], {type:'application/pdf'}), 'merged.pdf');
-            } catch(e) { alert("Error"); }
+            } catch(e) { alert("Merge failed: " + e.message); }
             finally { btn.textContent = translations[currentLang]['btn_merge_dl']; }
         });
 
         // 3. Split
         let splitFile, splitPdfDoc;
-        document.getElementById('file-split').addEventListener('change', async (e) => {
+        document.getElementById('file-split').addEventListener('change', async e => {
             if(e.target.files[0]) {
                 splitFile = e.target.files[0];
                 document.getElementById('name-split').textContent = splitFile.name;
                 const arr = await splitFile.arrayBuffer();
                 splitPdfDoc = await PDFLib.PDFDocument.load(arr);
                 const count = splitPdfDoc.getPageCount();
-                const endIn = document.getElementById('split-end');
-                endIn.value = count; endIn.max = count;
+                document.getElementById('split-end').value = count;
+                document.getElementById('split-end').max = count;
                 document.getElementById('split-start').max = count;
                 document.getElementById('ctrl-split').classList.remove('hidden');
             }
         });
         document.getElementById('do-split').addEventListener('click', async () => {
             if(!splitFile) return;
-            const start = parseInt(document.getElementById('split-start').value) - 1;
-            const end = parseInt(document.getElementById('split-end').value) - 1;
+            const start = parseInt(document.getElementById('split-start').value)-1;
+            const end = parseInt(document.getElementById('split-end').value)-1;
             try {
                 const { PDFDocument } = PDFLib;
                 const newPdf = await PDFDocument.create();
-                const indices = Array.from({length: end - start + 1}, (_, i) => start + i);
+                const indices = []; for(let i=start; i<=end; i++) indices.push(i);
                 const pages = await newPdf.copyPages(splitPdfDoc, indices);
-                pages.forEach(p => newPdf.addPage(p));
-                saveAs(new Blob([await newPdf.save()], {type:'application/pdf'}), `split_${start+1}-${end+1}.pdf`);
-            } catch(e) { alert("Error: " + e.message); }
+                pages.forEach(p=>newPdf.addPage(p));
+                saveAs(new Blob([await newPdf.save()],{type:'application/pdf'}), `split.pdf`);
+            } catch(e){ alert(e.message); }
         });
 
-        // 4. Rotate
-        let rotateFile, rotateDeg = 90;
-        document.getElementById('file-rotate').addEventListener('change', (e) => {
+        // 4. Compress (Rasterize)
+        let compressFile = null;
+        document.getElementById('file-compress').addEventListener('change', e => {
+            if(e.target.files[0]){
+                compressFile = e.target.files[0];
+                document.getElementById('name-compress').textContent = compressFile.name;
+                document.getElementById('ctrl-compress').classList.remove('hidden');
+            }
+        });
+        document.getElementById('do-compress').addEventListener('click', async () => {
+            if(!compressFile) return;
+            const btn = document.getElementById('do-compress');
+            const prog = document.getElementById('prog-compress');
+            const quality = parseFloat(document.getElementById('compress-quality').value);
+            
+            btn.disabled = true; btn.textContent = translations[currentLang]['processing'];
+            prog.classList.remove('hidden');
+
+            try {
+                // 1. Load Original
+                const pdfData = await compressFile.arrayBuffer();
+                const loadingTask = pdfjsLib.getDocument(pdfData);
+                const pdf = await loadingTask.promise;
+                const { PDFDocument } = PDFLib;
+                const newPdf = await PDFDocument.create();
+
+                // 2. Loop Pages -> Canvas -> JPG -> New PDF
+                for(let i=1; i<=pdf.numPages; i++){
+                    const page = await pdf.getPage(i);
+                    // 使用 1.5 倍縮放保持可讀性，但不要太大
+                    const scale = 1.5; 
+                    const viewport = page.getViewport({scale: scale});
+                    const canvas = document.createElement('canvas');
+                    canvas.width = viewport.width; canvas.height = viewport.height;
+                    
+                    await page.render({canvasContext: canvas.getContext('2d'), viewport}).promise;
+                    
+                    // 轉為 JPEG blob
+                    const imgDataUrl = canvas.toDataURL('image/jpeg', quality);
+                    const imgBytes = await fetch(imgDataUrl).then(res => res.arrayBuffer());
+                    
+                    const jpgImage = await newPdf.embedJpg(imgBytes);
+                    const newPage = newPdf.addPage([viewport.width/scale, viewport.height/scale]); // 還原原始尺寸單位
+                    newPage.drawImage(jpgImage, {
+                        x: 0, y: 0,
+                        width: viewport.width/scale,
+                        height: viewport.height/scale
+                    });
+                    
+                    prog.textContent = `Page ${i}/${pdf.numPages}`;
+                }
+                
+                const pdfBytes = await newPdf.save();
+                saveAs(new Blob([pdfBytes], {type: 'application/pdf'}), `compressed_${compressFile.name}`);
+
+            } catch(e){ console.error(e); alert("Compress Error: " + e.message); }
+            finally { btn.disabled=false; btn.textContent=translations[currentLang]['btn_compress_dl']; prog.classList.add('hidden'); }
+        });
+
+        // 5. Protect (Encrypt/Unlock)
+        // Encrypt
+        let encryptFile = null;
+        document.getElementById('file-encrypt').addEventListener('change', e => {
             if(e.target.files[0]) {
-                rotateFile = e.target.files[0];
-                document.getElementById('name-rotate').textContent = rotateFile.name;
+                encryptFile = e.target.files[0];
+                document.getElementById('name-encrypt').textContent = encryptFile.name;
+            }
+        });
+        document.getElementById('do-encrypt').addEventListener('click', async () => {
+            if(!encryptFile) return alert('請選擇檔案');
+            const pwd = document.getElementById('pass-encrypt').value;
+            if(!pwd) return alert('請輸入密碼');
+            try {
+                const { PDFDocument } = PDFLib;
+                const pdf = await PDFDocument.load(await encryptFile.arrayBuffer());
+                pdf.encrypt({ userPassword: pwd, ownerPassword: pwd });
+                saveAs(new Blob([await pdf.save()], {type:'application/pdf'}), `encrypted_${encryptFile.name}`);
+            } catch(e){ alert(e.message); }
+        });
+        
+        // Unlock
+        let unlockFile = null;
+        document.getElementById('file-unlock').addEventListener('change', e => {
+            if(e.target.files[0]) {
+                unlockFile = e.target.files[0];
+                document.getElementById('name-unlock').textContent = unlockFile.name;
+            }
+        });
+        document.getElementById('do-unlock').addEventListener('click', async () => {
+            if(!unlockFile) return alert('請選擇檔案');
+            const pwd = document.getElementById('pass-unlock').value;
+            try {
+                // 嘗試讀取，如果有密碼則需要傳入
+                // pdf-lib load 時若有密碼需在第二參數
+                const { PDFDocument } = PDFLib;
+                // PDF-lib 的解鎖邏輯是：如果能夠 load 成功，save 時不設 encrypt 即可
+                // 但如果檔案有密碼，load 必須給密碼，否則會報錯
+                const arr = await unlockFile.arrayBuffer();
+                let pdf;
+                try {
+                    pdf = await PDFDocument.load(arr, { password: pwd });
+                } catch(err) {
+                    if(err.message.includes('Password')) return alert('密碼錯誤或未輸入');
+                    throw err;
+                }
+                saveAs(new Blob([await pdf.save()], {type:'application/pdf'}), `unlocked_${unlockFile.name}`);
+            } catch(e){ alert("Unlock Error: " + e.message); }
+        });
+
+        // 6. Rotate
+        let rotateFile, rotateDeg=90;
+        document.getElementById('file-rotate').addEventListener('change', e => {
+            if(e.target.files[0]){
+                rotateFile=e.target.files[0];
+                document.getElementById('name-rotate').textContent=rotateFile.name;
                 document.getElementById('ctrl-rotate').classList.remove('hidden');
             }
         });
-        window.setRotate = (d) => {
-            rotateDeg = d;
-            document.querySelectorAll('.rotate-opt').forEach(b => {
-                const isActive = parseInt(b.dataset.deg) === d;
-                b.classList.toggle('bg-blue-100', isActive);
-                b.classList.toggle('border-blue-500', isActive);
-                b.classList.toggle('text-blue-700', isActive);
-                b.classList.toggle('bg-gray-100', !isActive);
+        window.setRotate = d => {
+            rotateDeg=d;
+            document.querySelectorAll('.rotate-opt').forEach(b=>{
+                const on = parseInt(b.dataset.deg)===d;
+                b.className = on ? 'rotate-opt bg-blue-100 hover:bg-blue-200 py-2 rounded border border-blue-500 text-blue-700' : 'rotate-opt bg-gray-100 hover:bg-gray-200 py-2 rounded border border-gray-200';
             });
         };
         setRotate(90);
@@ -561,29 +859,52 @@
                 const { PDFDocument, degrees } = PDFLib;
                 const pdf = await PDFDocument.load(await rotateFile.arrayBuffer());
                 pdf.getPages().forEach(p => p.setRotation(degrees(p.getRotation().angle + rotateDeg)));
-                saveAs(new Blob([await pdf.save()], {type:'application/pdf'}), `rotated_${rotateDeg}.pdf`);
-            } catch(e) { alert("Error"); }
+                saveAs(new Blob([await pdf.save()],{type:'application/pdf'}), `rotated.pdf`);
+            } catch(e){ alert(e.message); }
         });
 
-        // 5. HEIC
-        document.getElementById('file-heic').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if(!file) return;
-            document.getElementById('res-heic').classList.remove('hidden');
+        // 7. HEIC
+        document.getElementById('file-heic').addEventListener('change', e => {
+            const f=e.target.files[0]; if(!f) return;
+            const area=document.getElementById('res-heic');
+            area.classList.remove('hidden');
             document.getElementById('dl-heic').classList.add('hidden');
-            document.getElementById('preview-heic').src = '';
             document.getElementById('status-heic').textContent = translations[currentLang]['processing'];
-            
-            heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 })
-            .then((blob) => {
-                document.getElementById('preview-heic').src = URL.createObjectURL(blob);
-                document.getElementById('status-heic').textContent = "OK!";
-                const dlBtn = document.getElementById('dl-heic');
-                dlBtn.classList.remove('hidden');
-                dlBtn.onclick = () => saveAs(blob, file.name.replace(/\.(heic|heif)$/i, "") + ".jpg");
-            })
-            .catch(e => document.getElementById('status-heic').textContent = "Error: " + e.message);
+            heic2any({blob:f, toType:"image/jpeg", quality:0.9}).then(blob=>{
+                document.getElementById('preview-heic').src=URL.createObjectURL(blob);
+                document.getElementById('status-heic').textContent="OK!";
+                const btn=document.getElementById('dl-heic'); btn.classList.remove('hidden');
+                btn.onclick=()=>saveAs(blob, f.name.replace(/\..+/,".jpg"));
+            }).catch(e=>document.getElementById('status-heic').textContent="Error:"+e.message);
         });
+
+        // 8. JPG/PNG to AI
+        let toaiFile=null;
+        document.getElementById('file-toai').addEventListener('change', e=>{
+            if(e.target.files[0]){
+                toaiFile=e.target.files[0];
+                document.getElementById('name-toai').textContent=toaiFile.name;
+                document.getElementById('ctrl-toai').classList.remove('hidden');
+            }
+        });
+        document.getElementById('do-toai').addEventListener('click', async () => {
+            if(!toaiFile) return;
+            const btn=document.getElementById('do-toai'); btn.disabled=true; btn.textContent=translations[currentLang]['processing'];
+            try {
+                const { PDFDocument } = PDFLib;
+                const pdf = await PDFDocument.create();
+                const buf = await toaiFile.arrayBuffer();
+                let img;
+                if(toaiFile.type==='image/jpeg') img=await pdf.embedJpg(buf);
+                else if(toaiFile.type==='image/png') img=await pdf.embedPng(buf);
+                else return alert('Only JPG/PNG');
+                const page = pdf.addPage([img.width, img.height]);
+                page.drawImage(img, {x:0, y:0, width:img.width, height:img.height});
+                saveAs(new Blob([await pdf.save()],{type:'application/pdf'}), toaiFile.name.replace(/\..+/,".ai"));
+            } catch(e){ alert(e.message); }
+            finally { btn.disabled=false; btn.textContent=translations[currentLang]['btn_toai_dl']; }
+        });
+
     </script>
 </body>
 </html>
