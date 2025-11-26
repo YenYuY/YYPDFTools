@@ -220,7 +220,9 @@
                 <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
                     <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                 </div>
-                <h3 class="text-lg leading-6 font-medium text-gray-900" data-i18n="about_title">關於本站與隱私</h3>
+                <!-- 標題 -->
+                <h3 class="text-lg leading-6 font-bold text-gray-900" data-i18n="about_title">關於本站</h3>
+                
                 <div class="mt-2 px-2 py-3">
                     <p class="text-sm text-gray-500 text-left leading-relaxed bg-gray-50 p-3 rounded" data-i18n="about_content">
                         本網站的所有 PDF 與圖片處理功能均完全在您的「瀏覽器端」運行。
@@ -231,6 +233,15 @@
                         3. 您的隱私是 100% 安全的。
                     </p>
                 </div>
+
+                <!-- GitHub 連結按鈕 -->
+                <div class="mb-4">
+                    <a href="https://github.com/YenYuY/YYPDFTools" target="_blank" class="inline-flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 hover:text-gray-900 w-full transition">
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" /></svg>
+                        <span data-i18n="github_btn">前往 GitHub 專案</span>
+                    </a>
+                </div>
+
                 <div class="items-center px-4 py-3">
                     <button id="ok-btn" onclick="document.getElementById('about-modal').classList.add('hidden')" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300" data-i18n="btn_close">
                         了解，關閉視窗
@@ -241,7 +252,7 @@
     </div>
 
     <footer class="bg-white border-t py-6 text-center text-gray-400 text-sm">
-        &copy; 2023 All-in-One PDF Tools. <span data-i18n="footer_note">Local Processing Only.</span>
+        &copy; 2025 PDF Tools.
     </footer>
 
     <!-- 邏輯腳本 -->
@@ -285,10 +296,10 @@
                 drop_heic: "點擊上傳 HEIC 檔案",
                 btn_dl_jpg: "下載 JPG",
                 // About Modal
-                about_title: "關於本站與隱私",
+                about_title: "關於本站",
                 about_content: "本網站的所有 PDF 與圖片處理功能均完全在您的「瀏覽器端」運行。<br><br><strong>這意味著：</strong><br>1. 您的檔案<b>絕不會</b>上傳到我們的伺服器。<br>2. 即使沒有網路，頁面載入後依然可以使用。<br>3. 您的隱私是 100% 安全的。",
-                btn_close: "了解，關閉視窗",
-                footer_note: "僅在本地端運行，不儲存資料。"
+                github_btn: "前往 GitHub 專案",
+                btn_close: "了解，關閉視窗"
             },
             "en": {
                 site_title: "All-in-One PDF Tools | Secure Local Processing",
@@ -327,10 +338,10 @@
                 drop_heic: "Click to Upload HEIC File",
                 btn_dl_jpg: "Download JPG",
                 // About Modal
-                about_title: "About & Privacy",
+                about_title: "About",
                 about_content: "All PDF and image processing on this site runs entirely in your <b>Browser</b>.<br><br><strong>This means:</strong><br>1. Your files are <b>NEVER</b> uploaded to our servers.<br>2. It works even without internet after loading.<br>3. Your privacy is 100% secure.",
-                btn_close: "Got it, Close",
-                footer_note: "Local Processing Only. No Data Saved."
+                github_btn: "Visit GitHub Repo",
+                btn_close: "Got it, Close"
             },
             "ja": {
                 site_title: "PDF ツールボックス | 安全なローカル処理",
@@ -369,10 +380,10 @@
                 drop_heic: "クリックして HEIC をアップロード",
                 btn_dl_jpg: "JPG をダウンロード",
                 // About Modal
-                about_title: "プライバシーとこのサイトについて",
+                about_title: "このサイトについて",
                 about_content: "このサイトのすべての PDF および画像処理は、完全に<b>ブラウザ上</b>で実行されます。<br><br><strong>つまり：</strong><br>1. ファイルがサーバーにアップロードされることは<b>ありません</b>。<br>2. ページ読み込み後はオフラインでも使用できます。<br>3. プライバシーは 100% 安全です。",
-                btn_close: "閉じる",
-                footer_note: "ローカル処理のみ。データは保存されません。"
+                github_btn: "GitHub で見る",
+                btn_close: "閉じる"
             }
         };
 
@@ -423,7 +434,7 @@
             document.getElementById(`btn-tab-${target}`).classList.add('active');
         }
 
-        // ... 以下為原有的 PDF 處理邏輯，保持不變但套用 i18n 文字 ...
+        // ... 以下為原有的 PDF 處理邏輯 ...
 
         // 1. PDF to Image
         let pdfImgFile = null;
