@@ -3,11 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 標題已更新為 3Y工具箱 -->
-    <title data-i18n="site_title">3Y工具箱 | 本地端安全處理</title>
+    <!-- 標題 -->
+    <title data-i18n="site_title">3Y工具箱</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#111827',
+                            card: '#1f2937',
+                            text: '#f3f4f6',
+                            border: '#374151'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     
     <!-- 核心函式庫 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
@@ -18,6 +35,17 @@
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+        
+        // --- 自動偵測黑暗模式 ---
+        function updateTheme() {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+        updateTheme();
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme);
     </script>
 
     <style>
@@ -33,6 +61,7 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
+        /* Tab 按鈕樣式 */
         .tab-btn {
             white-space: nowrap;
             padding: 1rem 1.5rem;
@@ -41,47 +70,68 @@
             border-bottom: 2px solid transparent;
             color: #6b7280;
         }
+        .dark .tab-btn { color: #9ca3af; }
+        
         .tab-btn.active {
             border-bottom-color: #2563eb;
             color: #2563eb;
             font-weight: 700;
         }
+        .dark .tab-btn.active {
+            border-bottom-color: #60a5fa;
+            color: #60a5fa;
+        }
+
         .tab-btn:hover:not(.active) {
             color: #374151;
             background-color: #f9fafb;
         }
-        /* 拖曳時的樣式 */
+        .dark .tab-btn:hover:not(.active) {
+            color: #e5e7eb;
+            background-color: #374151;
+        }
+
+        /* 拖曳列表樣式 */
         .dragging {
             opacity: 0.5;
             background-color: #e5e7eb;
             border: 2px dashed #9ca3af;
         }
-        .drag-over {
-            border-top: 3px solid #3b82f6;
+        .dark .dragging { background-color: #4b5563; }
+        .drag-over { border-top: 3px solid #3b82f6; }
+
+        /* 上傳區拖曳時的高亮樣式 */
+        .upload-drag-active {
+            border-style: solid !important;
+            border-color: #3b82f6 !important; /* blue-500 */
+            background-color: #eff6ff !important; /* blue-50 */
+        }
+        .dark .upload-drag-active {
+            background-color: #374151 !important; /* gray-700 */
+            border-color: #60a5fa !important; /* blue-400 */
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col">
+<body class="bg-gray-50 dark:bg-dark-bg text-gray-800 dark:text-gray-200 font-sans min-h-screen flex flex-col transition-colors duration-300">
 
     <!-- 導覽列 -->
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
+    <nav class="bg-white dark:bg-dark-card shadow-sm sticky top-0 z-50 border-b dark:border-dark-border transition-colors">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex h-16 items-center justify-between">
                 <!-- Logo -->
                 <div class="flex items-center gap-2">
-                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                    <!-- LOGO文字已更新 -->
-                    <span class="font-bold text-xl tracking-tight hidden sm:block" data-i18n="nav_title">3Y工具箱</span>
+                    <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    <span class="font-bold text-xl tracking-tight hidden sm:block text-gray-900 dark:text-white" data-i18n="nav_title">3Y工具箱</span>
                 </div>
 
-                <!-- 右側選單 (語言 + 關於) -->
+                <!-- 右側選單 -->
                 <div class="flex items-center gap-3">
-                    <button onclick="openAboutModal()" class="text-sm font-medium text-gray-600 hover:text-blue-600 flex items-center gap-1">
+                    <button onclick="openAboutModal()" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         <span data-i18n="nav_about">關於本站</span>
                     </button>
                     
-                    <select id="lang-selector" onchange="changeLanguage(this.value)" class="text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 py-1 pl-2 pr-6">
+                    <select id="lang-selector" onchange="changeLanguage(this.value)" class="text-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 py-1 pl-2 pr-6">
                         <option value="zh-TW">繁體中文</option>
                         <option value="en">English</option>
                         <option value="ja">日本語</option>
@@ -92,17 +142,18 @@
     </nav>
 
     <!-- 橫向滾動選單 -->
-    <div class="bg-white border-b shadow-sm">
-        <div class="max-w-6xl mx-auto px-2">
+    <div class="bg-white dark:bg-dark-card border-b dark:border-dark-border shadow-sm transition-colors">
+        <div class="max-w-7xl mx-auto px-2">
             <div class="flex overflow-x-auto hide-scrollbar gap-2" id="tab-container">
                 <button onclick="switchTab('img')" class="tab-btn active" id="btn-tab-img" data-i18n="tab_img">PDF 轉圖片</button>
+                <button onclick="switchTab('img2pdf')" class="tab-btn text-teal-600 dark:text-teal-400" id="btn-tab-img2pdf" data-i18n="tab_img2pdf">圖片 轉 PDF</button>
                 <button onclick="switchTab('merge')" class="tab-btn" id="btn-tab-merge" data-i18n="tab_merge">PDF 合併</button>
                 <button onclick="switchTab('split')" class="tab-btn" id="btn-tab-split" data-i18n="tab_split">PDF 分割</button>
                 <button onclick="switchTab('compress')" class="tab-btn" id="btn-tab-compress" data-i18n="tab_compress">PDF 壓縮</button>
                 <button onclick="switchTab('protect')" class="tab-btn" id="btn-tab-protect" data-i18n="tab_protect">PDF 加密/解鎖</button>
                 <button onclick="switchTab('rotate')" class="tab-btn" id="btn-tab-rotate" data-i18n="tab_rotate">PDF 旋轉</button>
-                <button onclick="switchTab('heic')" class="tab-btn text-purple-600" id="btn-tab-heic" data-i18n="tab_heic">HEIC 轉 JPG</button>
-                <button onclick="switchTab('toai')" class="tab-btn text-orange-600" id="btn-tab-toai" data-i18n="tab_toai">JPG/PNG 轉 ai檔案(試用)</button>
+                <button onclick="switchTab('heic')" class="tab-btn text-purple-600 dark:text-purple-400" id="btn-tab-heic" data-i18n="tab_heic">HEIC 轉 JPG</button>
+                <button onclick="switchTab('toai')" class="tab-btn text-orange-600 dark:text-orange-400" id="btn-tab-toai" data-i18n="tab_toai">JPG/PNG 轉 ai檔案(試用)</button>
             </div>
         </div>
     </div>
@@ -113,69 +164,92 @@
         <!-- 1. PDF 轉圖片 -->
         <section id="sec-img" class="block">
             <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold" data-i18n="title_img">PDF 轉 JPG/PNG</h2>
-                <p class="text-gray-500" data-i18n="desc_img">將每一頁 PDF 轉換為圖片並打包下載</p>
+                <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_img">PDF 轉 JPG/PNG</h2>
+                <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_img">將每一頁 PDF 轉換為圖片並打包下載</p>
             </div>
-            <div class="bg-white rounded-xl shadow p-6">
+            <div class="bg-white dark:bg-dark-card rounded-xl shadow p-6 transition-colors">
                 <input type="file" id="file-img" class="hidden" accept="application/pdf">
-                <div onclick="document.getElementById('file-img').click()" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:bg-blue-50 hover:border-blue-400 transition">
-                    <p class="text-lg text-gray-600 font-medium" data-i18n="drop_pdf">點擊上傳 PDF</p>
+                <!-- Drop Zone ID: drop-img -->
+                <div id="drop-img" onclick="document.getElementById('file-img').click()" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700 hover:border-blue-400 transition">
+                    <p class="text-lg text-gray-600 dark:text-gray-300 font-medium" data-i18n="drop_pdf">點擊或拖曳上傳 PDF</p>
                 </div>
-                <div id="ctrl-img" class="hidden mt-4 pt-4 border-t">
-                    <p id="name-img" class="mb-2 font-bold text-gray-700"></p>
+                <div id="ctrl-img" class="hidden mt-4 pt-4 border-t dark:border-gray-700">
+                    <p id="name-img" class="mb-2 font-bold text-gray-700 dark:text-gray-200"></p>
                     <div class="flex gap-2">
-                        <select id="fmt-img" class="border rounded px-2 py-2"><option value="jpeg">JPG</option><option value="png">PNG</option></select>
+                        <select id="fmt-img" class="border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded px-2 py-2"><option value="jpeg">JPG</option><option value="png">PNG</option></select>
                         <button id="do-img" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full" data-i18n="btn_convert">開始轉換</button>
                     </div>
-                    <div id="prog-img" class="hidden mt-2 text-sm text-blue-600" data-i18n="processing">處理中...</div>
+                    <div id="prog-img" class="hidden mt-2 text-sm text-blue-600 dark:text-blue-400" data-i18n="processing">處理中...</div>
                 </div>
             </div>
         </section>
 
-        <!-- 2. PDF 合併 (支援拖曳排序) -->
-        <section id="sec-merge" class="hidden">
+        <!-- 2. 圖片 轉 PDF -->
+        <section id="sec-img2pdf" class="hidden">
             <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold" data-i18n="title_merge">PDF 合併</h2>
-                <p class="text-gray-500" data-i18n="desc_merge">將多個 PDF 串接成一個檔案，可拖曳調整順序</p>
+                <h2 class="text-2xl font-bold text-teal-700 dark:text-teal-400" data-i18n="title_img2pdf">圖片 轉 PDF</h2>
+                <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_img2pdf">將多張圖片合併為一個 PDF 檔案</p>
             </div>
-            <div class="bg-white rounded-xl shadow p-6">
-                <input type="file" id="file-merge" class="hidden" accept="application/pdf" multiple>
-                <div onclick="document.getElementById('file-merge').click()" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:bg-blue-50 hover:border-blue-400 transition">
-                    <p class="text-lg text-gray-600 font-medium" data-i18n="drop_pdfs">點擊選擇多個 PDF</p>
+            <div class="bg-white dark:bg-dark-card rounded-xl shadow p-6 border-t-4 border-teal-500 transition-colors">
+                <input type="file" id="file-img2pdf" class="hidden" accept="image/jpeg, image/png" multiple>
+                <!-- Drop Zone ID: drop-img2pdf -->
+                <div id="drop-img2pdf" onclick="document.getElementById('file-img2pdf').click()" class="border-2 border-dashed border-teal-200 dark:border-teal-900 bg-teal-50 dark:bg-gray-800 rounded-lg p-8 text-center cursor-pointer hover:bg-teal-100 dark:hover:bg-gray-700 transition">
+                    <p class="text-lg text-teal-900 dark:text-teal-300 font-medium" data-i18n="drop_imgs">點擊或拖曳選擇多張圖片 (JPG/PNG)</p>
                 </div>
                 
-                <!-- 拖曳列表區 -->
+                <div id="ctrl-img2pdf" class="hidden mt-4 pt-4 border-t dark:border-gray-700">
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2" data-i18n="selected_imgs">已選擇圖片：</p>
+                    <ul id="list-img2pdf" class="text-sm text-gray-700 dark:text-gray-300 mb-4 list-disc pl-5 max-h-40 overflow-y-auto"></ul>
+                    
+                    <button id="do-img2pdf" class="w-full bg-teal-600 text-white py-3 rounded hover:bg-teal-700 font-bold" data-i18n="btn_img2pdf_dl">合併並下載 PDF</button>
+                    <div id="prog-img2pdf" class="hidden mt-2 text-center text-sm text-teal-600 dark:text-teal-400">0%</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. PDF 合併 -->
+        <section id="sec-merge" class="hidden">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_merge">PDF 合併</h2>
+                <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_merge">將多個 PDF 串接成一個檔案，可拖曳調整順序</p>
+            </div>
+            <div class="bg-white dark:bg-dark-card rounded-xl shadow p-6 transition-colors">
+                <input type="file" id="file-merge" class="hidden" accept="application/pdf" multiple>
+                <!-- Drop Zone ID: drop-merge -->
+                <div id="drop-merge" onclick="document.getElementById('file-merge').click()" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700 hover:border-blue-400 transition">
+                    <p class="text-lg text-gray-600 dark:text-gray-300 font-medium" data-i18n="drop_pdfs">點擊或拖曳選擇多個 PDF</p>
+                </div>
+                
                 <div id="merge-container" class="mt-6 hidden">
-                    <p class="text-sm text-gray-500 mb-2 italic text-center" data-i18n="drag_hint">💡 提示：您可以拖曳下方的項目來調整合併順序</p>
-                    <ul id="list-merge" class="space-y-2">
-                        <!-- JS 動態生成 -->
-                    </ul>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2 italic text-center" data-i18n="drag_hint">💡 提示：您可以拖曳下方的項目來調整合併順序</p>
+                    <ul id="list-merge" class="space-y-2"></ul>
                     <button id="do-merge" class="mt-6 w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-bold" data-i18n="btn_merge_dl">合併並下載</button>
                 </div>
             </div>
         </section>
 
-        <!-- 3. PDF 分割 -->
+        <!-- 4. PDF 分割 -->
         <section id="sec-split" class="hidden">
             <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold" data-i18n="title_split">PDF 分割</h2>
-                <p class="text-gray-500" data-i18n="desc_split">提取指定範圍的頁面存為新 PDF</p>
+                <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_split">PDF 分割</h2>
+                <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_split">提取指定範圍的頁面存為新 PDF</p>
             </div>
-            <div class="bg-white rounded-xl shadow p-6">
+            <div class="bg-white dark:bg-dark-card rounded-xl shadow p-6 transition-colors">
                 <input type="file" id="file-split" class="hidden" accept="application/pdf">
-                <div onclick="document.getElementById('file-split').click()" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:bg-blue-50 hover:border-blue-400 transition">
-                    <p class="text-lg text-gray-600 font-medium" data-i18n="drop_pdf">點擊上傳 PDF</p>
+                <!-- Drop Zone ID: drop-split -->
+                <div id="drop-split" onclick="document.getElementById('file-split').click()" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700 hover:border-blue-400 transition">
+                    <p class="text-lg text-gray-600 dark:text-gray-300 font-medium" data-i18n="drop_pdf">點擊或拖曳上傳 PDF</p>
                 </div>
-                <div id="ctrl-split" class="hidden mt-4 pt-4 border-t">
-                    <p id="name-split" class="mb-4 font-bold text-gray-700"></p>
+                <div id="ctrl-split" class="hidden mt-4 pt-4 border-t dark:border-gray-700">
+                    <p id="name-split" class="mb-4 font-bold text-gray-700 dark:text-gray-200"></p>
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700" data-i18n="lbl_start_page">起始頁</label>
-                            <input type="number" id="split-start" min="1" value="1" class="mt-1 block w-full border-gray-300 rounded-md border p-2">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="lbl_start_page">起始頁</label>
+                            <input type="number" id="split-start" min="1" value="1" class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md border p-2">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700" data-i18n="lbl_end_page">結束頁</label>
-                            <input type="number" id="split-end" min="1" value="1" class="mt-1 block w-full border-gray-300 rounded-md border p-2">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="lbl_end_page">結束頁</label>
+                            <input type="number" id="split-end" min="1" value="1" class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md border p-2">
                         </div>
                     </div>
                     <button id="do-split" class="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-bold" data-i18n="btn_split_dl">分割並下載</button>
@@ -183,132 +257,139 @@
             </div>
         </section>
 
-        <!-- 4. PDF 壓縮 (新功能) -->
+        <!-- 5. PDF 壓縮 -->
         <section id="sec-compress" class="hidden">
             <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold" data-i18n="title_compress">PDF 壓縮 (重製)</h2>
-                <p class="text-gray-500" data-i18n="desc_compress">透過將 PDF 轉為圖片再重建來減少檔案大小</p>
+                <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_compress">PDF 壓縮 (重製)</h2>
+                <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_compress">透過將 PDF 轉為圖片再重建來減少檔案大小</p>
             </div>
-            <div class="bg-white rounded-xl shadow p-6">
+            <div class="bg-white dark:bg-dark-card rounded-xl shadow p-6 transition-colors">
                 <input type="file" id="file-compress" class="hidden" accept="application/pdf">
-                <div onclick="document.getElementById('file-compress').click()" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:bg-green-50 hover:border-green-400 transition">
-                    <p class="text-lg text-gray-600 font-medium" data-i18n="drop_pdf">點擊上傳 PDF</p>
+                <!-- Drop Zone ID: drop-compress -->
+                <div id="drop-compress" onclick="document.getElementById('file-compress').click()" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:bg-green-50 dark:hover:bg-gray-700 hover:border-green-400 transition">
+                    <p class="text-lg text-gray-600 dark:text-gray-300 font-medium" data-i18n="drop_pdf">點擊或拖曳上傳 PDF</p>
                 </div>
-                <div id="ctrl-compress" class="hidden mt-4 pt-4 border-t">
-                    <p id="name-compress" class="mb-4 font-bold text-gray-700"></p>
-                    <div class="bg-yellow-50 border border-yellow-200 p-3 rounded mb-4 text-sm text-yellow-800">
+                <div id="ctrl-compress" class="hidden mt-4 pt-4 border-t dark:border-gray-700">
+                    <p id="name-compress" class="mb-4 font-bold text-gray-700 dark:text-gray-200"></p>
+                    <div class="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 p-3 rounded mb-4 text-sm text-yellow-800 dark:text-yellow-200">
                         <strong data-i18n="note_title">注意：</strong> <span data-i18n="note_compress">此模式會將所有頁面轉為圖片。文字將無法選取，但可大幅減少掃描檔的大小。</span>
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="lbl_quality">圖片品質 (越低檔案越小)</label>
-                        <select id="compress-quality" class="w-full border rounded p-2">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="lbl_quality">圖片品質 (越低檔案越小)</label>
+                        <select id="compress-quality" class="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded p-2">
                             <option value="0.5">低畫質 (高壓縮)</option>
                             <option value="0.7" selected>中畫質 (推薦)</option>
                             <option value="0.9">高畫質 (輕微壓縮)</option>
                         </select>
                     </div>
                     <button id="do-compress" class="w-full bg-green-600 text-white py-3 rounded hover:bg-green-700 font-bold" data-i18n="btn_compress_dl">開始壓縮並下載</button>
-                    <div id="prog-compress" class="hidden mt-2 text-center text-sm text-green-600">0%</div>
+                    <div id="prog-compress" class="hidden mt-2 text-center text-sm text-green-600 dark:text-green-400">0%</div>
                 </div>
             </div>
         </section>
 
-        <!-- 5. PDF 加密/解鎖 (新功能) -->
+        <!-- 6. PDF 加密/解鎖 -->
         <section id="sec-protect" class="hidden">
             <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold" data-i18n="title_protect">PDF 加密與解鎖</h2>
-                <p class="text-gray-500" data-i18n="desc_protect">為文件設定密碼，或移除已知密碼</p>
+                <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_protect">PDF 加密與解鎖</h2>
+                <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_protect">為文件設定密碼，或移除已知密碼</p>
             </div>
             
             <div class="grid md:grid-cols-2 gap-6">
                 <!-- 加密區 -->
-                <div class="bg-white rounded-xl shadow p-6 border-t-4 border-blue-500">
-                    <h3 class="font-bold text-lg mb-4" data-i18n="subtitle_encrypt">加密 (設定密碼)</h3>
+                <div class="bg-white dark:bg-dark-card rounded-xl shadow p-6 border-t-4 border-blue-500 transition-colors">
+                    <h3 class="font-bold text-lg mb-4 dark:text-white" data-i18n="subtitle_encrypt">加密 (設定密碼)</h3>
                     <input type="file" id="file-encrypt" class="hidden" accept="application/pdf">
-                    <button onclick="document.getElementById('file-encrypt').click()" class="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:bg-gray-50 mb-4">
-                        <span id="name-encrypt" class="text-gray-600 block truncate" data-i18n="select_file">選擇檔案</span>
+                    <!-- Drop Zone ID: drop-encrypt -->
+                    <button id="drop-encrypt" onclick="document.getElementById('file-encrypt').click()" class="w-full border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:bg-gray-50 dark:hover:bg-gray-700 mb-4 transition">
+                        <span id="name-encrypt" class="text-gray-600 dark:text-gray-300 block truncate" data-i18n="select_file">選擇或拖曳檔案</span>
                     </button>
-                    <input type="password" id="pass-encrypt" class="w-full border rounded p-2 mb-4" placeholder="設定密碼" data-i18n="ph_set_pass">
+                    <input type="password" id="pass-encrypt" class="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded p-2 mb-4" placeholder="設定密碼" data-i18n="ph_set_pass">
                     <button id="do-encrypt" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700" data-i18n="btn_encrypt">下載加密檔案</button>
                 </div>
 
                 <!-- 解鎖區 -->
-                <div class="bg-white rounded-xl shadow p-6 border-t-4 border-red-500">
-                    <h3 class="font-bold text-lg mb-4" data-i18n="subtitle_unlock">解鎖 (移除密碼)</h3>
+                <div class="bg-white dark:bg-dark-card rounded-xl shadow p-6 border-t-4 border-red-500 transition-colors">
+                    <h3 class="font-bold text-lg mb-4 dark:text-white" data-i18n="subtitle_unlock">解鎖 (移除密碼)</h3>
                     <input type="file" id="file-unlock" class="hidden" accept="application/pdf">
-                    <button onclick="document.getElementById('file-unlock').click()" class="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:bg-gray-50 mb-4">
-                        <span id="name-unlock" class="text-gray-600 block truncate" data-i18n="select_file">選擇檔案</span>
+                    <!-- Drop Zone ID: drop-unlock -->
+                    <button id="drop-unlock" onclick="document.getElementById('file-unlock').click()" class="w-full border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:bg-gray-50 dark:hover:bg-gray-700 mb-4 transition">
+                        <span id="name-unlock" class="text-gray-600 dark:text-gray-300 block truncate" data-i18n="select_file">選擇或拖曳檔案</span>
                     </button>
-                    <input type="password" id="pass-unlock" class="w-full border rounded p-2 mb-4" placeholder="輸入原始密碼" data-i18n="ph_org_pass">
+                    <input type="password" id="pass-unlock" class="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded p-2 mb-4" placeholder="輸入原始密碼" data-i18n="ph_org_pass">
                     <button id="do-unlock" class="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700" data-i18n="btn_unlock">下載解鎖檔案</button>
                 </div>
             </div>
         </section>
 
-        <!-- 6. PDF 旋轉 -->
+        <!-- 7. PDF 旋轉 -->
         <section id="sec-rotate" class="hidden">
             <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold" data-i18n="title_rotate">PDF 頁面旋轉</h2>
-                <p class="text-gray-500" data-i18n="desc_rotate">將 PDF 所有頁面進行旋轉</p>
+                <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_rotate">PDF 頁面旋轉</h2>
+                <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_rotate">將 PDF 所有頁面進行旋轉</p>
             </div>
-            <div class="bg-white rounded-xl shadow p-6">
+            <div class="bg-white dark:bg-dark-card rounded-xl shadow p-6 transition-colors">
                 <input type="file" id="file-rotate" class="hidden" accept="application/pdf">
-                <div onclick="document.getElementById('file-rotate').click()" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:bg-blue-50 hover:border-blue-400 transition">
-                    <p class="text-lg text-gray-600 font-medium" data-i18n="drop_pdf">點擊上傳 PDF</p>
+                <!-- Drop Zone ID: drop-rotate -->
+                <div id="drop-rotate" onclick="document.getElementById('file-rotate').click()" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700 hover:border-blue-400 transition">
+                    <p class="text-lg text-gray-600 dark:text-gray-300 font-medium" data-i18n="drop_pdf">點擊或拖曳上傳 PDF</p>
                 </div>
-                <div id="ctrl-rotate" class="hidden mt-4 pt-4 border-t">
-                    <p id="name-rotate" class="mb-4 font-bold text-gray-700"></p>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="lbl_rotate_deg">選擇旋轉角度 (順時針)</label>
+                <div id="ctrl-rotate" class="hidden mt-4 pt-4 border-t dark:border-gray-700">
+                    <p id="name-rotate" class="mb-4 font-bold text-gray-700 dark:text-gray-200"></p>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-i18n="lbl_rotate_deg">選擇旋轉角度 (順時針)</label>
                     <div class="grid grid-cols-3 gap-2 mb-4">
-                        <button onclick="setRotate(90)" class="rotate-opt bg-gray-100 hover:bg-gray-200 py-2 rounded border border-gray-200" data-deg="90">90°</button>
-                        <button onclick="setRotate(180)" class="rotate-opt bg-gray-100 hover:bg-gray-200 py-2 rounded border border-gray-200" data-deg="180">180°</button>
-                        <button onclick="setRotate(270)" class="rotate-opt bg-gray-100 hover:bg-gray-200 py-2 rounded border border-gray-200" data-deg="270">270°</button>
+                        <button onclick="setRotate(90)" class="rotate-opt bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 py-2 rounded border border-gray-200 dark:border-gray-600 dark:text-white" data-deg="90">90°</button>
+                        <button onclick="setRotate(180)" class="rotate-opt bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 py-2 rounded border border-gray-200 dark:border-gray-600 dark:text-white" data-deg="180">180°</button>
+                        <button onclick="setRotate(270)" class="rotate-opt bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 py-2 rounded border border-gray-200 dark:border-gray-600 dark:text-white" data-deg="270">270°</button>
                     </div>
                     <button id="do-rotate" class="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-bold" data-i18n="btn_rotate_dl">旋轉並下載</button>
                 </div>
             </div>
         </section>
 
-        <!-- 7. HEIC 轉 JPG -->
+        <!-- 8. HEIC 轉 JPG -->
         <section id="sec-heic" class="hidden">
             <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold text-purple-700" data-i18n="title_heic">HEIC 轉 JPG</h2>
-                <p class="text-gray-500" data-i18n="desc_heic">iPhone 照片格式轉換為通用 JPG</p>
+                <h2 class="text-2xl font-bold text-purple-700 dark:text-purple-400" data-i18n="title_heic">HEIC 轉 JPG</h2>
+                <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_heic">iPhone 照片格式轉換為通用 JPG</p>
             </div>
-            <div class="bg-white rounded-xl shadow p-6 border-t-4 border-purple-500">
+            <div class="bg-white dark:bg-dark-card rounded-xl shadow p-6 border-t-4 border-purple-500 transition-colors">
                 <input type="file" id="file-heic" class="hidden" accept=".heic, .heif">
-                <div onclick="document.getElementById('file-heic').click()" class="border-2 border-dashed border-purple-200 bg-purple-50 rounded-lg p-8 text-center cursor-pointer hover:bg-purple-100 transition">
+                <!-- Drop Zone ID: drop-heic -->
+                <div id="drop-heic" onclick="document.getElementById('file-heic').click()" class="border-2 border-dashed border-purple-200 dark:border-purple-900 bg-purple-50 dark:bg-gray-800 rounded-lg p-8 text-center cursor-pointer hover:bg-purple-100 dark:hover:bg-gray-700 transition">
                     <div class="flex flex-col items-center">
                         <svg class="w-10 h-10 text-purple-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        <p class="text-lg text-purple-900 font-medium" data-i18n="drop_heic">點擊上傳 HEIC 檔案</p>
+                        <p class="text-lg text-purple-900 dark:text-purple-300 font-medium" data-i18n="drop_heic">點擊或拖曳上傳 HEIC 檔案</p>
                     </div>
                 </div>
                 <div id="res-heic" class="hidden mt-6 text-center">
-                    <p id="status-heic" class="text-sm font-bold text-gray-700 mb-2" data-i18n="processing">轉換中...</p>
+                    <p id="status-heic" class="text-sm font-bold text-gray-700 dark:text-gray-200 mb-2" data-i18n="processing">轉換中...</p>
                     <img id="preview-heic" class="max-w-full h-auto rounded shadow mx-auto mb-4" style="max-height: 300px;">
                     <button id="dl-heic" class="bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700" data-i18n="btn_dl_jpg">下載 JPG</button>
                 </div>
             </div>
         </section>
 
-        <!-- 8. JPG/PNG 轉 AI (試用) -->
+        <!-- 9. JPG/PNG 轉 AI -->
         <section id="sec-toai" class="hidden">
             <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold text-orange-700" data-i18n="title_toai">JPG/PNG 轉 ai檔案(試用)</h2>
-                <p class="text-gray-500" data-i18n="desc_toai">將圖片轉換為 Adobe Illustrator 相容檔案 (.ai)</p>
+                <!-- 文字修正回「...ai檔案(試用)」 -->
+                <h2 class="text-2xl font-bold text-orange-700 dark:text-orange-400" data-i18n="title_toai">JPG/PNG 轉 ai檔案(試用)</h2>
+                <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_toai">將圖片轉換為 Adobe Illustrator 相容檔案 (.ai)</p>
             </div>
-            <div class="bg-white rounded-xl shadow p-6 border-t-4 border-orange-500">
+            <div class="bg-white dark:bg-dark-card rounded-xl shadow p-6 border-t-4 border-orange-500 transition-colors">
                 <input type="file" id="file-toai" class="hidden" accept="image/jpeg, image/png">
-                <div onclick="document.getElementById('file-toai').click()" class="border-2 border-dashed border-orange-200 bg-orange-50 rounded-lg p-8 text-center cursor-pointer hover:bg-orange-100 transition">
+                <!-- Drop Zone ID: drop-toai -->
+                <div id="drop-toai" onclick="document.getElementById('file-toai').click()" class="border-2 border-dashed border-orange-200 dark:border-orange-900 bg-orange-50 dark:bg-gray-800 rounded-lg p-8 text-center cursor-pointer hover:bg-orange-100 dark:hover:bg-gray-700 transition">
                     <div class="flex flex-col items-center">
                         <svg class="w-10 h-10 text-orange-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        <p class="text-lg text-orange-900 font-medium" data-i18n="drop_img">點擊上傳 JPG 或 PNG 圖片</p>
+                        <p class="text-lg text-orange-900 dark:text-orange-300 font-medium" data-i18n="drop_img">點擊或拖曳上傳 JPG 或 PNG 圖片</p>
                     </div>
                 </div>
                 
-                <div id="ctrl-toai" class="hidden mt-6 pt-4 border-t text-center">
-                    <p id="name-toai" class="mb-4 font-bold text-gray-700"></p>
-                    <p class="text-sm text-gray-500 mb-4 bg-yellow-50 p-2 rounded border border-yellow-200" data-i18n="note_toai">
+                <div id="ctrl-toai" class="hidden mt-6 pt-4 border-t dark:border-gray-700 text-center">
+                    <p id="name-toai" class="mb-4 font-bold text-gray-700 dark:text-gray-200"></p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 bg-yellow-50 dark:bg-yellow-900/30 p-2 rounded border border-yellow-200 dark:border-yellow-800" data-i18n="note_toai">
                         注意：此功能會將圖片嵌入到 AI 檔中，並非轉為向量線條。但您可以直接用 Illustrator 開啟編輯。
                     </p>
                     <button id="do-toai" class="w-full sm:w-auto bg-orange-600 text-white px-8 py-3 rounded shadow hover:bg-orange-700 font-bold" data-i18n="btn_toai_dl">轉換並下載 .AI</button>
@@ -320,16 +401,16 @@
 
     <!-- 關於本站 Modal -->
     <div id="about-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50 flex items-center justify-center">
-        <div class="relative p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+        <div class="relative p-5 border w-full max-w-md shadow-lg rounded-md bg-white dark:bg-gray-800 dark:border-gray-700">
             <div class="mt-3 text-center">
-                <h3 class="text-lg leading-6 font-bold text-gray-900 mb-4" data-i18n="about_title">關於本站</h3>
+                <h3 class="text-lg leading-6 font-bold text-gray-900 dark:text-white mb-4" data-i18n="about_title">關於本站</h3>
                 <div class="mt-2 px-2 py-3">
-                    <p class="text-sm text-gray-500 text-left leading-relaxed bg-gray-50 p-3 rounded" data-i18n="about_content">
+                    <p class="text-sm text-gray-500 dark:text-gray-300 text-left leading-relaxed bg-gray-50 dark:bg-gray-700 p-3 rounded" data-i18n="about_content">
                         內容...
                     </p>
                 </div>
                 <div class="mb-4">
-                    <a href="https://github.com/YenYuY/YYPDFTools" target="_blank" class="inline-flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 w-full transition">
+                    <a href="https://github.com/YenYuY/YYPDFTools" target="_blank" class="inline-flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 w-full transition">
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" /></svg>
                         <span data-i18n="github_btn">前往 GitHub 專案</span>
                     </a>
@@ -343,19 +424,19 @@
         </div>
     </div>
 
-    <footer class="bg-white border-t py-6 text-center text-gray-400 text-sm">
+    <footer class="bg-white dark:bg-dark-card border-t dark:border-dark-border py-6 text-center text-gray-400 text-sm transition-colors">
         &copy; 2025 3Y Tools.
     </footer>
 
     <!-- 邏輯腳本 -->
     <script>
-        // === 多語言字典 (已更新為 3Y工具箱) ===
         const translations = {
             "zh-TW": {
-                site_title: "3Y工具箱 | 本地端安全處理",
+                site_title: "3Y工具箱",
                 nav_title: "3Y工具箱",
                 nav_about: "關於本站",
                 tab_img: "PDF 轉圖片",
+                tab_img2pdf: "圖片 轉 PDF",
                 tab_merge: "PDF 合併",
                 tab_split: "PDF 分割",
                 tab_compress: "PDF 壓縮",
@@ -363,18 +444,23 @@
                 tab_rotate: "PDF 旋轉",
                 tab_heic: "HEIC 轉 JPG",
                 tab_toai: "JPG/PNG 轉 ai檔案(試用)",
-                // Common
                 processing: "處理中...",
-                drop_pdf: "點擊上傳 PDF",
-                select_file: "選擇檔案",
+                drop_pdf: "點擊或拖曳上傳 PDF",
+                select_file: "選擇或拖曳檔案",
                 // PDF to IMG
                 title_img: "PDF 轉 JPG/PNG",
                 desc_img: "將每一頁 PDF 轉換為圖片並打包下載",
                 btn_convert: "開始轉換",
+                // IMG to PDF
+                title_img2pdf: "圖片 轉 PDF",
+                desc_img2pdf: "將多張圖片合併為一個 PDF 檔案",
+                drop_imgs: "點擊或拖曳選擇多張圖片 (JPG/PNG)",
+                selected_imgs: "已選擇圖片：",
+                btn_img2pdf_dl: "合併並下載 PDF",
                 // Merge
                 title_merge: "PDF 合併",
                 desc_merge: "將多個 PDF 串接成一個檔案，可拖曳調整順序",
-                drop_pdfs: "點擊選擇多個 PDF",
+                drop_pdfs: "點擊或拖曳選擇多個 PDF",
                 drag_hint: "💡 提示：您可以拖曳下方的項目來調整合併順序",
                 btn_merge_dl: "合併並下載",
                 // Split
@@ -407,12 +493,12 @@
                 // HEIC
                 title_heic: "HEIC 轉 JPG",
                 desc_heic: "iPhone 照片格式轉換為通用 JPG",
-                drop_heic: "點擊上傳 HEIC 檔案",
+                drop_heic: "點擊或拖曳上傳 HEIC 檔案",
                 btn_dl_jpg: "下載 JPG",
                 // IMG to AI
                 title_toai: "JPG/PNG 轉 ai檔案(試用)",
                 desc_toai: "將圖片轉換為 Adobe Illustrator 相容檔案 (.ai)",
-                drop_img: "點擊上傳 JPG 或 PNG 圖片",
+                drop_img: "點擊或拖曳上傳 JPG 或 PNG 圖片",
                 note_toai: "注意：此功能會將圖片嵌入到 AI 檔中，並非轉為向量線條。但您可以直接用 Illustrator 開啟編輯。",
                 btn_toai_dl: "轉換並下載 .AI",
                 // About
@@ -422,10 +508,11 @@
                 btn_close: "了解，關閉視窗"
             },
             "en": {
-                site_title: "3Y Tools | Secure Local Processing",
+                site_title: "3Y Tools",
                 nav_title: "3Y Tools",
                 nav_about: "About",
                 tab_img: "PDF to Image",
+                tab_img2pdf: "Images to PDF",
                 tab_merge: "Merge PDF",
                 tab_split: "Split PDF",
                 tab_compress: "Compress PDF",
@@ -434,14 +521,19 @@
                 tab_heic: "HEIC to JPG",
                 tab_toai: "JPG/PNG to .ai (Trial)",
                 processing: "Processing...",
-                drop_pdf: "Click to Upload PDF",
-                select_file: "Select File",
+                drop_pdf: "Click or Drag to Upload PDF",
+                select_file: "Select or Drag File",
                 title_img: "PDF to JPG/PNG",
                 desc_img: "Convert each PDF page to image",
                 btn_convert: "Convert",
+                title_img2pdf: "Images to PDF",
+                desc_img2pdf: "Combine multiple images into one PDF",
+                drop_imgs: "Click or Drag to Select Images (JPG/PNG)",
+                selected_imgs: "Selected Images:",
+                btn_img2pdf_dl: "Combine & Download PDF",
                 title_merge: "Merge PDF",
                 desc_merge: "Combine multiple PDFs into one, drag to reorder",
-                drop_pdfs: "Click to Select Multiple PDFs",
+                drop_pdfs: "Click or Drag to Select Multiple PDFs",
                 drag_hint: "💡 Tip: Drag items below to reorder",
                 btn_merge_dl: "Merge & Download",
                 title_split: "Split PDF",
@@ -469,15 +561,15 @@
                 btn_rotate_dl: "Rotate & Download",
                 title_heic: "HEIC to JPG",
                 desc_heic: "Convert HEIC to JPG",
-                drop_heic: "Click to Upload HEIC",
+                drop_heic: "Click or Drag to Upload HEIC",
                 btn_dl_jpg: "Download JPG",
                 title_toai: "JPG/PNG to .ai (Trial)",
                 desc_toai: "Convert image to .ai file",
-                drop_img: "Click to Upload JPG/PNG",
+                drop_img: "Click or Drag to Upload JPG/PNG",
                 note_toai: "Note: Embeds image into AI file, not vectorization.",
                 btn_toai_dl: "Convert & Download",
                 about_title: "About",
-                about_content: "All processing runs in your <b>Browser</b>.<br>Files are <b>NEVER</b> uploaded.",
+                about_content: "All PDF and image processing functions on this website run entirely within your <b>Browser</b>.<br><br><strong>This means:</strong><br>1. Your files are <b>NEVER</b> uploaded to our servers.<br>2. You can use this site even without an internet connection after the page loads.<br>3. Your privacy is 100% secure.",
                 github_btn: "Visit GitHub",
                 btn_close: "Close"
             },
@@ -486,6 +578,7 @@
                 nav_title: "3Y ツール",
                 nav_about: "情報",
                 tab_img: "PDF 画像変換",
+                tab_img2pdf: "画像 PDF 変換",
                 tab_merge: "PDF 結合",
                 tab_split: "PDF 分割",
                 tab_compress: "PDF 圧縮",
@@ -494,14 +587,19 @@
                 tab_heic: "HEIC JPG 変換",
                 tab_toai: "画像 .ai 変換(試用)",
                 processing: "処理中...",
-                drop_pdf: "PDF をアップロード",
-                select_file: "ファイルを選択",
+                drop_pdf: "PDF をドラッグ＆ドロップ",
+                select_file: "ファイルを選択またはドラッグ",
                 title_img: "PDF 画像変換",
                 desc_img: "各ページを画像に変換",
                 btn_convert: "変換開始",
+                title_img2pdf: "画像 PDF 変換",
+                desc_img2pdf: "複数の画像を一つのPDFに結合",
+                drop_imgs: "画像を選択またはドラッグ (JPG/PNG)",
+                selected_imgs: "選択された画像：",
+                btn_img2pdf_dl: "結合してダウンロード",
                 title_merge: "PDF 結合",
                 desc_merge: "複数のPDFを結合 (ドラッグで並び替え)",
-                drop_pdfs: "複数の PDF を選択",
+                drop_pdfs: "複数の PDF をドラッグ＆ドロップ",
                 drag_hint: "💡 ヒント：ドラッグして順序を変更できます",
                 btn_merge_dl: "結合してダウンロード",
                 title_split: "PDF 分割",
@@ -529,15 +627,15 @@
                 btn_rotate_dl: "回転してDL",
                 title_heic: "HEIC JPG 変換",
                 desc_heic: "HEIC を JPG に変換",
-                drop_heic: "HEIC をアップロード",
+                drop_heic: "HEIC をドラッグ＆ドロップ",
                 btn_dl_jpg: "JPG DL",
                 title_toai: "画像 .ai 変換(試用)",
                 desc_toai: "画像を .ai 形式に変換",
-                drop_img: "画像をアップロード",
+                drop_img: "画像をドラッグ＆ドロップ",
                 note_toai: "注：画像は埋め込まれます。ベクター化はされません。",
                 btn_toai_dl: "変換してDL",
                 about_title: "このサイトについて",
-                about_content: "処理は全て<b>ブラウザ上</b>で行われます。<br>サーバーへのアップロードはありません。",
+                about_content: "このWebサイトのすべてのPDFおよび画像処理機能は、完全に<b>ブラウザ上</b>で実行されます。<br><br><strong>つまり：</strong><br>1. ファイルがサーバーにアップロードされることは<b>決してありません</b>。<br>2. ページ読み込み後は、インターネット接続がなくても使用可能です。<br>3. プライバシーは100%守られます。",
                 github_btn: "GitHub へ",
                 btn_close: "閉じる"
             }
@@ -563,7 +661,7 @@
         });
         function openAboutModal() { document.getElementById('about-modal').classList.remove('hidden'); }
 
-        const tabs = ['img', 'merge', 'split', 'compress', 'protect', 'rotate', 'heic', 'toai'];
+        const tabs = ['img', 'img2pdf', 'merge', 'split', 'compress', 'protect', 'rotate', 'heic', 'toai'];
         function switchTab(t) {
             tabs.forEach(x => {
                 document.getElementById(`sec-${x}`).classList.add('hidden');
@@ -572,6 +670,52 @@
             document.getElementById(`sec-${t}`).classList.remove('hidden');
             document.getElementById(`btn-tab-${t}`).classList.add('active');
         }
+
+        // ================= 通用：拖曳上傳處理函式 =================
+        function setupDragDrop(dropZoneId, fileInputId) {
+            const dropZone = document.getElementById(dropZoneId);
+            const fileInput = document.getElementById(fileInputId);
+
+            if (!dropZone || !fileInput) return;
+
+            // 阻止預設行為
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+            function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+
+            // 拖曳進來時加上樣式
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.add('upload-drag-active'), false);
+            });
+
+            // 拖曳離開或放下時移除樣式
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.remove('upload-drag-active'), false);
+            });
+
+            // 放下檔案
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                fileInput.files = files; // 將檔案指派給 input
+                fileInput.dispatchEvent(new Event('change')); // 手動觸發 change 事件
+            }, false);
+        }
+
+        // 初始化所有拖曳區塊
+        document.addEventListener('DOMContentLoaded', () => {
+            setupDragDrop('drop-img', 'file-img');
+            setupDragDrop('drop-img2pdf', 'file-img2pdf');
+            setupDragDrop('drop-merge', 'file-merge');
+            setupDragDrop('drop-split', 'file-split');
+            setupDragDrop('drop-compress', 'file-compress');
+            setupDragDrop('drop-encrypt', 'file-encrypt');
+            setupDragDrop('drop-unlock', 'file-unlock');
+            setupDragDrop('drop-rotate', 'file-rotate');
+            setupDragDrop('drop-heic', 'file-heic');
+            setupDragDrop('drop-toai', 'file-toai');
+        });
 
         // ================= 功能邏輯 =================
 
@@ -609,7 +753,54 @@
             finally { btn.disabled=false; btn.textContent=translations[currentLang]['btn_convert']; prog.classList.add('hidden'); }
         });
 
-        // 2. PDF 合併 (含拖曳排序)
+        // 2. 圖片 轉 PDF
+        let img2pdfFiles = [];
+        document.getElementById('file-img2pdf').addEventListener('change', e => {
+            if(e.target.files.length > 0){
+                img2pdfFiles = Array.from(e.target.files);
+                const list = document.getElementById('list-img2pdf');
+                list.innerHTML = '';
+                img2pdfFiles.forEach(f => {
+                    const li = document.createElement('li');
+                    li.textContent = f.name;
+                    list.appendChild(li);
+                });
+                document.getElementById('ctrl-img2pdf').classList.remove('hidden');
+            }
+        });
+        document.getElementById('do-img2pdf').addEventListener('click', async () => {
+            if(img2pdfFiles.length === 0) return;
+            const btn = document.getElementById('do-img2pdf');
+            const prog = document.getElementById('prog-img2pdf');
+            btn.disabled = true; btn.textContent = translations[currentLang]['processing'];
+            prog.classList.remove('hidden');
+
+            try {
+                const { PDFDocument } = PDFLib;
+                const pdfDoc = await PDFDocument.create();
+                
+                for(let i=0; i<img2pdfFiles.length; i++){
+                    const file = img2pdfFiles[i];
+                    const bytes = await file.arrayBuffer();
+                    let img;
+                    if(file.type === 'image/jpeg') img = await pdfDoc.embedJpg(bytes);
+                    else if(file.type === 'image/png') img = await pdfDoc.embedPng(bytes);
+                    else continue; // skip unsupport
+
+                    const page = pdfDoc.addPage([img.width, img.height]);
+                    page.drawImage(img, { x:0, y:0, width:img.width, height:img.height });
+                    
+                    prog.textContent = `Processing ${i+1}/${img2pdfFiles.length}`;
+                }
+                
+                const pdfBytes = await pdfDoc.save();
+                saveAs(new Blob([pdfBytes], {type:'application/pdf'}), 'images_combined.pdf');
+
+            } catch(e){ alert(e.message); }
+            finally { btn.disabled=false; btn.textContent=translations[currentLang]['btn_img2pdf_dl']; prog.classList.add('hidden'); }
+        });
+
+        // 3. PDF 合併 (含拖曳排序)
         let mergeFiles = [];
         const mergeContainer = document.getElementById('merge-container');
         const listMerge = document.getElementById('list-merge');
@@ -628,18 +819,17 @@
             listMerge.innerHTML = '';
             mergeFiles.forEach((file, index) => {
                 const li = document.createElement('li');
-                li.className = 'flex justify-between items-center bg-gray-50 p-3 rounded border cursor-move select-none';
+                li.className = 'flex justify-between items-center bg-gray-50 dark:bg-gray-700 p-3 rounded border dark:border-gray-600 cursor-move select-none transition-colors';
                 li.draggable = true;
                 li.dataset.index = index;
                 li.innerHTML = `
                     <div class="flex items-center gap-2 overflow-hidden">
-                        <span class="text-gray-400">☰</span>
-                        <span class="truncate text-sm font-medium">${index + 1}. ${file.name}</span>
+                        <span class="text-gray-400 dark:text-gray-500">☰</span>
+                        <span class="truncate text-sm font-medium text-gray-700 dark:text-gray-200">${index + 1}. ${file.name}</span>
                     </div>
-                    <button onclick="removeMerge(${index})" class="text-red-500 hover:text-red-700 font-bold px-2">✕</button>
+                    <button onclick="removeMerge(${index})" class="text-red-500 hover:text-red-700 dark:hover:text-red-400 font-bold px-2">✕</button>
                 `;
                 
-                // 拖曳事件
                 li.addEventListener('dragstart', handleDragStart);
                 li.addEventListener('dragover', handleDragOver);
                 li.addEventListener('drop', handleDrop);
@@ -655,7 +845,6 @@
             renderMergeList();
         };
 
-        // 拖曳邏輯
         let dragSrcIndex = null;
         function handleDragStart(e) {
             this.classList.add('dragging');
@@ -698,7 +887,7 @@
             finally { btn.textContent = translations[currentLang]['btn_merge_dl']; }
         });
 
-        // 3. Split
+        // 4. Split
         let splitFile, splitPdfDoc;
         document.getElementById('file-split').addEventListener('change', async e => {
             if(e.target.files[0]) {
@@ -727,7 +916,7 @@
             } catch(e){ alert(e.message); }
         });
 
-        // 4. Compress (Rasterize)
+        // 5. Compress
         let compressFile = null;
         document.getElementById('file-compress').addEventListener('change', e => {
             if(e.target.files[0]){
@@ -746,17 +935,14 @@
             prog.classList.remove('hidden');
 
             try {
-                // 1. Load Original
                 const pdfData = await compressFile.arrayBuffer();
                 const loadingTask = pdfjsLib.getDocument(pdfData);
                 const pdf = await loadingTask.promise;
                 const { PDFDocument } = PDFLib;
                 const newPdf = await PDFDocument.create();
 
-                // 2. Loop Pages -> Canvas -> JPG -> New PDF
                 for(let i=1; i<=pdf.numPages; i++){
                     const page = await pdf.getPage(i);
-                    // 使用 1.5 倍縮放保持可讀性，但不要太大
                     const scale = 1.5; 
                     const viewport = page.getViewport({scale: scale});
                     const canvas = document.createElement('canvas');
@@ -764,12 +950,11 @@
                     
                     await page.render({canvasContext: canvas.getContext('2d'), viewport}).promise;
                     
-                    // 轉為 JPEG blob
                     const imgDataUrl = canvas.toDataURL('image/jpeg', quality);
                     const imgBytes = await fetch(imgDataUrl).then(res => res.arrayBuffer());
                     
                     const jpgImage = await newPdf.embedJpg(imgBytes);
-                    const newPage = newPdf.addPage([viewport.width/scale, viewport.height/scale]); // 還原原始尺寸單位
+                    const newPage = newPdf.addPage([viewport.width/scale, viewport.height/scale]);
                     newPage.drawImage(jpgImage, {
                         x: 0, y: 0,
                         width: viewport.width/scale,
@@ -786,8 +971,7 @@
             finally { btn.disabled=false; btn.textContent=translations[currentLang]['btn_compress_dl']; prog.classList.add('hidden'); }
         });
 
-        // 5. Protect (Encrypt/Unlock)
-        // Encrypt
+        // 6. Protect
         let encryptFile = null;
         document.getElementById('file-encrypt').addEventListener('change', e => {
             if(e.target.files[0]) {
@@ -807,7 +991,6 @@
             } catch(e){ alert(e.message); }
         });
         
-        // Unlock
         let unlockFile = null;
         document.getElementById('file-unlock').addEventListener('change', e => {
             if(e.target.files[0]) {
@@ -819,11 +1002,7 @@
             if(!unlockFile) return alert('請選擇檔案');
             const pwd = document.getElementById('pass-unlock').value;
             try {
-                // 嘗試讀取，如果有密碼則需要傳入
-                // pdf-lib load 時若有密碼需在第二參數
                 const { PDFDocument } = PDFLib;
-                // PDF-lib 的解鎖邏輯是：如果能夠 load 成功，save 時不設 encrypt 即可
-                // 但如果檔案有密碼，load 必須給密碼，否則會報錯
                 const arr = await unlockFile.arrayBuffer();
                 let pdf;
                 try {
@@ -836,7 +1015,7 @@
             } catch(e){ alert("Unlock Error: " + e.message); }
         });
 
-        // 6. Rotate
+        // 7. Rotate
         let rotateFile, rotateDeg=90;
         document.getElementById('file-rotate').addEventListener('change', e => {
             if(e.target.files[0]){
@@ -849,7 +1028,12 @@
             rotateDeg=d;
             document.querySelectorAll('.rotate-opt').forEach(b=>{
                 const on = parseInt(b.dataset.deg)===d;
-                b.className = on ? 'rotate-opt bg-blue-100 hover:bg-blue-200 py-2 rounded border border-blue-500 text-blue-700' : 'rotate-opt bg-gray-100 hover:bg-gray-200 py-2 rounded border border-gray-200';
+                // 處理 Dark mode class
+                if (on) {
+                    b.className = 'rotate-opt bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 py-2 rounded border border-blue-500 text-blue-700 dark:text-blue-300';
+                } else {
+                    b.className = 'rotate-opt bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 py-2 rounded border border-gray-200 dark:border-gray-600 dark:text-white';
+                }
             });
         };
         setRotate(90);
@@ -863,7 +1047,7 @@
             } catch(e){ alert(e.message); }
         });
 
-        // 7. HEIC
+        // 8. HEIC
         document.getElementById('file-heic').addEventListener('change', e => {
             const f=e.target.files[0]; if(!f) return;
             const area=document.getElementById('res-heic');
@@ -878,7 +1062,7 @@
             }).catch(e=>document.getElementById('status-heic').textContent="Error:"+e.message);
         });
 
-        // 8. JPG/PNG to AI
+        // 9. JPG/PNG to AI
         let toaiFile=null;
         document.getElementById('file-toai').addEventListener('change', e=>{
             if(e.target.files[0]){
