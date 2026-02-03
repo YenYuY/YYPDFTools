@@ -31,7 +31,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/heic-to@1.3.0/dist/iife/heic-to.js"></script>
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
@@ -144,16 +144,15 @@
     <!-- 橫向滾動選單 -->
     <div class="bg-white dark:bg-dark-card border-b dark:border-dark-border shadow-sm transition-colors">
         <div class="max-w-7xl mx-auto px-2">
-            <div class="flex overflow-x-auto hide-scrollbar gap-2" id="tab-container">
-                <button onclick="switchTab('img')" class="tab-btn active" id="btn-tab-img" data-i18n="tab_img">PDF 轉圖片</button>
+            <div class="flex overflow-x-auto hide-scrollbar gap-2 justify-center" id="tab-container">
+                <button onclick="switchTab('img')" class="tab-btn" id="btn-tab-img" data-i18n="tab_img">PDF 轉圖片</button>
                 <button onclick="switchTab('img2pdf')" class="tab-btn text-teal-600 dark:text-teal-400" id="btn-tab-img2pdf" data-i18n="tab_img2pdf">圖片 轉 PDF</button>
-                <button onclick="switchTab('merge')" class="tab-btn" id="btn-tab-merge" data-i18n="tab_merge">PDF 合併</button>
+                <button onclick="switchTab('merge')" class="tab-btn active" id="btn-tab-merge" data-i18n="tab_merge">PDF 合併</button>
                 <button onclick="switchTab('split')" class="tab-btn" id="btn-tab-split" data-i18n="tab_split">PDF 分割</button>
                 <button onclick="switchTab('compress')" class="tab-btn" id="btn-tab-compress" data-i18n="tab_compress">PDF 壓縮</button>
                 <button onclick="switchTab('protect')" class="tab-btn" id="btn-tab-protect" data-i18n="tab_protect">PDF 加密/解鎖</button>
                 <button onclick="switchTab('rotate')" class="tab-btn" id="btn-tab-rotate" data-i18n="tab_rotate">PDF 旋轉</button>
                 <button onclick="switchTab('heic')" class="tab-btn text-purple-600 dark:text-purple-400" id="btn-tab-heic" data-i18n="tab_heic">HEIC 轉 JPG</button>
-                <button onclick="switchTab('toai')" class="tab-btn text-orange-600 dark:text-orange-400" id="btn-tab-toai" data-i18n="tab_toai">JPG/PNG 轉 ai檔案(試用)</button>
             </div>
         </div>
     </div>
@@ -162,7 +161,7 @@
     <main class="max-w-4xl mx-auto px-4 py-8 flex-grow w-full">
 
         <!-- 1. PDF 轉圖片 -->
-        <section id="sec-img" class="block">
+        <section id="sec-img" class="hidden">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_img">PDF 轉 JPG/PNG</h2>
                 <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_img">將每一頁 PDF 轉換為圖片並打包下載</p>
@@ -208,7 +207,7 @@
         </section>
 
         <!-- 3. PDF 合併 -->
-        <section id="sec-merge" class="hidden">
+        <section id="sec-merge" class="block">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_merge">PDF 合併</h2>
                 <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_merge">將多個 PDF 串接成一個檔案，可拖曳調整順序</p>
@@ -354,7 +353,7 @@
                 <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_heic">iPhone 照片格式轉換為通用 JPG</p>
             </div>
             <div class="bg-white dark:bg-dark-card rounded-xl shadow p-6 border-t-4 border-purple-500 transition-colors">
-                <input type="file" id="file-heic" class="hidden" accept=".heic, .heif">
+                <input type="file" id="file-heic" class="hidden" accept=".heic, .heif" multiple>
                 <!-- Drop Zone ID: drop-heic -->
                 <div id="drop-heic" onclick="document.getElementById('file-heic').click()" class="border-2 border-dashed border-purple-200 dark:border-purple-900 bg-purple-50 dark:bg-gray-800 rounded-lg p-8 text-center cursor-pointer hover:bg-purple-100 dark:hover:bg-gray-700 transition">
                     <div class="flex flex-col items-center">
@@ -365,34 +364,8 @@
                 <div id="res-heic" class="hidden mt-6 text-center">
                     <p id="status-heic" class="text-sm font-bold text-gray-700 dark:text-gray-200 mb-2" data-i18n="processing">轉換中...</p>
                     <img id="preview-heic" class="max-w-full h-auto rounded shadow mx-auto mb-4" style="max-height: 300px;">
-                    <button id="dl-heic" class="bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700" data-i18n="btn_dl_jpg">下載 JPG</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- 9. JPG/PNG 轉 AI -->
-        <section id="sec-toai" class="hidden">
-            <div class="text-center mb-6">
-                <!-- 文字修正回「...ai檔案(試用)」 -->
-                <h2 class="text-2xl font-bold text-orange-700 dark:text-orange-400" data-i18n="title_toai">JPG/PNG 轉 ai檔案(試用)</h2>
-                <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_toai">將圖片轉換為 Adobe Illustrator 相容檔案 (.ai)</p>
-            </div>
-            <div class="bg-white dark:bg-dark-card rounded-xl shadow p-6 border-t-4 border-orange-500 transition-colors">
-                <input type="file" id="file-toai" class="hidden" accept="image/jpeg, image/png">
-                <!-- Drop Zone ID: drop-toai -->
-                <div id="drop-toai" onclick="document.getElementById('file-toai').click()" class="border-2 border-dashed border-orange-200 dark:border-orange-900 bg-orange-50 dark:bg-gray-800 rounded-lg p-8 text-center cursor-pointer hover:bg-orange-100 dark:hover:bg-gray-700 transition">
-                    <div class="flex flex-col items-center">
-                        <svg class="w-10 h-10 text-orange-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        <p class="text-lg text-orange-900 dark:text-orange-300 font-medium" data-i18n="drop_img">點擊或拖曳上傳 JPG 或 PNG 圖片</p>
-                    </div>
-                </div>
-                
-                <div id="ctrl-toai" class="hidden mt-6 pt-4 border-t dark:border-gray-700 text-center">
-                    <p id="name-toai" class="mb-4 font-bold text-gray-700 dark:text-gray-200"></p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 bg-yellow-50 dark:bg-yellow-900/30 p-2 rounded border border-yellow-200 dark:border-yellow-800" data-i18n="note_toai">
-                        注意：此功能會將圖片嵌入到 AI 檔中，並非轉為向量線條。但您可以直接用 Illustrator 開啟編輯。
-                    </p>
-                    <button id="do-toai" class="w-full sm:w-auto bg-orange-600 text-white px-8 py-3 rounded shadow hover:bg-orange-700 font-bold" data-i18n="btn_toai_dl">轉換並下載 .AI</button>
+                    <div id="heic-list" class="text-left text-sm text-gray-700 dark:text-gray-300 space-y-2 mb-4"></div>
+                    <button id="dl-heic-all" class="hidden bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700" data-i18n="btn_dl_all_jpg">下載全部 JPG</button>
                 </div>
             </div>
         </section>
@@ -443,7 +416,6 @@
                 tab_protect: "加密/解鎖",
                 tab_rotate: "PDF 旋轉",
                 tab_heic: "HEIC 轉 JPG",
-                tab_toai: "JPG/PNG 轉 ai檔案(試用)",
                 processing: "處理中...",
                 drop_pdf: "點擊或拖曳上傳 PDF",
                 select_file: "選擇或拖曳檔案",
@@ -495,12 +467,7 @@
                 desc_heic: "iPhone 照片格式轉換為通用 JPG",
                 drop_heic: "點擊或拖曳上傳 HEIC 檔案",
                 btn_dl_jpg: "下載 JPG",
-                // IMG to AI
-                title_toai: "JPG/PNG 轉 ai檔案(試用)",
-                desc_toai: "將圖片轉換為 Adobe Illustrator 相容檔案 (.ai)",
-                drop_img: "點擊或拖曳上傳 JPG 或 PNG 圖片",
-                note_toai: "注意：此功能會將圖片嵌入到 AI 檔中，並非轉為向量線條。但您可以直接用 Illustrator 開啟編輯。",
-                btn_toai_dl: "轉換並下載 .AI",
+                btn_dl_all_jpg: "下載全部 JPG",
                 // About
                 about_title: "關於本站",
                 about_content: "本網站的所有 PDF 與圖片處理功能均完全在您的「瀏覽器端」運行。<br><br><strong>這意味著：</strong><br>1. 您的檔案<b>絕不會</b>上傳到我們的伺服器。<br>2. 即使沒有網路，頁面載入後依然可以使用。<br>3. 您的隱私是 100% 安全的。",
@@ -519,7 +486,6 @@
                 tab_protect: "Protect/Unlock",
                 tab_rotate: "Rotate PDF",
                 tab_heic: "HEIC to JPG",
-                tab_toai: "JPG/PNG to .ai (Trial)",
                 processing: "Processing...",
                 drop_pdf: "Click or Drag to Upload PDF",
                 select_file: "Select or Drag File",
@@ -563,11 +529,7 @@
                 desc_heic: "Convert HEIC to JPG",
                 drop_heic: "Click or Drag to Upload HEIC",
                 btn_dl_jpg: "Download JPG",
-                title_toai: "JPG/PNG to .ai (Trial)",
-                desc_toai: "Convert image to .ai file",
-                drop_img: "Click or Drag to Upload JPG/PNG",
-                note_toai: "Note: Embeds image into AI file, not vectorization.",
-                btn_toai_dl: "Convert & Download",
+                btn_dl_all_jpg: "Download All JPGs",
                 about_title: "About",
                 about_content: "All PDF and image processing functions on this website run entirely within your <b>Browser</b>.<br><br><strong>This means:</strong><br>1. Your files are <b>NEVER</b> uploaded to our servers.<br>2. You can use this site even without an internet connection after the page loads.<br>3. Your privacy is 100% secure.",
                 github_btn: "Visit GitHub",
@@ -585,7 +547,6 @@
                 tab_protect: "暗号化/解除",
                 tab_rotate: "PDF 回転",
                 tab_heic: "HEIC JPG 変換",
-                tab_toai: "画像 .ai 変換(試用)",
                 processing: "処理中...",
                 drop_pdf: "PDF をドラッグ＆ドロップ",
                 select_file: "ファイルを選択またはドラッグ",
@@ -629,11 +590,7 @@
                 desc_heic: "HEIC を JPG に変換",
                 drop_heic: "HEIC をドラッグ＆ドロップ",
                 btn_dl_jpg: "JPG DL",
-                title_toai: "画像 .ai 変換(試用)",
-                desc_toai: "画像を .ai 形式に変換",
-                drop_img: "画像をドラッグ＆ドロップ",
-                note_toai: "注：画像は埋め込まれます。ベクター化はされません。",
-                btn_toai_dl: "変換してDL",
+                btn_dl_all_jpg: "すべてのJPGをDL",
                 about_title: "このサイトについて",
                 about_content: "このWebサイトのすべてのPDFおよび画像処理機能は、完全に<b>ブラウザ上</b>で実行されます。<br><br><strong>つまり：</strong><br>1. ファイルがサーバーにアップロードされることは<b>決してありません</b>。<br>2. ページ読み込み後は、インターネット接続がなくても使用可能です。<br>3. プライバシーは100%守られます。",
                 github_btn: "GitHub へ",
@@ -661,7 +618,7 @@
         });
         function openAboutModal() { document.getElementById('about-modal').classList.remove('hidden'); }
 
-        const tabs = ['img', 'img2pdf', 'merge', 'split', 'compress', 'protect', 'rotate', 'heic', 'toai'];
+        const tabs = ['img', 'img2pdf', 'merge', 'split', 'compress', 'protect', 'rotate', 'heic'];
         function switchTab(t) {
             tabs.forEach(x => {
                 document.getElementById(`sec-${x}`).classList.add('hidden');
@@ -714,7 +671,6 @@
             setupDragDrop('drop-unlock', 'file-unlock');
             setupDragDrop('drop-rotate', 'file-rotate');
             setupDragDrop('drop-heic', 'file-heic');
-            setupDragDrop('drop-toai', 'file-toai');
         });
 
         // ================= 功能邏輯 =================
@@ -1049,44 +1005,63 @@
 
         // 8. HEIC
         document.getElementById('file-heic').addEventListener('change', e => {
-            const f=e.target.files[0]; if(!f) return;
+            const files = Array.from(e.target.files || []); if(!files.length) return;
             const area=document.getElementById('res-heic');
+            const list=document.getElementById('heic-list');
+            const btnAll=document.getElementById('dl-heic-all');
             area.classList.remove('hidden');
-            document.getElementById('dl-heic').classList.add('hidden');
+            list.innerHTML = '';
+            btnAll.classList.add('hidden');
             document.getElementById('status-heic').textContent = translations[currentLang]['processing'];
-            heic2any({blob:f, toType:"image/jpeg", quality:0.9}).then(blob=>{
-                document.getElementById('preview-heic').src=URL.createObjectURL(blob);
-                document.getElementById('status-heic').textContent="OK!";
-                const btn=document.getElementById('dl-heic'); btn.classList.remove('hidden');
-                btn.onclick=()=>saveAs(blob, f.name.replace(/\..+/,".jpg"));
-            }).catch(e=>document.getElementById('status-heic').textContent="Error:"+e.message);
-        });
 
-        // 9. JPG/PNG to AI
-        let toaiFile=null;
-        document.getElementById('file-toai').addEventListener('change', e=>{
-            if(e.target.files[0]){
-                toaiFile=e.target.files[0];
-                document.getElementById('name-toai').textContent=toaiFile.name;
-                document.getElementById('ctrl-toai').classList.remove('hidden');
-            }
-        });
-        document.getElementById('do-toai').addEventListener('click', async () => {
-            if(!toaiFile) return;
-            const btn=document.getElementById('do-toai'); btn.disabled=true; btn.textContent=translations[currentLang]['processing'];
-            try {
-                const { PDFDocument } = PDFLib;
-                const pdf = await PDFDocument.create();
-                const buf = await toaiFile.arrayBuffer();
-                let img;
-                if(toaiFile.type==='image/jpeg') img=await pdf.embedJpg(buf);
-                else if(toaiFile.type==='image/png') img=await pdf.embedPng(buf);
-                else return alert('Only JPG/PNG');
-                const page = pdf.addPage([img.width, img.height]);
-                page.drawImage(img, {x:0, y:0, width:img.width, height:img.height});
-                saveAs(new Blob([await pdf.save()],{type:'application/pdf'}), toaiFile.name.replace(/\..+/,".ai"));
-            } catch(e){ alert(e.message); }
-            finally { btn.disabled=false; btn.textContent=translations[currentLang]['btn_toai_dl']; }
+            const results = [];
+            const makeRow = (name) => {
+                const row = document.createElement('div');
+                row.className = 'flex items-center justify-between gap-3';
+                const left = document.createElement('div');
+                left.className = 'truncate';
+                const status = document.createElement('span');
+                status.className = 'ml-2 text-xs text-gray-500 dark:text-gray-400';
+                left.textContent = name;
+                left.appendChild(status);
+                const dlBtn = document.createElement('button');
+                dlBtn.className = 'px-3 py-1 rounded bg-green-600 text-white text-xs hover:bg-green-700 disabled:opacity-50';
+                dlBtn.textContent = translations[currentLang]['btn_dl_jpg'];
+                dlBtn.disabled = true;
+                row.appendChild(left);
+                row.appendChild(dlBtn);
+                list.appendChild(row);
+                return { status, dlBtn };
+            };
+
+            (async () => {
+                let previewSet = false;
+                for (const f of files) {
+                    const { status, dlBtn } = makeRow(f.name);
+                    try {
+                        const isHeic = await HeicTo.isHeic(f);
+                        if (!isHeic) throw new Error('Not a HEIC/HEIF file');
+                        const jpgBlob = await HeicTo({blob: f, type:"image/jpeg", quality:0.9});
+                        results.push({ file: f, blob: jpgBlob });
+                        status.textContent = 'OK';
+                        dlBtn.disabled = false;
+                        dlBtn.onclick = () => saveAs(jpgBlob, f.name.replace(/\..+/,".jpg"));
+                        if (!previewSet) {
+                            document.getElementById('preview-heic').src = URL.createObjectURL(jpgBlob);
+                            previewSet = true;
+                        }
+                    } catch (err) {
+                        status.textContent = 'Error';
+                    }
+                }
+                document.getElementById('status-heic').textContent = results.length ? 'OK!' : 'Error';
+                if (results.length) {
+                    btnAll.classList.remove('hidden');
+                    btnAll.onclick = () => {
+                        results.forEach(r => saveAs(r.blob, r.file.name.replace(/\..+/,".jpg")));
+                    };
+                }
+            })().catch(e=>document.getElementById('status-heic').textContent="Error:"+e.message);
         });
 
     </script>
