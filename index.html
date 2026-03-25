@@ -478,6 +478,30 @@
                 drop_heic: "點擊或拖曳上傳 HEIC 檔案",
                 btn_dl_jpg: "下載 JPG",
                 btn_dl_all_jpg: "下載全部 JPG",
+                processing_count: "處理中 {current}/{total}",
+                progress_page: "第 {current}/{total} 頁",
+                err_select_at_least_two_pdfs: "請至少選擇 2 個 PDF 檔案",
+                err_invalid_page_number: "請輸入有效頁碼",
+                err_page_range: "頁碼必須介於 1 到 {totalPages} 之間",
+                err_start_greater_than_end: "起始頁不能大於結束頁",
+                err_select_file: "請選擇檔案",
+                err_enter_password: "請輸入密碼",
+                err_password_incorrect: "密碼錯誤或未輸入",
+                err_unlock_unsupported: "此 PDF 的加密方式目前無法解鎖，可能需要擁有者密碼或使用 Acrobat 另存或列印成 PDF 後再處理。",
+                err_not_heic: "不是 HEIC/HEIF 檔案",
+                err_merge_failed: "PDF 合併失敗：{message}",
+                err_convert_failed: "PDF 轉圖片失敗：{message}",
+                err_img2pdf_failed: "圖片轉 PDF 失敗：{message}",
+                err_split_failed: "PDF 分割失敗：{message}",
+                err_compress_failed: "PDF 壓縮失敗：{message}",
+                err_canvas_export_failed: "無法匯出頁面影像",
+                err_encrypt_failed: "PDF 加密失敗：{message}",
+                err_unlock_failed: "PDF 解鎖失敗：{message}",
+                err_rotate_failed: "PDF 旋轉失敗：{message}",
+                heic_status_ok: "完成",
+                heic_status_error: "失敗",
+                heic_status_done: "轉換完成",
+                heic_status_error_with_message: "失敗：{message}",
                 // About
                 about_title: "關於本站",
                 about_content: "本網站的所有 PDF 與圖片處理功能均完全在您的「瀏覽器端」運行。<br><br><strong>這意味著：</strong><br>1. 您的檔案<b>絕不會</b>上傳到我們的伺服器。<br>2. 即使沒有網路，頁面載入後依然可以使用。<br>3. 您的隱私是 100% 安全的。",
@@ -500,53 +524,77 @@
                 drop_pdf: "Click or Drag to Upload PDF",
                 select_file: "Select or Drag File",
                 title_img: "PDF to JPG/PNG",
-                desc_img: "Convert each PDF page to image",
-                btn_convert: "Convert",
+                desc_img: "Convert each PDF page into an image and download them as a ZIP",
+                btn_convert: "Start Conversion",
                 title_img2pdf: "Images to PDF",
-                desc_img2pdf: "Combine multiple images into one PDF",
+                desc_img2pdf: "Combine multiple images into a single PDF file",
                 drop_imgs: "Click or Drag to Select Images (JPG/PNG)",
                 selected_imgs: "Selected Images:",
-                btn_img2pdf_dl: "Combine & Download PDF",
+                btn_img2pdf_dl: "Merge and Download PDF",
                 title_merge: "Merge PDF",
-                desc_merge: "Combine multiple PDFs into one, drag to reorder",
-                drop_pdfs: "Click or Drag to Select Multiple PDFs",
-                drag_hint: "💡 Tip: Drag items below to reorder",
-                btn_merge_dl: "Merge & Download",
+                desc_merge: "Combine multiple PDFs into one file and drag to reorder them",
+                drop_pdfs: "Click or drag to select multiple PDFs",
+                drag_hint: "💡 Tip: You can drag the items below to change the merge order",
+                btn_merge_dl: "Merge and Download",
                 title_split: "Split PDF",
                 desc_split: "Split the selected page range into separate PDFs and download them automatically",
-                lbl_start_page: "Start",
-                lbl_end_page: "End",
+                lbl_start_page: "Start Page",
+                lbl_end_page: "End Page",
                 split_hint: "Each page in the selected range becomes its own PDF. Multiple pages are downloaded as a ZIP.",
-                btn_split_dl: "Split & Download",
+                btn_split_dl: "Split and Download",
                 title_compress: "Compress PDF (Rasterize)",
-                desc_compress: "Reduce size by converting pages to images",
+                desc_compress: "Reduce file size by converting the PDF into images and rebuilding it",
                 note_title: "Note:",
-                note_compress: "This converts pages to images. Text will not be selectable, but it reduces file size effectively for scans.",
+                note_compress: "This mode converts all pages into images. Text will no longer be selectable, but it can greatly reduce the size of scanned PDFs.",
                 lbl_quality: "Image Quality (Lower = Smaller)",
-                btn_compress_dl: "Compress & Download",
+                btn_compress_dl: "Start Compressing and Download",
                 title_protect: "Encrypt & Unlock",
-                desc_protect: "Set password or remove password",
+                desc_protect: "Set a password for the document, or remove a known password",
                 subtitle_encrypt: "Encrypt (Set Password)",
                 ph_set_pass: "Set Password",
-                btn_encrypt: "Download Encrypted",
+                btn_encrypt: "Download Encrypted File",
                 subtitle_unlock: "Unlock (Remove Password)",
                 ph_org_pass: "Enter Original Password",
-                btn_unlock: "Download Unlocked",
+                btn_unlock: "Download Unlocked File",
                 show_pass: "Show",
                 hide_pass: "Hide",
                 title_rotate: "Rotate PDF",
-                desc_rotate: "Rotate all pages",
-                lbl_rotate_deg: "Angle (Clockwise)",
-                btn_rotate_dl: "Rotate & Download",
+                desc_rotate: "Rotate all pages in the PDF",
+                lbl_rotate_deg: "Choose Rotation Angle (Clockwise)",
+                btn_rotate_dl: "Rotate and Download",
                 title_heic: "HEIC to JPG",
-                desc_heic: "Convert HEIC to JPG",
+                desc_heic: "Convert iPhone photo format into standard JPG",
                 drop_heic: "Click or Drag to Upload HEIC",
                 btn_dl_jpg: "Download JPG",
                 btn_dl_all_jpg: "Download All JPGs",
+                processing_count: "Processing {current}/{total}",
+                progress_page: "Page {current}/{total}",
+                err_select_at_least_two_pdfs: "Please select at least 2 PDF files",
+                err_invalid_page_number: "Please enter a valid page number",
+                err_page_range: "Page numbers must be between 1 and {totalPages}",
+                err_start_greater_than_end: "The start page cannot be greater than the end page",
+                err_select_file: "Please select a file",
+                err_enter_password: "Please enter a password",
+                err_password_incorrect: "The password is incorrect or missing",
+                err_unlock_unsupported: "This PDF encryption method is not currently supported for unlocking. You may need the owner password, or save or print it as a new PDF in Acrobat before trying again.",
+                err_not_heic: "This is not a HEIC/HEIF file",
+                err_merge_failed: "PDF merge failed: {message}",
+                err_convert_failed: "PDF to image failed: {message}",
+                err_img2pdf_failed: "Images to PDF failed: {message}",
+                err_split_failed: "PDF split failed: {message}",
+                err_compress_failed: "PDF compression failed: {message}",
+                err_canvas_export_failed: "Failed to export the page image",
+                err_encrypt_failed: "PDF encryption failed: {message}",
+                err_unlock_failed: "PDF unlock failed: {message}",
+                err_rotate_failed: "PDF rotation failed: {message}",
+                heic_status_ok: "Done",
+                heic_status_error: "Failed",
+                heic_status_done: "Conversion complete",
+                heic_status_error_with_message: "Failed: {message}",
                 about_title: "About",
                 about_content: "All PDF and image processing functions on this website run entirely within your <b>Browser</b>.<br><br><strong>This means:</strong><br>1. Your files are <b>NEVER</b> uploaded to our servers.<br>2. You can use this site even without an internet connection after the page loads.<br>3. Your privacy is 100% secure.",
                 github_btn: "Visit GitHub",
-                btn_close: "Close"
+                btn_close: "Got it, Close"
             },
             "ja": {
                 site_title: "3Y ツールボックス",
@@ -564,49 +612,73 @@
                 drop_pdf: "PDF をドラッグ＆ドロップ",
                 select_file: "ファイルを選択またはドラッグ",
                 title_img: "PDF 画像変換",
-                desc_img: "各ページを画像に変換",
+                desc_img: "PDF の各ページを画像に変換し、まとめてダウンロードします",
                 btn_convert: "変換開始",
                 title_img2pdf: "画像 PDF 変換",
-                desc_img2pdf: "複数の画像を一つのPDFに結合",
-                drop_imgs: "画像を選択またはドラッグ (JPG/PNG)",
+                desc_img2pdf: "複数の画像を 1 つの PDF ファイルに結合します",
+                drop_imgs: "複数の画像を選択またはドラッグ (JPG/PNG)",
                 selected_imgs: "選択された画像：",
-                btn_img2pdf_dl: "結合してダウンロード",
+                btn_img2pdf_dl: "PDF に結合してダウンロード",
                 title_merge: "PDF 結合",
-                desc_merge: "複数のPDFを結合 (ドラッグで並び替え)",
+                desc_merge: "複数の PDF を 1 つのファイルに結合し、ドラッグで順序を変更できます",
                 drop_pdfs: "複数の PDF をドラッグ＆ドロップ",
-                drag_hint: "💡 ヒント：ドラッグして順序を変更できます",
+                drag_hint: "💡 ヒント：下の項目をドラッグして結合順を変更できます",
                 btn_merge_dl: "結合してダウンロード",
                 title_split: "PDF 分割",
                 desc_split: "指定範囲の各ページを個別の PDF に分割して自動ダウンロード",
-                lbl_start_page: "開始",
-                lbl_end_page: "終了",
+                lbl_start_page: "開始ページ",
+                lbl_end_page: "終了ページ",
                 split_hint: "選択範囲内の各ページを個別 PDF にします。複数ページの場合は ZIP でダウンロードします。",
                 btn_split_dl: "分割ダウンロード",
                 title_compress: "PDF 圧縮 (ラスタライズ)",
-                desc_compress: "画像を再構築してサイズを削減",
+                desc_compress: "PDF を画像に変換して再構築し、ファイルサイズを削減します",
                 note_title: "注意：",
                 note_compress: "ページ全体が画像化されます。テキスト選択はできませんが、スキャンデータの圧縮に有効です。",
                 lbl_quality: "画質 (低いほど軽量)",
                 btn_compress_dl: "圧縮してダウンロード",
                 title_protect: "暗号化と解除",
-                desc_protect: "パスワード設定または解除",
+                desc_protect: "ドキュメントにパスワードを設定するか、既知のパスワードを解除します",
                 subtitle_encrypt: "暗号化 (パスワード設定)",
                 ph_set_pass: "パスワードを設定",
-                btn_encrypt: "暗号化してDL",
+                btn_encrypt: "暗号化したファイルをダウンロード",
                 subtitle_unlock: "解除 (パスワード削除)",
                 ph_org_pass: "元のパスワードを入力",
-                btn_unlock: "解除してDL",
+                btn_unlock: "解除したファイルをダウンロード",
                 show_pass: "表示",
                 hide_pass: "非表示",
                 title_rotate: "PDF 回転",
-                desc_rotate: "全ページを回転",
-                lbl_rotate_deg: "角度 (時計回り)",
-                btn_rotate_dl: "回転してDL",
+                desc_rotate: "PDF の全ページを回転します",
+                lbl_rotate_deg: "回転角度を選択 (時計回り)",
+                btn_rotate_dl: "回転してダウンロード",
                 title_heic: "HEIC JPG 変換",
-                desc_heic: "HEIC を JPG に変換",
+                desc_heic: "iPhone の写真形式を一般的な JPG に変換します",
                 drop_heic: "HEIC をドラッグ＆ドロップ",
-                btn_dl_jpg: "JPG DL",
-                btn_dl_all_jpg: "すべてのJPGをDL",
+                btn_dl_jpg: "JPG をダウンロード",
+                btn_dl_all_jpg: "すべての JPG をダウンロード",
+                processing_count: "処理中 {current}/{total}",
+                progress_page: "{current}/{total} ページ",
+                err_select_at_least_two_pdfs: "少なくとも 2 つの PDF ファイルを選択してください",
+                err_invalid_page_number: "有効なページ番号を入力してください",
+                err_page_range: "ページ番号は 1 から {totalPages} の範囲で入力してください",
+                err_start_greater_than_end: "開始ページは終了ページより大きくできません",
+                err_select_file: "ファイルを選択してください",
+                err_enter_password: "パスワードを入力してください",
+                err_password_incorrect: "パスワードが正しくないか、入力されていません",
+                err_unlock_unsupported: "この PDF の暗号化方式は現在解除に対応していません。所有者パスワードが必要な場合や、Acrobat で別名保存または PDF として印刷してから再度お試しいただく必要があります。",
+                err_not_heic: "HEIC/HEIF ファイルではありません",
+                err_merge_failed: "PDF の結合に失敗しました：{message}",
+                err_convert_failed: "PDF の画像変換に失敗しました：{message}",
+                err_img2pdf_failed: "画像の PDF 変換に失敗しました：{message}",
+                err_split_failed: "PDF の分割に失敗しました：{message}",
+                err_compress_failed: "PDF の圧縮に失敗しました：{message}",
+                err_canvas_export_failed: "ページ画像の書き出しに失敗しました",
+                err_encrypt_failed: "PDF の暗号化に失敗しました：{message}",
+                err_unlock_failed: "PDF の解除に失敗しました：{message}",
+                err_rotate_failed: "PDF の回転に失敗しました：{message}",
+                heic_status_ok: "完了",
+                heic_status_error: "失敗",
+                heic_status_done: "変換完了",
+                heic_status_error_with_message: "失敗：{message}",
                 about_title: "このサイトについて",
                 about_content: "このWebサイトのすべてのPDFおよび画像処理機能は、完全に<b>ブラウザ上</b>で実行されます。<br><br><strong>つまり：</strong><br>1. ファイルがサーバーにアップロードされることは<b>決してありません</b>。<br>2. ページ読み込み後は、インターネット接続がなくても使用可能です。<br>3. プライバシーは100%守られます。",
                 github_btn: "GitHub へ",
@@ -615,6 +687,14 @@
         };
 
         let currentLang = 'zh-TW';
+        function t(key, params = {}) {
+            const fallback = translations['zh-TW'] || {};
+            let text = (translations[currentLang] && translations[currentLang][key]) || fallback[key] || key;
+            Object.entries(params).forEach(([name, value]) => {
+                text = text.replaceAll(`{${name}}`, value);
+            });
+            return text;
+        }
         function updatePasswordToggleLabel(btn, input) {
             if(!btn || !input) return;
             const key = input.type === 'password' ? 'show_pass' : 'hide_pass';
@@ -743,7 +823,7 @@
                     prog.textContent = `${Math.round(i/pdf.numPages*100)}%`;
                 }
                 saveAs(await zip.generateAsync({type:"blob"}), `${pdfImgFile.name}_images.zip`);
-            } catch(e){ alert(e.message); }
+            } catch(e){ alert(t('err_convert_failed', { message: e.message })); }
             finally { btn.disabled=false; btn.textContent=translations[currentLang]['btn_convert']; prog.classList.add('hidden'); }
         });
 
@@ -784,13 +864,13 @@
                     const page = pdfDoc.addPage([img.width, img.height]);
                     page.drawImage(img, { x:0, y:0, width:img.width, height:img.height });
                     
-                    prog.textContent = `Processing ${i+1}/${img2pdfFiles.length}`;
+                    prog.textContent = t('processing_count', { current: i + 1, total: img2pdfFiles.length });
                 }
                 
                 const pdfBytes = await pdfDoc.save();
                 saveAs(new Blob([pdfBytes], {type:'application/pdf'}), 'images_combined.pdf');
 
-            } catch(e){ alert(e.message); }
+            } catch(e){ alert(t('err_img2pdf_failed', { message: e.message })); }
             finally { btn.disabled=false; btn.textContent=translations[currentLang]['btn_img2pdf_dl']; prog.classList.add('hidden'); }
         });
 
@@ -816,15 +896,31 @@
                 li.className = 'flex justify-between items-center bg-gray-50 dark:bg-gray-700 p-3 rounded border dark:border-gray-600 cursor-move select-none transition-colors';
                 li.draggable = true;
                 li.dataset.index = index;
-                li.innerHTML = `
-                    <div class="flex items-center gap-2 overflow-hidden">
-                        <span class="text-gray-400 dark:text-gray-500">☰</span>
-                        <span class="truncate text-sm font-medium text-gray-700 dark:text-gray-200">${index + 1}. ${file.name}</span>
-                    </div>
-                    <button onclick="removeMerge(${index})" class="text-red-500 hover:text-red-700 dark:hover:text-red-400 font-bold px-2">✕</button>
-                `;
+                
+                const itemWrap = document.createElement('div');
+                itemWrap.className = 'flex items-center gap-2 overflow-hidden';
+
+                const dragHandle = document.createElement('span');
+                dragHandle.className = 'text-gray-400 dark:text-gray-500';
+                dragHandle.textContent = '☰';
+
+                const name = document.createElement('span');
+                name.className = 'truncate text-sm font-medium text-gray-700 dark:text-gray-200';
+                name.textContent = `${index + 1}. ${file.name}`;
+
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'text-red-500 hover:text-red-700 dark:hover:text-red-400 font-bold px-2';
+                removeBtn.textContent = '✕';
+                removeBtn.addEventListener('click', () => window.removeMerge(index));
+
+                itemWrap.appendChild(dragHandle);
+                itemWrap.appendChild(name);
+                li.appendChild(itemWrap);
+                li.appendChild(removeBtn);
                 
                 li.addEventListener('dragstart', handleDragStart);
+                li.addEventListener('dragend', handleDragEnd);
                 li.addEventListener('dragover', handleDragOver);
                 li.addEventListener('drop', handleDrop);
                 li.addEventListener('dragenter', handleDragEnter);
@@ -844,6 +940,9 @@
             this.classList.add('dragging');
             dragSrcIndex = Number(this.dataset.index);
             e.dataTransfer.effectAllowed = 'move';
+        }
+        function handleDragEnd() {
+            this.classList.remove('dragging');
         }
         function handleDragOver(e) {
             if (e.preventDefault) e.preventDefault();
@@ -865,7 +964,7 @@
         }
 
         document.getElementById('do-merge').addEventListener('click', async () => {
-            if(mergeFiles.length < 2) return alert("Please select at least 2 files");
+            if(mergeFiles.length < 2) return alert(t('err_select_at_least_two_pdfs'));
             const btn = document.getElementById('do-merge');
             btn.textContent = translations[currentLang]['processing'];
             try {
@@ -877,43 +976,67 @@
                     pages.forEach(p => merged.addPage(p));
                 }
                 saveAs(new Blob([await merged.save()], {type:'application/pdf'}), 'merged.pdf');
-            } catch(e) { alert("Merge failed: " + e.message); }
+            } catch(e) { alert(t('err_merge_failed', { message: e.message })); }
             finally { btn.textContent = translations[currentLang]['btn_merge_dl']; }
         });
 
         // 4. Split
         let splitFile, splitPdfDoc;
+        const splitName = document.getElementById('name-split');
+        const splitCtrl = document.getElementById('ctrl-split');
+        const splitStartInput = document.getElementById('split-start');
+        const splitEndInput = document.getElementById('split-end');
+
+        function resetSplitState() {
+            splitFile = null;
+            splitPdfDoc = null;
+            splitName.textContent = '';
+            splitCtrl.classList.add('hidden');
+            splitStartInput.value = 1;
+            splitEndInput.value = 1;
+            splitStartInput.max = 1;
+            splitEndInput.max = 1;
+        }
+
         document.getElementById('file-split').addEventListener('change', async e => {
             if(e.target.files[0]) {
-                splitFile = e.target.files[0];
-                document.getElementById('name-split').textContent = splitFile.name;
-                const arr = await splitFile.arrayBuffer();
-                splitPdfDoc = await PDFLib.PDFDocument.load(arr);
-                const count = splitPdfDoc.getPageCount();
-                document.getElementById('split-end').value = count;
-                document.getElementById('split-end').max = count;
-                document.getElementById('split-start').max = count;
-                document.getElementById('ctrl-split').classList.remove('hidden');
+                const nextFile = e.target.files[0];
+                try {
+                    const arr = await nextFile.arrayBuffer();
+                    const nextPdfDoc = await PDFLib.PDFDocument.load(arr);
+                    const count = nextPdfDoc.getPageCount();
+
+                    splitFile = nextFile;
+                    splitPdfDoc = nextPdfDoc;
+                    splitName.textContent = nextFile.name;
+                    splitStartInput.value = 1;
+                    splitEndInput.value = count;
+                    splitStartInput.max = count;
+                    splitEndInput.max = count;
+                    splitCtrl.classList.remove('hidden');
+                } catch (err) {
+                    resetSplitState();
+                    e.target.value = '';
+                    alert(t('err_split_failed', { message: err.message }));
+                }
             }
         });
         document.getElementById('do-split').addEventListener('click', async () => {
             if(!splitFile || !splitPdfDoc) return;
 
             const btn = document.getElementById('do-split');
-            const startInput = document.getElementById('split-start');
-            const endInput = document.getElementById('split-end');
             const totalPages = splitPdfDoc.getPageCount();
-            const start = parseInt(startInput.value, 10);
-            const end = parseInt(endInput.value, 10);
+            const start = parseInt(splitStartInput.value, 10);
+            const end = parseInt(splitEndInput.value, 10);
 
             if (Number.isNaN(start) || Number.isNaN(end)) {
-                return alert('請輸入有效頁碼');
+                return alert(t('err_invalid_page_number'));
             }
             if (start < 1 || end < 1 || start > totalPages || end > totalPages) {
-                return alert(`頁碼必須介於 1 到 ${totalPages} 之間`);
+                return alert(t('err_page_range', { totalPages }));
             }
             if (start > end) {
-                return alert('起始頁不能大於結束頁');
+                return alert(t('err_start_greater_than_end'));
             }
 
             const baseName = splitFile.name.replace(/\.pdf$/i, '') || 'split';
@@ -946,7 +1069,7 @@
                     await zip.generateAsync({ type: 'blob' }),
                     `${baseName}_pages_${start}-${end}.zip`
                 );
-            } catch(e){ alert(e.message); }
+            } catch(e){ alert(t('err_split_failed', { message: e.message })); }
             finally {
                 btn.disabled = false;
                 btn.textContent = translations[currentLang]['btn_split_dl'];
@@ -987,8 +1110,14 @@
                     
                     await page.render({canvasContext: canvas.getContext('2d'), viewport}).promise;
                     
-                    const imgDataUrl = canvas.toDataURL('image/jpeg', quality);
-                    const imgBytes = await fetch(imgDataUrl).then(res => res.arrayBuffer());
+                    const imgBlob = await new Promise((resolve, reject) => {
+                        canvas.toBlob(
+                            blob => blob ? resolve(blob) : reject(new Error(t('err_canvas_export_failed'))),
+                            'image/jpeg',
+                            quality
+                        );
+                    });
+                    const imgBytes = await imgBlob.arrayBuffer();
                     
                     const jpgImage = await newPdf.embedJpg(imgBytes);
                     const newPage = newPdf.addPage([viewport.width/scale, viewport.height/scale]);
@@ -998,13 +1127,13 @@
                         height: viewport.height/scale
                     });
                     
-                    prog.textContent = `Page ${i}/${pdf.numPages}`;
+                    prog.textContent = t('progress_page', { current: i, total: pdf.numPages });
                 }
                 
                 const pdfBytes = await newPdf.save();
                 saveAs(new Blob([pdfBytes], {type: 'application/pdf'}), `compressed_${compressFile.name}`);
 
-            } catch(e){ console.error(e); alert("Compress Error: " + e.message); }
+            } catch(e){ console.error(e); alert(t('err_compress_failed', { message: e.message })); }
             finally { btn.disabled=false; btn.textContent=translations[currentLang]['btn_compress_dl']; prog.classList.add('hidden'); }
         });
 
@@ -1017,15 +1146,15 @@
             }
         });
         document.getElementById('do-encrypt').addEventListener('click', async () => {
-            if(!encryptFile) return alert('請選擇檔案');
+            if(!encryptFile) return alert(t('err_select_file'));
             const pwd = document.getElementById('pass-encrypt').value;
-            if(!pwd) return alert('請輸入密碼');
+            if(!pwd) return alert(t('err_enter_password'));
             try {
                 const { PDFDocument } = PDFLib;
                 const pdf = await PDFDocument.load(await encryptFile.arrayBuffer());
                 pdf.encrypt({ userPassword: pwd, ownerPassword: pwd });
                 saveAs(new Blob([await pdf.save()], {type:'application/pdf'}), `encrypted_${encryptFile.name}`);
-            } catch(e){ alert(e.message); }
+            } catch(e){ alert(t('err_encrypt_failed', { message: e.message })); }
         });
         
         let unlockFile = null;
@@ -1036,10 +1165,10 @@
             }
         });
         document.getElementById('do-unlock').addEventListener('click', async () => {
-            if(!unlockFile) return alert('請選擇檔案');
+            if(!unlockFile) return alert(t('err_select_file'));
             const rawPwd = document.getElementById('pass-unlock').value;
             const pwd = rawPwd.trim();
-            if(!pwd) return alert('請輸入密碼');
+            if(!pwd) return alert(t('err_enter_password'));
             try {
                 const { PDFDocument } = PDFLib;
                 const arr = await unlockFile.arrayBuffer();
@@ -1050,7 +1179,7 @@
                     return;
                 } catch(err) {
                     if(err.message && err.message.includes('Password')) {
-                        return alert('密碼錯誤或未輸入');
+                        return alert(t('err_password_incorrect'));
                     }
                     if(err.message && err.message.includes('is encrypted')) {
                         // Some PDFs use encryption modes pdf-lib cannot fully decrypt.
@@ -1062,12 +1191,12 @@
                             saveAs(new Blob([await newDoc.save()], {type:'application/pdf'}), `unlocked_${unlockFile.name}`);
                             return;
                         } catch(copyErr) {
-                            return alert('此 PDF 的加密方式目前無法解鎖，可能需要擁有者密碼或使用 Acrobat 另存/列印成 PDF 後再處理。');
+                            return alert(t('err_unlock_unsupported'));
                         }
                     }
                     throw err;
                 }
-            } catch(e){ alert("Unlock Error: " + e.message); }
+            } catch(e){ alert(t('err_unlock_failed', { message: e.message })); }
         });
 
         // 7. Rotate
@@ -1099,19 +1228,26 @@
                 const pdf = await PDFDocument.load(await rotateFile.arrayBuffer());
                 pdf.getPages().forEach(p => p.setRotation(degrees(p.getRotation().angle + rotateDeg)));
                 saveAs(new Blob([await pdf.save()],{type:'application/pdf'}), `rotated.pdf`);
-            } catch(e){ alert(e.message); }
+            } catch(e){ alert(t('err_rotate_failed', { message: e.message })); }
         });
 
         // 8. HEIC
+        let currentHeicPreviewUrl = null;
         document.getElementById('file-heic').addEventListener('change', e => {
             const files = Array.from(e.target.files || []); if(!files.length) return;
             const area=document.getElementById('res-heic');
             const list=document.getElementById('heic-list');
             const btnAll=document.getElementById('dl-heic-all');
+            const previewImg = document.getElementById('preview-heic');
             area.classList.remove('hidden');
             list.innerHTML = '';
             btnAll.classList.add('hidden');
             document.getElementById('status-heic').textContent = translations[currentLang]['processing'];
+            if (currentHeicPreviewUrl) {
+                URL.revokeObjectURL(currentHeicPreviewUrl);
+                currentHeicPreviewUrl = null;
+            }
+            previewImg.removeAttribute('src');
 
             const results = [];
             const makeRow = (name) => {
@@ -1139,28 +1275,29 @@
                     const { status, dlBtn } = makeRow(f.name);
                     try {
                         const isHeic = await HeicTo.isHeic(f);
-                        if (!isHeic) throw new Error('Not a HEIC/HEIF file');
+                        if (!isHeic) throw new Error(t('err_not_heic'));
                         const jpgBlob = await HeicTo({blob: f, type:"image/jpeg", quality:0.9});
                         results.push({ file: f, blob: jpgBlob });
-                        status.textContent = 'OK';
+                        status.textContent = t('heic_status_ok');
                         dlBtn.disabled = false;
                         dlBtn.onclick = () => saveAs(jpgBlob, f.name.replace(/\..+/,".jpg"));
                         if (!previewSet) {
-                            document.getElementById('preview-heic').src = URL.createObjectURL(jpgBlob);
+                            currentHeicPreviewUrl = URL.createObjectURL(jpgBlob);
+                            previewImg.src = currentHeicPreviewUrl;
                             previewSet = true;
                         }
                     } catch (err) {
-                        status.textContent = 'Error';
+                        status.textContent = t('heic_status_error');
                     }
                 }
-                document.getElementById('status-heic').textContent = results.length ? 'OK!' : 'Error';
+                document.getElementById('status-heic').textContent = results.length ? t('heic_status_done') : t('heic_status_error');
                 if (results.length) {
                     btnAll.classList.remove('hidden');
                     btnAll.onclick = () => {
                         results.forEach(r => saveAs(r.blob, r.file.name.replace(/\..+/,".jpg")));
                     };
                 }
-            })().catch(e=>document.getElementById('status-heic').textContent="Error:"+e.message);
+            })().catch(e=>document.getElementById('status-heic').textContent = t('heic_status_error_with_message', { message: e.message }));
         });
 
     </script>
