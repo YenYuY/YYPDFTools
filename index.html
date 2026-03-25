@@ -231,7 +231,7 @@
         <section id="sec-split" class="hidden">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_split">PDF 分割</h2>
-                <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_split">提取指定範圍的頁面存為新 PDF</p>
+                <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_split">將指定範圍的頁面分割成獨立 PDF，並自動打包下載</p>
             </div>
             <div class="bg-white dark:bg-dark-card rounded-xl shadow p-6 transition-colors">
                 <input type="file" id="file-split" class="hidden" accept="application/pdf">
@@ -251,6 +251,7 @@
                             <input type="number" id="split-end" min="1" value="1" class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md border p-2">
                         </div>
                     </div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4" data-i18n="split_hint">範圍內每一頁都會被分成獨立 PDF；多頁時會下載 ZIP。</p>
                     <button id="do-split" class="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-bold" data-i18n="btn_split_dl">分割並下載</button>
                 </div>
             </div>
@@ -443,9 +444,10 @@
                 btn_merge_dl: "合併並下載",
                 // Split
                 title_split: "PDF 分割",
-                desc_split: "提取指定範圍的頁面存為新 PDF",
+                desc_split: "將指定範圍的頁面分割成獨立 PDF，並自動打包下載",
                 lbl_start_page: "起始頁",
                 lbl_end_page: "結束頁",
+                split_hint: "範圍內每一頁都會被分成獨立 PDF；多頁時會下載 ZIP。",
                 btn_split_dl: "分割並下載",
                 // Compress
                 title_compress: "PDF 壓縮 (重製)",
@@ -511,9 +513,10 @@
                 drag_hint: "💡 Tip: Drag items below to reorder",
                 btn_merge_dl: "Merge & Download",
                 title_split: "Split PDF",
-                desc_split: "Extract pages to new PDF",
+                desc_split: "Split the selected page range into separate PDFs and download them automatically",
                 lbl_start_page: "Start",
                 lbl_end_page: "End",
+                split_hint: "Each page in the selected range becomes its own PDF. Multiple pages are downloaded as a ZIP.",
                 btn_split_dl: "Split & Download",
                 title_compress: "Compress PDF (Rasterize)",
                 desc_compress: "Reduce size by converting pages to images",
@@ -574,9 +577,10 @@
                 drag_hint: "💡 ヒント：ドラッグして順序を変更できます",
                 btn_merge_dl: "結合してダウンロード",
                 title_split: "PDF 分割",
-                desc_split: "指定範囲を抽出",
+                desc_split: "指定範囲の各ページを個別の PDF に分割して自動ダウンロード",
                 lbl_start_page: "開始",
                 lbl_end_page: "終了",
+                split_hint: "選択範囲内の各ページを個別 PDF にします。複数ページの場合は ZIP でダウンロードします。",
                 btn_split_dl: "分割ダウンロード",
                 title_compress: "PDF 圧縮 (ラスタライズ)",
                 desc_compress: "画像を再構築してサイズを削減",
@@ -893,17 +897,60 @@
             }
         });
         document.getElementById('do-split').addEventListener('click', async () => {
-            if(!splitFile) return;
-            const start = parseInt(document.getElementById('split-start').value)-1;
-            const end = parseInt(document.getElementById('split-end').value)-1;
+            if(!splitFile || !splitPdfDoc) return;
+
+            const btn = document.getElementById('do-split');
+            const startInput = document.getElementById('split-start');
+            const endInput = document.getElementById('split-end');
+            const totalPages = splitPdfDoc.getPageCount();
+            const start = parseInt(startInput.value, 10);
+            const end = parseInt(endInput.value, 10);
+
+            if (Number.isNaN(start) || Number.isNaN(end)) {
+                return alert('請輸入有效頁碼');
+            }
+            if (start < 1 || end < 1 || start > totalPages || end > totalPages) {
+                return alert(`頁碼必須介於 1 到 ${totalPages} 之間`);
+            }
+            if (start > end) {
+                return alert('起始頁不能大於結束頁');
+            }
+
+            const baseName = splitFile.name.replace(/\.pdf$/i, '') || 'split';
+
+            btn.disabled = true;
+            btn.textContent = translations[currentLang]['processing'];
+
             try {
                 const { PDFDocument } = PDFLib;
-                const newPdf = await PDFDocument.create();
-                const indices = []; for(let i=start; i<=end; i++) indices.push(i);
-                const pages = await newPdf.copyPages(splitPdfDoc, indices);
-                pages.forEach(p=>newPdf.addPage(p));
-                saveAs(new Blob([await newPdf.save()],{type:'application/pdf'}), `split.pdf`);
+                const pageNumbers = [];
+                for (let pageNum = start; pageNum <= end; pageNum++) pageNumbers.push(pageNum);
+
+                if (pageNumbers.length === 1) {
+                    const singlePdf = await PDFDocument.create();
+                    const [page] = await singlePdf.copyPages(splitPdfDoc, [pageNumbers[0] - 1]);
+                    singlePdf.addPage(page);
+                    saveAs(new Blob([await singlePdf.save()], { type: 'application/pdf' }), `${baseName}_page_${pageNumbers[0]}.pdf`);
+                    return;
+                }
+
+                const zip = new JSZip();
+                for (const pageNum of pageNumbers) {
+                    const pagePdf = await PDFDocument.create();
+                    const [page] = await pagePdf.copyPages(splitPdfDoc, [pageNum - 1]);
+                    pagePdf.addPage(page);
+                    zip.file(`${baseName}_page_${pageNum}.pdf`, await pagePdf.save());
+                }
+
+                saveAs(
+                    await zip.generateAsync({ type: 'blob' }),
+                    `${baseName}_pages_${start}-${end}.zip`
+                );
             } catch(e){ alert(e.message); }
+            finally {
+                btn.disabled = false;
+                btn.textContent = translations[currentLang]['btn_split_dl'];
+            }
         });
 
         // 5. Compress
