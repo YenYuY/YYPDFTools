@@ -231,7 +231,7 @@
         <section id="sec-split" class="hidden">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_split">PDF 分割</h2>
-                <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_split">將指定範圍的頁面分割成獨立 PDF，並自動打包下載</p>
+                <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_split">將 PDF 依分割點切成兩份，或把指定範圍拆成單頁 PDF</p>
             </div>
             <div class="bg-white dark:bg-dark-card rounded-xl shadow p-6 transition-colors">
                 <input type="file" id="file-split" class="hidden" accept="application/pdf">
@@ -241,6 +241,22 @@
                 </div>
                 <div id="ctrl-split" class="hidden mt-4 pt-4 border-t dark:border-gray-700">
                     <p id="name-split" class="mb-4 font-bold text-gray-700 dark:text-gray-200"></p>
+                    <div class="grid sm:grid-cols-2 gap-2 mb-4">
+                        <label class="flex items-center gap-2 rounded border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-900/20 px-3 py-2 text-sm font-medium text-gray-800 dark:text-gray-100 cursor-pointer">
+                            <input type="radio" name="split-mode" value="two" class="text-blue-600" checked>
+                            <span data-i18n="split_mode_two">分成兩份</span>
+                        </label>
+                        <label class="flex items-center gap-2 rounded border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-800 dark:text-gray-100 cursor-pointer">
+                            <input type="radio" name="split-mode" value="pages" class="text-blue-600">
+                            <span data-i18n="split_mode_pages">逐頁分割</span>
+                        </label>
+                    </div>
+                    <div id="split-two-options" class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="lbl_split_after_page">在第幾頁後分割</label>
+                        <input type="number" id="split-after" min="1" value="1" class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md border p-2">
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2" data-i18n="split_two_hint">例如輸入 3：第 1-3 頁會成為第一份，第 4 頁之後成為第二份。</p>
+                    </div>
+                    <div id="split-page-options" class="hidden">
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="lbl_start_page">起始頁</label>
@@ -252,6 +268,7 @@
                         </div>
                     </div>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-4" data-i18n="split_hint">範圍內每一頁都會被分成獨立 PDF；多頁時會下載 ZIP。</p>
+                    </div>
                     <button id="do-split" class="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-bold" data-i18n="btn_split_dl">分割並下載</button>
                 </div>
             </div>
@@ -444,9 +461,13 @@
                 btn_merge_dl: "合併並下載",
                 // Split
                 title_split: "PDF 分割",
-                desc_split: "將指定範圍的頁面分割成獨立 PDF，並自動打包下載",
+                desc_split: "將 PDF 依分割點切成兩份，或把指定範圍拆成單頁 PDF",
+                split_mode_two: "分成兩份",
+                split_mode_pages: "逐頁分割",
+                lbl_split_after_page: "在第幾頁後分割",
                 lbl_start_page: "起始頁",
                 lbl_end_page: "結束頁",
+                split_two_hint: "例如輸入 3：第 1-3 頁會成為第一份，第 4 頁之後成為第二份。",
                 split_hint: "範圍內每一頁都會被分成獨立 PDF；多頁時會下載 ZIP。",
                 btn_split_dl: "分割並下載",
                 // Compress
@@ -484,6 +505,8 @@
                 err_invalid_page_number: "請輸入有效頁碼",
                 err_page_range: "頁碼必須介於 1 到 {totalPages} 之間",
                 err_start_greater_than_end: "起始頁不能大於結束頁",
+                err_split_requires_two_pages: "PDF 至少需要 2 頁才能分成兩份",
+                err_split_after_range: "分割頁必須介於 1 到 {lastSplitPage} 之間",
                 err_select_file: "請選擇檔案",
                 err_enter_password: "請輸入密碼",
                 err_password_incorrect: "密碼錯誤或未輸入",
@@ -537,9 +560,13 @@
                 drag_hint: "💡 Tip: You can drag the items below to change the merge order",
                 btn_merge_dl: "Merge and Download",
                 title_split: "Split PDF",
-                desc_split: "Split the selected page range into separate PDFs and download them automatically",
+                desc_split: "Split a PDF into two parts, or split a selected range into single-page PDFs",
+                split_mode_two: "Split into Two",
+                split_mode_pages: "Split by Page",
+                lbl_split_after_page: "Split after page",
                 lbl_start_page: "Start Page",
                 lbl_end_page: "End Page",
+                split_two_hint: "For example, enter 3 to make pages 1-3 the first PDF and page 4 onward the second PDF.",
                 split_hint: "Each page in the selected range becomes its own PDF. Multiple pages are downloaded as a ZIP.",
                 btn_split_dl: "Split and Download",
                 title_compress: "Compress PDF (Rasterize)",
@@ -573,6 +600,8 @@
                 err_invalid_page_number: "Please enter a valid page number",
                 err_page_range: "Page numbers must be between 1 and {totalPages}",
                 err_start_greater_than_end: "The start page cannot be greater than the end page",
+                err_split_requires_two_pages: "The PDF needs at least 2 pages to split into two files",
+                err_split_after_range: "The split page must be between 1 and {lastSplitPage}",
                 err_select_file: "Please select a file",
                 err_enter_password: "Please enter a password",
                 err_password_incorrect: "The password is incorrect or missing",
@@ -625,9 +654,13 @@
                 drag_hint: "💡 ヒント：下の項目をドラッグして結合順を変更できます",
                 btn_merge_dl: "結合してダウンロード",
                 title_split: "PDF 分割",
-                desc_split: "指定範囲の各ページを個別の PDF に分割して自動ダウンロード",
+                desc_split: "PDF を分割点で 2 つに分けるか、指定範囲をページごとに分割します",
+                split_mode_two: "2 つに分割",
+                split_mode_pages: "ページごとに分割",
+                lbl_split_after_page: "何ページ目の後で分割",
                 lbl_start_page: "開始ページ",
                 lbl_end_page: "終了ページ",
+                split_two_hint: "例：3 を入力すると、1-3 ページが 1 つ目、4 ページ以降が 2 つ目の PDF になります。",
                 split_hint: "選択範囲内の各ページを個別 PDF にします。複数ページの場合は ZIP でダウンロードします。",
                 btn_split_dl: "分割ダウンロード",
                 title_compress: "PDF 圧縮 (ラスタライズ)",
@@ -661,6 +694,8 @@
                 err_invalid_page_number: "有効なページ番号を入力してください",
                 err_page_range: "ページ番号は 1 から {totalPages} の範囲で入力してください",
                 err_start_greater_than_end: "開始ページは終了ページより大きくできません",
+                err_split_requires_two_pages: "PDF を 2 つに分割するには少なくとも 2 ページ必要です",
+                err_split_after_range: "分割ページは 1 から {lastSplitPage} の範囲で入力してください",
                 err_select_file: "ファイルを選択してください",
                 err_enter_password: "パスワードを入力してください",
                 err_password_incorrect: "パスワードが正しくないか、入力されていません",
@@ -986,12 +1021,35 @@
         const splitCtrl = document.getElementById('ctrl-split');
         const splitStartInput = document.getElementById('split-start');
         const splitEndInput = document.getElementById('split-end');
+        const splitAfterInput = document.getElementById('split-after');
+        const splitTwoOptions = document.getElementById('split-two-options');
+        const splitPageOptions = document.getElementById('split-page-options');
+
+        function updateSplitMode() {
+            const mode = document.querySelector('input[name="split-mode"]:checked')?.value || 'two';
+            splitTwoOptions.classList.toggle('hidden', mode !== 'two');
+            splitPageOptions.classList.toggle('hidden', mode !== 'pages');
+            document.querySelectorAll('input[name="split-mode"]').forEach(input => {
+                const label = input.closest('label');
+                const activeClasses = ['border-blue-200', 'dark:border-blue-900', 'bg-blue-50', 'dark:bg-blue-900/20'];
+                const idleClasses = ['border-gray-200', 'dark:border-gray-600', 'bg-gray-50', 'dark:bg-gray-700'];
+                activeClasses.forEach(className => label.classList.toggle(className, input.checked));
+                idleClasses.forEach(className => label.classList.toggle(className, !input.checked));
+            });
+        }
+
+        document.querySelectorAll('input[name="split-mode"]').forEach(input => {
+            input.addEventListener('change', updateSplitMode);
+        });
+        updateSplitMode();
 
         function resetSplitState() {
             splitFile = null;
             splitPdfDoc = null;
             splitName.textContent = '';
             splitCtrl.classList.add('hidden');
+            splitAfterInput.value = 1;
+            splitAfterInput.max = 1;
             splitStartInput.value = 1;
             splitEndInput.value = 1;
             splitStartInput.max = 1;
@@ -1009,6 +1067,8 @@
                     splitFile = nextFile;
                     splitPdfDoc = nextPdfDoc;
                     splitName.textContent = nextFile.name;
+                    splitAfterInput.value = Math.max(1, Math.floor(count / 2));
+                    splitAfterInput.max = Math.max(1, count - 1);
                     splitStartInput.value = 1;
                     splitEndInput.value = count;
                     splitStartInput.max = count;
@@ -1026,18 +1086,7 @@
 
             const btn = document.getElementById('do-split');
             const totalPages = splitPdfDoc.getPageCount();
-            const start = parseInt(splitStartInput.value, 10);
-            const end = parseInt(splitEndInput.value, 10);
-
-            if (Number.isNaN(start) || Number.isNaN(end)) {
-                return alert(t('err_invalid_page_number'));
-            }
-            if (start < 1 || end < 1 || start > totalPages || end > totalPages) {
-                return alert(t('err_page_range', { totalPages }));
-            }
-            if (start > end) {
-                return alert(t('err_start_greater_than_end'));
-            }
+            const mode = document.querySelector('input[name="split-mode"]:checked')?.value || 'two';
 
             const baseName = splitFile.name.replace(/\.pdf$/i, '') || 'split';
 
@@ -1046,23 +1095,70 @@
 
             try {
                 const { PDFDocument } = PDFLib;
+                const buildPdfFromIndices = async (pageIndices) => {
+                    const pdf = await PDFDocument.create();
+                    const pages = await pdf.copyPages(splitPdfDoc, pageIndices);
+                    pages.forEach(page => pdf.addPage(page));
+                    return pdf.save();
+                };
+
+                if (mode === 'two') {
+                    if (totalPages < 2) {
+                        return alert(t('err_split_requires_two_pages'));
+                    }
+
+                    const splitAfter = parseInt(splitAfterInput.value, 10);
+                    const lastSplitPage = totalPages - 1;
+                    if (Number.isNaN(splitAfter)) {
+                        return alert(t('err_invalid_page_number'));
+                    }
+                    if (splitAfter < 1 || splitAfter > lastSplitPage) {
+                        return alert(t('err_split_after_range', { lastSplitPage }));
+                    }
+
+                    const zip = new JSZip();
+                    const firstPartIndices = Array.from({ length: splitAfter }, (_, index) => index);
+                    const secondPartIndices = Array.from({ length: totalPages - splitAfter }, (_, index) => index + splitAfter);
+
+                    zip.file(
+                        `${baseName}_part_1_pages_1-${splitAfter}.pdf`,
+                        await buildPdfFromIndices(firstPartIndices)
+                    );
+                    zip.file(
+                        `${baseName}_part_2_pages_${splitAfter + 1}-${totalPages}.pdf`,
+                        await buildPdfFromIndices(secondPartIndices)
+                    );
+                    saveAs(await zip.generateAsync({ type: 'blob' }), `${baseName}_split_two_parts.zip`);
+                    return;
+                }
+
+                const start = parseInt(splitStartInput.value, 10);
+                const end = parseInt(splitEndInput.value, 10);
+
+                if (Number.isNaN(start) || Number.isNaN(end)) {
+                    return alert(t('err_invalid_page_number'));
+                }
+                if (start < 1 || end < 1 || start > totalPages || end > totalPages) {
+                    return alert(t('err_page_range', { totalPages }));
+                }
+                if (start > end) {
+                    return alert(t('err_start_greater_than_end'));
+                }
+
                 const pageNumbers = [];
                 for (let pageNum = start; pageNum <= end; pageNum++) pageNumbers.push(pageNum);
 
                 if (pageNumbers.length === 1) {
-                    const singlePdf = await PDFDocument.create();
-                    const [page] = await singlePdf.copyPages(splitPdfDoc, [pageNumbers[0] - 1]);
-                    singlePdf.addPage(page);
-                    saveAs(new Blob([await singlePdf.save()], { type: 'application/pdf' }), `${baseName}_page_${pageNumbers[0]}.pdf`);
+                    saveAs(
+                        new Blob([await buildPdfFromIndices([pageNumbers[0] - 1])], { type: 'application/pdf' }),
+                        `${baseName}_page_${pageNumbers[0]}.pdf`
+                    );
                     return;
                 }
 
                 const zip = new JSZip();
                 for (const pageNum of pageNumbers) {
-                    const pagePdf = await PDFDocument.create();
-                    const [page] = await pagePdf.copyPages(splitPdfDoc, [pageNum - 1]);
-                    pagePdf.addPage(page);
-                    zip.file(`${baseName}_page_${pageNum}.pdf`, await pagePdf.save());
+                    zip.file(`${baseName}_page_${pageNum}.pdf`, await buildPdfFromIndices([pageNum - 1]));
                 }
 
                 saveAs(
