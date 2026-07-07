@@ -49,85 +49,1096 @@
     </script>
 
     <style>
-        .loader {
-            border-top-color: #3b82f6;
-            -webkit-animation: spinner 1.5s linear infinite;
-            animation: spinner 1.5s linear infinite;
+        :root {
+            color-scheme: light;
+            --bg: oklch(0.972 0.009 235);
+            --surface: oklch(1 0 0);
+            --surface-2: oklch(0.955 0.011 235);
+            --surface-3: oklch(0.925 0.014 235);
+            --ink: oklch(0.2 0.025 240);
+            --muted: oklch(0.42 0.024 240);
+            --line: oklch(0.865 0.018 240);
+            --accent: oklch(0.52 0.16 250);
+            --accent-strong: oklch(0.46 0.18 250);
+            --accent-soft: oklch(0.935 0.036 250);
+            --success: oklch(0.52 0.13 160);
+            --success-soft: oklch(0.94 0.045 160);
+            --danger: oklch(0.54 0.18 25);
+            --danger-soft: oklch(0.95 0.04 25);
+            --warning: oklch(0.51 0.1 78);
+            --warning-soft: oklch(0.955 0.052 84);
+            --shadow: 0 1px 2px oklch(0.2 0.02 240 / 0.08);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.25rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            --space-10: 2.5rem;
+            --space-12: 3rem;
         }
-        @keyframes spinner {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        .dark {
+            color-scheme: dark;
+            --bg: oklch(0.18 0.024 240);
+            --surface: oklch(0.235 0.023 240);
+            --surface-2: oklch(0.285 0.026 240);
+            --surface-3: oklch(0.34 0.028 240);
+            --ink: oklch(0.94 0.01 240);
+            --muted: oklch(0.74 0.018 240);
+            --line: oklch(0.37 0.028 240);
+            --accent: oklch(0.72 0.14 250);
+            --accent-strong: oklch(0.78 0.13 250);
+            --accent-soft: oklch(0.31 0.07 250);
+            --success: oklch(0.73 0.11 160);
+            --success-soft: oklch(0.31 0.06 160);
+            --danger: oklch(0.72 0.14 25);
+            --danger-soft: oklch(0.31 0.07 25);
+            --warning: oklch(0.83 0.09 84);
+            --warning-soft: oklch(0.3 0.06 84);
+            --shadow: none;
         }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body.app-body {
+            min-height: 100vh;
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            transition: background-color 180ms ease, color 180ms ease;
+        }
+        button,
+        input,
+        select { font: inherit; }
+        button { cursor: pointer; }
+        button:disabled,
+        button[aria-disabled="true"] {
+            cursor: not-allowed;
+            opacity: 0.58;
+        }
+        .hidden { display: none !important; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Tab 按鈕樣式 */
-        .tab-btn {
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
             white-space: nowrap;
-            padding: 1rem 1.5rem;
-            font-weight: 500;
-            transition: all 0.2s;
-            border-bottom: 2px solid transparent;
-            color: #6b7280;
+            border: 0;
         }
-        .dark .tab-btn { color: #9ca3af; }
-        
-        .tab-btn.active {
-            border-bottom-color: #2563eb;
-            color: #2563eb;
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            border-bottom: 1px solid var(--line);
+            background: color-mix(in oklch, var(--surface), transparent 7%);
+            backdrop-filter: blur(14px);
+        }
+        .topbar-inner {
+            width: min(1220px, calc(100% - 2rem));
+            min-height: 4.5rem;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-4);
+        }
+        .brand-lockup {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            min-width: 0;
+        }
+        .brand-mark {
+            width: 2.5rem;
+            height: 2.5rem;
+            padding: 0.5rem;
+            border-radius: var(--radius-md);
+            color: white;
+            background: var(--accent-strong);
+            flex: 0 0 auto;
+        }
+        .brand-title {
+            display: block;
+            color: var(--ink);
+            font-size: 1rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+        .brand-subtitle {
+            display: block;
+            max-width: 32ch;
+            margin-top: 0.125rem;
+            color: var(--muted);
+            font-size: 0.8125rem;
+            line-height: 1.25;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            flex: 0 0 auto;
+            min-width: 0;
+        }
+        .topbar-action,
+        #lang-selector {
+            min-height: 2.5rem;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            color: var(--ink);
+            font-size: 0.875rem;
+            font-weight: 700;
+            box-shadow: none;
+            transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
+        }
+        .topbar-action {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: 0 var(--space-3);
+        }
+        #lang-selector {
+            padding: 0 var(--space-8) 0 var(--space-3);
+        }
+        .topbar-action:hover,
+        #lang-selector:hover {
+            border-color: color-mix(in oklch, var(--accent), var(--line) 35%);
+            color: var(--accent-strong);
+        }
+        .topbar-action:focus-visible,
+        #lang-selector:focus-visible,
+        .tab-btn:focus-visible,
+        .workspace button:focus-visible,
+        .workspace select:focus-visible,
+        .workspace input:focus-visible,
+        .workspace [id^="drop-"]:focus-visible {
+            outline: 3px solid color-mix(in oklch, var(--accent), transparent 72%);
+            outline-offset: 2px;
+        }
+
+        .app-shell {
+            width: min(1220px, calc(100% - 2rem));
+            margin: 0 auto;
+            padding: var(--space-6) 0 var(--space-12);
+            display: grid;
+            grid-template-columns: 16rem minmax(0, 1fr);
+            gap: var(--space-6);
+            flex: 1;
+        }
+        .tool-nav-shell {
+            position: sticky;
+            top: 5.5rem;
+            align-self: start;
+        }
+        .tool-nav-inner {
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            background: var(--surface);
+            box-shadow: var(--shadow);
+            padding: var(--space-2);
+        }
+        .tool-nav-label {
+            padding: var(--space-3) var(--space-3) var(--space-2);
+            color: var(--muted);
+            font-size: 0.75rem;
+            font-weight: 800;
+        }
+        .tool-tabs {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-1);
+        }
+        .tab-btn {
+            width: 100%;
+            min-height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: var(--space-3);
+            border: 1px solid transparent;
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: var(--muted);
+            padding: var(--space-2);
+            font-size: 0.925rem;
+            font-weight: 700;
+            line-height: 1.2;
+            text-align: left;
+            white-space: nowrap;
+            transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+        }
+        .tab-btn::before {
+            content: attr(data-short);
+            width: 2rem;
+            height: 2rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-sm);
+            background: var(--surface-2);
+            color: var(--muted);
+            font-size: 0.68rem;
+            font-weight: 850;
+            letter-spacing: 0;
+            flex: 0 0 auto;
+        }
+        .tab-btn.active,
+        .tab-btn[aria-selected="true"] {
+            border-color: color-mix(in oklch, var(--accent), var(--line) 45%);
+            background: var(--accent-soft);
+            color: var(--accent-strong);
+        }
+        .tab-btn.active::before,
+        .tab-btn[aria-selected="true"]::before {
+            border-color: color-mix(in oklch, var(--accent), var(--line) 30%);
+            background: var(--surface);
+            color: var(--accent-strong);
+        }
+        .tab-btn:hover:not(.active) {
+            background: var(--surface-2);
+            color: var(--ink);
+        }
+
+        .workspace {
+            width: 100%;
+            min-width: 0;
+            padding: 0;
+        }
+        .workspace > section {
+            min-width: 0;
+        }
+        .workspace > section > .text-center {
+            margin-bottom: var(--space-4) !important;
+            text-align: left !important;
+        }
+        .workspace h2 {
+            margin: 0;
+            color: var(--ink) !important;
+            font-size: 1.65rem !important;
+            line-height: 1.2;
+            letter-spacing: 0;
+            text-wrap: balance;
+        }
+        .workspace h2 + p {
+            margin-top: var(--space-2);
+            color: var(--muted) !important;
+            font-size: 0.975rem;
+            line-height: 1.6;
+            max-width: 68ch;
+            text-wrap: pretty;
+        }
+        .workspace h3 {
+            color: var(--ink) !important;
+            font-size: 1rem;
+            line-height: 1.35;
+        }
+        .workspace > section > div[class*="bg-white"],
+        .workspace > section > .grid > div[class*="bg-white"] {
+            border: 1px solid var(--line) !important;
+            border-radius: var(--radius-lg) !important;
+            background: var(--surface) !important;
+            box-shadow: var(--shadow) !important;
+            padding: clamp(1rem, 2.2vw, 1.5rem) !important;
+        }
+        .workspace > section > div[class*="border-t-4"],
+        .workspace > section > .grid > div[class*="border-t-4"] {
+            border-top-width: 1px !important;
+        }
+        .workspace [id^="drop-"] {
+            width: 100%;
+            min-height: 10rem;
+            border: 1.5px dashed color-mix(in oklch, var(--accent), var(--line) 45%) !important;
+            border-radius: var(--radius-md) !important;
+            background: color-mix(in oklch, var(--accent-soft), var(--surface) 38%) !important;
+            color: var(--ink) !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: border-color 160ms ease, background-color 160ms ease;
+        }
+        .workspace [id^="drop-"]:hover {
+            border-color: var(--accent) !important;
+            background: color-mix(in oklch, var(--accent-soft), var(--surface) 18%) !important;
+        }
+        .workspace [id^="drop-"] p,
+        .workspace [id^="drop-"] span {
+            color: var(--ink) !important;
+            font-size: 1rem !important;
+            font-weight: 800 !important;
+            overflow-wrap: anywhere;
+        }
+        .workspace [id^="ctrl-"],
+        #merge-container,
+        #res-heic {
+            border-top-color: var(--line) !important;
+        }
+        .workspace input:not([type="file"]):not([type="radio"]),
+        .workspace select {
+            min-height: 2.75rem;
+            border: 1px solid var(--line) !important;
+            border-radius: var(--radius-sm) !important;
+            background: var(--surface) !important;
+            color: var(--ink) !important;
+        }
+        .workspace input::placeholder {
+            color: color-mix(in oklch, var(--muted), var(--ink) 18%);
+            opacity: 1;
+        }
+        .workspace button[id^="do-"],
+        .workspace #dl-heic-all {
+            --button-bg: var(--accent-strong);
+            min-height: 2.875rem;
+            border: 1px solid var(--button-bg) !important;
+            border-radius: var(--radius-sm) !important;
+            background: var(--button-bg) !important;
+            color: white !important;
+            font-weight: 800 !important;
+            box-shadow: none !important;
+            transition: background-color 160ms ease, opacity 160ms ease;
+        }
+        #do-unlock { --button-bg: var(--danger); }
+        #do-compress,
+        #dl-heic-all { --button-bg: var(--success); }
+        .workspace button[id^="do-"]:hover,
+        .workspace #dl-heic-all:hover {
+            background: color-mix(in oklch, var(--button-bg), black 12%) !important;
+        }
+        #toggle-pass-unlock,
+        .rotate-opt {
+            min-height: 2.75rem;
+            border: 1px solid var(--line) !important;
+            border-radius: var(--radius-sm) !important;
+            background: var(--surface-2) !important;
+            color: var(--ink) !important;
             font-weight: 700;
         }
-        .dark .tab-btn.active {
-            border-bottom-color: #60a5fa;
-            color: #60a5fa;
+        .rotate-opt.is-selected,
+        .rotate-opt[aria-pressed="true"] {
+            border-color: color-mix(in oklch, var(--accent), var(--line) 25%) !important;
+            background: var(--accent-soft) !important;
+            color: var(--accent-strong) !important;
+        }
+        .workspace label {
+            color: var(--ink) !important;
+        }
+        .workspace .text-gray-500,
+        .workspace .text-gray-600,
+        .workspace .text-gray-700,
+        .workspace .text-gray-800 {
+            color: var(--muted) !important;
+        }
+        .workspace .font-bold,
+        .workspace .font-medium {
+            color: var(--ink);
+        }
+        .workspace .bg-yellow-50 {
+            border-color: color-mix(in oklch, var(--warning), var(--line) 50%) !important;
+            background: var(--warning-soft) !important;
+            color: var(--warning) !important;
         }
 
-        .tab-btn:hover:not(.active) {
-            color: #374151;
-            background-color: #f9fafb;
+        #list-merge > li,
+        #heic-list > div {
+            min-width: 0;
+            border: 1px solid var(--line) !important;
+            border-radius: var(--radius-sm) !important;
+            background: var(--surface-2) !important;
         }
-        .dark .tab-btn:hover:not(.active) {
-            color: #e5e7eb;
-            background-color: #374151;
-        }
-
-        /* 拖曳列表樣式 */
         .dragging {
-            opacity: 0.5;
-            background-color: #e5e7eb;
-            border: 2px dashed #9ca3af;
+            opacity: 0.55;
+            border: 1.5px dashed var(--accent) !important;
         }
-        .dark .dragging { background-color: #4b5563; }
-        .drag-over { border-top: 3px solid #3b82f6; }
-
-        /* 上傳區拖曳時的高亮樣式 */
+        .drag-over { border-top: 3px solid var(--accent) !important; }
         .upload-drag-active {
             border-style: solid !important;
-            border-color: #3b82f6 !important; /* blue-500 */
-            background-color: #eff6ff !important; /* blue-50 */
+            border-color: var(--accent) !important;
+            background: color-mix(in oklch, var(--accent-soft), var(--surface) 8%) !important;
         }
-        .dark .upload-drag-active {
-            background-color: #374151 !important; /* gray-700 */
-            border-color: #60a5fa !important; /* blue-400 */
+
+        .toast {
+            position: fixed;
+            right: 1rem;
+            bottom: 1rem;
+            z-index: 70;
+            width: min(26rem, calc(100vw - 2rem));
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            background: var(--surface);
+            color: var(--ink);
+            box-shadow: 0 8px 24px oklch(0.2 0.02 240 / 0.18);
+            padding: var(--space-4);
+        }
+        .toast[data-type="error"] {
+            border-color: color-mix(in oklch, var(--danger), var(--line) 45%);
+            background: color-mix(in oklch, var(--danger-soft), var(--surface) 32%);
+        }
+        .toast[data-type="success"] {
+            border-color: color-mix(in oklch, var(--success), var(--line) 45%);
+            background: color-mix(in oklch, var(--success-soft), var(--surface) 32%);
+        }
+        .toast-message {
+            margin: 0;
+            font-size: 0.925rem;
+            line-height: 1.45;
+            color: var(--ink);
+            overflow-wrap: anywhere;
+        }
+
+        #about-modal {
+            background: oklch(0.2 0.02 240 / 0.56) !important;
+        }
+        #about-modal > div {
+            border: 1px solid var(--line) !important;
+            border-radius: var(--radius-lg) !important;
+            background: var(--surface) !important;
+            box-shadow: 0 16px 40px oklch(0.2 0.02 240 / 0.24) !important;
+        }
+        #about-modal h3 {
+            color: var(--ink) !important;
+        }
+        #about-modal p {
+            background: var(--surface-2) !important;
+            color: var(--muted) !important;
+        }
+        #about-modal a,
+        #about-modal button {
+            border-radius: var(--radius-sm) !important;
+        }
+        .about-actions {
+            display: grid;
+            gap: var(--space-3);
+            padding: 0 var(--space-2) var(--space-3);
+        }
+        .about-action {
+            width: 100%;
+            min-height: 3.75rem;
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+            padding: 0 var(--space-4) !important;
+            font-size: 1rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+        .about-action svg {
+            width: 1.25rem;
+            height: 1.25rem;
+            flex: 0 0 auto;
+        }
+        footer {
+            border-top: 1px solid var(--line);
+            background: transparent !important;
+            color: var(--muted) !important;
+        }
+
+        @media (max-width: 900px) {
+            .topbar-inner {
+                width: min(100%, calc(100% - 1.5rem));
+                min-height: 4.25rem;
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) 2.5rem;
+                align-items: center;
+                gap: var(--space-2);
+            }
+            .brand-subtitle {
+                display: none;
+            }
+            .brand-lockup {
+                min-width: 0;
+            }
+            .topbar-actions {
+                display: contents;
+            }
+            .app-shell {
+                width: 100%;
+                padding: 0 0 var(--space-8);
+                display: block;
+            }
+            .tool-nav-shell {
+                position: sticky;
+                top: 4.25rem;
+                z-index: 30;
+                border-bottom: 1px solid var(--line);
+                background: color-mix(in oklch, var(--bg), transparent 4%);
+                backdrop-filter: blur(12px);
+            }
+            .tool-nav-inner {
+                border: 0;
+                border-radius: 0;
+                background: transparent;
+                box-shadow: none;
+                padding: var(--space-2) var(--space-3);
+            }
+            .tool-nav-label {
+                display: none;
+            }
+            .tool-tabs {
+                flex-direction: row;
+                gap: var(--space-2);
+                overflow-x: auto;
+                padding-bottom: var(--space-1);
+                scroll-snap-type: x proximity;
+            }
+            .tab-btn {
+                width: auto;
+                flex: 0 0 auto;
+                min-height: 2.75rem;
+                scroll-snap-align: start;
+            }
+            .tab-btn::before {
+                display: none;
+            }
+            .workspace {
+                padding: var(--space-4);
+            }
+            .workspace h2 {
+                font-size: 1.35rem !important;
+            }
+            .topbar-action span {
+                display: none;
+            }
+            .topbar-action {
+                grid-column: 2;
+                width: 2.5rem;
+                justify-content: center;
+                padding: 0;
+            }
+            #lang-selector {
+                display: none;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .topbar-inner {
+                grid-template-columns: minmax(0, 1fr) 2.5rem;
+            }
+            .brand-mark {
+                width: 2.25rem;
+                height: 2.25rem;
+            }
+            .brand-title {
+                max-width: 6.5rem;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            #lang-selector {
+                display: none;
+            }
+            .workspace {
+                padding: var(--space-3);
+            }
+            .workspace [id^="drop-"] {
+                min-height: 8.5rem;
+                padding: var(--space-4) !important;
+            }
+            .toast {
+                right: 0.75rem;
+                bottom: 0.75rem;
+                width: calc(100vw - 1.5rem);
+            }
+        }
+
+        .layout-v3,
+        .dark .layout-v3 {
+            color-scheme: light;
+            --bg: oklch(0.965 0.004 250);
+            --surface: oklch(1 0 0);
+            --surface-2: oklch(0.945 0.005 250);
+            --surface-3: oklch(0.91 0.006 250);
+            --ink: oklch(0.2 0.014 250);
+            --muted: oklch(0.43 0.014 250);
+            --line: oklch(0.84 0.008 250);
+            --accent: oklch(0.53 0.15 245);
+            --accent-strong: oklch(0.42 0.15 245);
+            --accent-soft: oklch(0.93 0.03 245);
+            --success: oklch(0.49 0.11 165);
+            --success-soft: oklch(0.94 0.035 165);
+            --danger: oklch(0.52 0.17 24);
+            --danger-soft: oklch(0.95 0.035 24);
+            --warning: oklch(0.54 0.095 82);
+            --warning-soft: oklch(0.95 0.04 82);
+            --shadow: none;
+            background: var(--bg);
+        }
+
+        body.app-body.layout-v3 {
+            background: var(--bg);
+            color: var(--ink);
+            min-width: 320px;
+        }
+
+        .layout-v3 .topbar {
+            border-bottom: 1px solid var(--line);
+            background: var(--surface);
+            backdrop-filter: none;
+        }
+
+        .layout-v3 .topbar-inner {
+            width: min(1180px, calc(100% - 2rem));
+            min-height: 4rem;
+            gap: var(--space-3);
+        }
+
+        .layout-v3 .brand-mark {
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 8px;
+            background: var(--ink);
+            color: var(--surface);
+        }
+
+        .layout-v3 .brand-title {
+            font-size: 0.975rem;
+            font-weight: 750;
+        }
+
+        .layout-v3 .brand-subtitle {
+            color: var(--muted);
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .layout-v3 .topbar-action,
+        .layout-v3 #lang-selector {
+            min-height: 2.375rem;
+            border-radius: 7px;
+            border-color: var(--line);
+            background: var(--surface);
+            color: var(--ink);
+            font-size: 0.84rem;
+            font-weight: 650;
+            box-shadow: none;
+        }
+
+        .layout-v3 .topbar-action:hover,
+        .layout-v3 #lang-selector:hover {
+            border-color: color-mix(in oklch, var(--accent), var(--line) 45%);
+            background: var(--surface-2);
+            color: var(--accent-strong);
+        }
+
+        .layout-v3 .app-shell {
+            width: min(1180px, calc(100% - 2rem));
+            grid-template-columns: 15rem minmax(0, 1fr);
+            gap: 0;
+            padding: 1.25rem 0 2.5rem;
+            align-items: start;
+        }
+
+        .layout-v3 .tool-nav-shell {
+            top: 5.25rem;
+        }
+
+        .layout-v3 .tool-nav-inner {
+            min-height: 29rem;
+            border: 1px solid var(--line);
+            border-right: 0;
+            border-radius: 10px 0 0 10px;
+            background: var(--surface-2);
+            box-shadow: none;
+            padding: 0.5rem;
+        }
+
+        .layout-v3 .tool-nav-label {
+            padding: 0.875rem 0.625rem 0.625rem;
+            color: var(--muted);
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .layout-v3 .tool-tabs {
+            gap: 0.25rem;
+        }
+
+        .layout-v3 .tab-btn {
+            min-height: 2.625rem;
+            border-radius: 7px;
+            border-color: transparent;
+            padding: 0.45rem 0.625rem;
+            gap: 0.625rem;
+            color: var(--muted);
+            font-size: 0.875rem;
+            font-weight: 650;
+        }
+
+        .layout-v3 .tab-btn::before {
+            content: "";
+            width: 0.5rem;
+            height: 0.5rem;
+            border: 0;
+            border-radius: 999px;
+            background: var(--line);
+            flex: 0 0 auto;
+        }
+
+        .layout-v3 .tab-btn.active,
+        .layout-v3 .tab-btn[aria-selected="true"] {
+            border-color: var(--line);
+            background: var(--surface);
+            color: var(--ink);
+        }
+
+        .layout-v3 .tab-btn.active::before,
+        .layout-v3 .tab-btn[aria-selected="true"]::before {
+            background: var(--accent);
+        }
+
+        .layout-v3 .tab-btn:hover:not(.active) {
+            background: color-mix(in oklch, var(--surface), var(--surface-2) 45%);
+            color: var(--ink);
+        }
+
+        .layout-v3 .workspace {
+            min-height: 29rem;
+            border: 1px solid var(--line);
+            border-radius: 0 10px 10px 0;
+            background: var(--surface);
+            overflow: hidden;
+            box-shadow: none;
+        }
+
+        .layout-v3 .workspace > section:not(.hidden) {
+            min-height: 29rem;
+            display: grid;
+            grid-template-rows: auto 1fr;
+        }
+
+        .layout-v3 .workspace > section > .text-center {
+            margin: 0 !important;
+            padding: 1.45rem 1.75rem 1.25rem;
+            border-bottom: 1px solid var(--line);
+            background: var(--surface);
+            text-align: left !important;
+        }
+
+        .layout-v3 .workspace h2 {
+            font-size: 1.35rem !important;
+            line-height: 1.25;
+            font-weight: 760;
+            color: var(--ink) !important;
+            text-wrap: balance;
+        }
+
+        .layout-v3 .workspace h2 + p {
+            margin-top: 0.35rem;
+            max-width: 70ch;
+            color: var(--muted) !important;
+            font-size: 0.92rem;
+            line-height: 1.55;
+        }
+
+        .layout-v3 .workspace h3 {
+            color: var(--ink) !important;
+            font-size: 0.98rem;
+            font-weight: 720;
+        }
+
+        .layout-v3 .workspace > section > div[class*="bg-white"],
+        .layout-v3 .workspace > section > .grid,
+        .layout-v3 .workspace > section > .grid > div[class*="bg-white"] {
+            border: 0 !important;
+            border-radius: 0 !important;
+            background: var(--surface) !important;
+            box-shadow: none !important;
+            padding: 1.75rem !important;
+        }
+
+        .layout-v3 .workspace > section > div[class*="border-t-4"],
+        .layout-v3 .workspace > section > .grid > div[class*="border-t-4"] {
+            border-top-width: 0 !important;
+        }
+
+        .layout-v3 .workspace [id^="drop-"] {
+            min-height: 12.5rem;
+            border: 1.5px dashed color-mix(in oklch, var(--accent), var(--line) 45%) !important;
+            border-radius: 10px !important;
+            background: var(--surface-2) !important;
+            color: var(--ink) !important;
+            transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+        }
+
+        .layout-v3 .workspace [id^="drop-"]:hover {
+            border-color: var(--accent) !important;
+            background: color-mix(in oklch, var(--accent-soft), var(--surface) 42%) !important;
+            transform: translateY(-1px);
+        }
+
+        .layout-v3 .workspace [id^="drop-"] p,
+        .layout-v3 .workspace [id^="drop-"] span {
+            color: var(--ink) !important;
+            font-size: 1rem !important;
+            font-weight: 720 !important;
+            line-height: 1.45;
+            overflow-wrap: anywhere;
+        }
+
+        .layout-v3 .workspace [id^="ctrl-"],
+        .layout-v3 #merge-container,
+        .layout-v3 #res-heic {
+            border-top: 1px solid var(--line) !important;
+            margin-top: 1.25rem !important;
+            padding-top: 1.25rem !important;
+        }
+
+        .layout-v3 .workspace input:not([type="file"]):not([type="radio"]),
+        .layout-v3 .workspace select {
+            min-height: 2.625rem;
+            border: 1px solid var(--line) !important;
+            border-radius: 7px !important;
+            background: var(--surface) !important;
+            color: var(--ink) !important;
+            box-shadow: none !important;
+        }
+
+        .layout-v3 .workspace input::placeholder {
+            color: color-mix(in oklch, var(--muted), var(--ink) 15%);
+            opacity: 1;
+        }
+
+        .layout-v3 .workspace button[id^="do-"],
+        .layout-v3 .workspace #dl-heic-all {
+            min-height: 2.75rem;
+            border: 1px solid var(--accent-strong) !important;
+            border-radius: 7px !important;
+            background: var(--accent-strong) !important;
+            color: white !important;
+            font-weight: 720 !important;
+            box-shadow: none !important;
+        }
+
+        .layout-v3 #do-unlock {
+            border-color: var(--danger) !important;
+            background: var(--danger) !important;
+        }
+
+        .layout-v3 #do-compress,
+        .layout-v3 #dl-heic-all {
+            border-color: var(--success) !important;
+            background: var(--success) !important;
+        }
+
+        .layout-v3 .workspace button[id^="do-"]:hover,
+        .layout-v3 .workspace #dl-heic-all:hover {
+            filter: brightness(0.95);
+        }
+
+        .layout-v3 #toggle-pass-unlock,
+        .layout-v3 .rotate-opt {
+            min-height: 2.625rem;
+            border: 1px solid var(--line) !important;
+            border-radius: 7px !important;
+            background: var(--surface-2) !important;
+            color: var(--ink) !important;
+            font-weight: 650;
+            box-shadow: none !important;
+        }
+
+        .layout-v3 .rotate-opt.is-selected,
+        .layout-v3 .rotate-opt[aria-pressed="true"] {
+            border-color: color-mix(in oklch, var(--accent), var(--line) 25%) !important;
+            background: var(--accent-soft) !important;
+            color: var(--accent-strong) !important;
+        }
+
+        .layout-v3 .workspace label {
+            color: var(--ink) !important;
+        }
+
+        .layout-v3 .workspace .text-gray-500,
+        .layout-v3 .workspace .text-gray-600,
+        .layout-v3 .workspace .text-gray-700,
+        .layout-v3 .workspace .text-gray-800 {
+            color: var(--muted) !important;
+        }
+
+        .layout-v3 .workspace .font-bold,
+        .layout-v3 .workspace .font-medium {
+            color: var(--ink);
+        }
+
+        .layout-v3 .workspace .bg-yellow-50 {
+            border: 1px solid color-mix(in oklch, var(--warning), var(--line) 45%) !important;
+            border-radius: 8px !important;
+            background: var(--warning-soft) !important;
+            color: var(--ink) !important;
+        }
+
+        .layout-v3 #list-merge > li,
+        .layout-v3 #heic-list > div {
+            border: 1px solid var(--line) !important;
+            border-radius: 7px !important;
+            background: var(--surface-2) !important;
+            box-shadow: none !important;
+        }
+
+        .layout-v3 .toast {
+            border-radius: 9px;
+            box-shadow: 0 2px 8px oklch(0.2 0.014 250 / 0.12);
+        }
+
+        .layout-v3 #about-modal {
+            background: oklch(0.2 0.014 250 / 0.48) !important;
+        }
+
+        .layout-v3 #about-modal > div {
+            border: 1px solid var(--line) !important;
+            border-radius: 10px !important;
+            background: var(--surface) !important;
+            box-shadow: 0 4px 12px oklch(0.2 0.014 250 / 0.16) !important;
+        }
+
+        .layout-v3 .about-action {
+            min-height: 3.25rem;
+            border-radius: 7px !important;
+            font-size: 0.96rem;
+        }
+
+        .layout-v3 footer {
+            border-top: 1px solid var(--line);
+            background: transparent !important;
+            color: var(--muted) !important;
+            padding: 1.25rem 0 !important;
+        }
+
+        @media (max-width: 900px) {
+            .layout-v3 .topbar-inner {
+                width: min(100%, calc(100% - 1.25rem));
+                min-height: 3.75rem;
+            }
+
+            .layout-v3 .app-shell {
+                width: 100%;
+                display: block;
+                padding: 0 0 2rem;
+            }
+
+            .layout-v3 .tool-nav-shell {
+                position: sticky;
+                top: 3.75rem;
+                border-bottom: 1px solid var(--line);
+                background: var(--surface);
+                backdrop-filter: none;
+            }
+
+            .layout-v3 .tool-nav-inner {
+                min-height: 0;
+                border: 0;
+                border-radius: 0;
+                background: transparent;
+                padding: 0.5rem 0.75rem;
+            }
+
+            .layout-v3 .tool-tabs {
+                display: flex;
+                flex-direction: row;
+                overflow-x: auto;
+                gap: 0.5rem;
+                padding-bottom: 0.125rem;
+            }
+
+            .layout-v3 .tab-btn {
+                width: auto;
+                flex: 0 0 auto;
+                min-height: 2.5rem;
+                padding: 0 0.75rem;
+            }
+
+            .layout-v3 .tab-btn::before {
+                display: none;
+            }
+
+            .layout-v3 .workspace {
+                min-height: auto;
+                border: 0;
+                border-radius: 0;
+                overflow: hidden;
+                padding: 0 !important;
+            }
+
+            .layout-v3 .workspace > section:not(.hidden) {
+                min-height: auto;
+            }
+
+            .layout-v3 .workspace > section > .text-center,
+            .layout-v3 .workspace > section > div[class*="bg-white"],
+            .layout-v3 .workspace > section > .grid,
+            .layout-v3 .workspace > section > .grid > div[class*="bg-white"] {
+                padding: 1.25rem !important;
+            }
+
+            .layout-v3 .workspace [id^="drop-"] {
+                width: auto !important;
+                min-height: 10.5rem;
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .layout-v3 .brand-title {
+                max-width: 8rem;
+            }
+
+            .layout-v3 .workspace h2 {
+                font-size: 1.2rem !important;
+            }
+
+            .layout-v3 .workspace > section > .text-center,
+            .layout-v3 .workspace > section > div[class*="bg-white"],
+            .layout-v3 .workspace > section > .grid,
+            .layout-v3 .workspace > section > .grid > div[class*="bg-white"] {
+                padding: 1rem !important;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-dark-bg text-gray-800 dark:text-gray-200 font-sans min-h-screen flex flex-col transition-colors duration-300">
+<body class="app-body layout-v3 flex flex-col">
 
     <!-- 導覽列 -->
-    <nav class="bg-white dark:bg-dark-card shadow-sm sticky top-0 z-50 border-b dark:border-dark-border transition-colors">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex h-16 items-center justify-between">
+    <nav class="topbar" aria-label="Primary">
+        <div class="topbar-inner">
                 <!-- Logo -->
-                <div class="flex items-center gap-2">
-                    <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                    <span class="font-bold text-xl tracking-tight hidden sm:block text-gray-900 dark:text-white" data-i18n="nav_title">3Y工具箱</span>
+                <div class="brand-lockup">
+                    <svg class="brand-mark" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    <div>
+                        <span class="brand-title" data-i18n="nav_title">3Y工具箱</span>
+                        <span class="brand-subtitle" data-i18n="nav_privacy">瀏覽器端處理，不上傳檔案</span>
+                    </div>
                 </div>
 
                 <!-- 右側選單 -->
-                <div class="flex items-center gap-3">
-                    <button onclick="openAboutModal()" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="topbar-actions">
+                    <button type="button" onclick="openAboutModal()" class="topbar-action">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         <span data-i18n="nav_about">關於本站</span>
                     </button>
                     
@@ -137,31 +1148,32 @@
                         <option value="ja">日本語</option>
                     </select>
                 </div>
-            </div>
         </div>
     </nav>
 
+    <div class="app-shell">
     <!-- 橫向滾動選單 -->
-    <div class="bg-white dark:bg-dark-card border-b dark:border-dark-border shadow-sm transition-colors">
-        <div class="max-w-7xl mx-auto px-2">
-            <div class="flex overflow-x-auto hide-scrollbar gap-2 justify-center" id="tab-container">
-                <button onclick="switchTab('img')" class="tab-btn" id="btn-tab-img" data-i18n="tab_img">PDF 轉圖片</button>
-                <button onclick="switchTab('img2pdf')" class="tab-btn text-teal-600 dark:text-teal-400" id="btn-tab-img2pdf" data-i18n="tab_img2pdf">圖片 轉 PDF</button>
-                <button onclick="switchTab('merge')" class="tab-btn active" id="btn-tab-merge" data-i18n="tab_merge">PDF 合併</button>
-                <button onclick="switchTab('split')" class="tab-btn" id="btn-tab-split" data-i18n="tab_split">PDF 分割</button>
-                <button onclick="switchTab('compress')" class="tab-btn" id="btn-tab-compress" data-i18n="tab_compress">PDF 壓縮</button>
-                <button onclick="switchTab('protect')" class="tab-btn" id="btn-tab-protect" data-i18n="tab_protect">PDF 加密/解鎖</button>
-                <button onclick="switchTab('rotate')" class="tab-btn" id="btn-tab-rotate" data-i18n="tab_rotate">PDF 旋轉</button>
-                <button onclick="switchTab('heic')" class="tab-btn text-purple-600 dark:text-purple-400" id="btn-tab-heic" data-i18n="tab_heic">HEIC 轉 JPG</button>
+    <aside class="tool-nav-shell">
+        <div class="tool-nav-inner">
+            <div class="tool-nav-label" data-i18n="nav_tools">工具</div>
+            <div class="tool-tabs hide-scrollbar" id="tab-container" role="tablist" aria-label="Tools">
+                <button type="button" onclick="switchTab('img')" class="tab-btn" id="btn-tab-img" role="tab" aria-controls="sec-img" aria-selected="false" tabindex="-1" data-short="P2I" data-i18n="tab_img">PDF 轉圖片</button>
+                <button type="button" onclick="switchTab('img2pdf')" class="tab-btn" id="btn-tab-img2pdf" role="tab" aria-controls="sec-img2pdf" aria-selected="false" tabindex="-1" data-short="I2P" data-i18n="tab_img2pdf">圖片 轉 PDF</button>
+                <button type="button" onclick="switchTab('merge')" class="tab-btn active" id="btn-tab-merge" role="tab" aria-controls="sec-merge" aria-selected="true" data-short="MRG" data-i18n="tab_merge">PDF 合併</button>
+                <button type="button" onclick="switchTab('split')" class="tab-btn" id="btn-tab-split" role="tab" aria-controls="sec-split" aria-selected="false" tabindex="-1" data-short="SPL" data-i18n="tab_split">PDF 分割</button>
+                <button type="button" onclick="switchTab('compress')" class="tab-btn" id="btn-tab-compress" role="tab" aria-controls="sec-compress" aria-selected="false" tabindex="-1" data-short="CMP" data-i18n="tab_compress">PDF 壓縮</button>
+                <button type="button" onclick="switchTab('protect')" class="tab-btn" id="btn-tab-protect" role="tab" aria-controls="sec-protect" aria-selected="false" tabindex="-1" data-short="UNL" data-i18n="tab_protect">PDF 解鎖</button>
+                <button type="button" onclick="switchTab('rotate')" class="tab-btn" id="btn-tab-rotate" role="tab" aria-controls="sec-rotate" aria-selected="false" tabindex="-1" data-short="ROT" data-i18n="tab_rotate">PDF 旋轉</button>
+                <button type="button" onclick="switchTab('heic')" class="tab-btn" id="btn-tab-heic" role="tab" aria-controls="sec-heic" aria-selected="false" tabindex="-1" data-short="JPG" data-i18n="tab_heic">HEIC 轉 JPG</button>
             </div>
         </div>
-    </div>
+    </aside>
 
     <!-- 主要內容區 -->
-    <main class="max-w-4xl mx-auto px-4 py-8 flex-grow w-full">
+    <main class="workspace">
 
         <!-- 1. PDF 轉圖片 -->
-        <section id="sec-img" class="hidden">
+        <section id="sec-img" class="hidden" role="tabpanel" aria-labelledby="btn-tab-img">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_img">PDF 轉 JPG/PNG</h2>
                 <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_img">將每一頁 PDF 轉換為圖片並打包下載</p>
@@ -184,7 +1196,7 @@
         </section>
 
         <!-- 2. 圖片 轉 PDF -->
-        <section id="sec-img2pdf" class="hidden">
+        <section id="sec-img2pdf" class="hidden" role="tabpanel" aria-labelledby="btn-tab-img2pdf">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-bold text-teal-700 dark:text-teal-400" data-i18n="title_img2pdf">圖片 轉 PDF</h2>
                 <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_img2pdf">將多張圖片合併為一個 PDF 檔案</p>
@@ -207,7 +1219,7 @@
         </section>
 
         <!-- 3. PDF 合併 -->
-        <section id="sec-merge" class="block">
+        <section id="sec-merge" class="block" role="tabpanel" aria-labelledby="btn-tab-merge">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_merge">PDF 合併</h2>
                 <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_merge">將多個 PDF 串接成一個檔案，可拖曳調整順序</p>
@@ -220,7 +1232,7 @@
                 </div>
                 
                 <div id="merge-container" class="mt-6 hidden">
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2 italic text-center" data-i18n="drag_hint">💡 提示：您可以拖曳下方的項目來調整合併順序</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2 italic text-center" data-i18n="drag_hint">提示：您可以拖曳下方的項目來調整合併順序</p>
                     <ul id="list-merge" class="space-y-2"></ul>
                     <button id="do-merge" class="mt-6 w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-bold" data-i18n="btn_merge_dl">合併並下載</button>
                 </div>
@@ -228,7 +1240,7 @@
         </section>
 
         <!-- 4. PDF 分割 -->
-        <section id="sec-split" class="hidden">
+        <section id="sec-split" class="hidden" role="tabpanel" aria-labelledby="btn-tab-split">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_split">PDF 分割</h2>
                 <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_split">將 PDF 依分割點切成兩份，或把指定範圍拆成單頁 PDF</p>
@@ -275,7 +1287,7 @@
         </section>
 
         <!-- 5. PDF 壓縮 -->
-        <section id="sec-compress" class="hidden">
+        <section id="sec-compress" class="hidden" role="tabpanel" aria-labelledby="btn-tab-compress">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_compress">PDF 壓縮 (重製)</h2>
                 <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_compress">透過將 PDF 轉為圖片再重建來減少檔案大小</p>
@@ -305,48 +1317,32 @@
             </div>
         </section>
 
-        <!-- 6. PDF 加密/解鎖 -->
-        <section id="sec-protect" class="hidden">
+        <!-- 6. PDF 解鎖 -->
+        <section id="sec-protect" class="hidden" role="tabpanel" aria-labelledby="btn-tab-protect">
             <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_protect">PDF 加密與解鎖</h2>
-                <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_protect">為文件設定密碼，或移除已知密碼</p>
+                <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_protect">PDF 解鎖</h2>
+                <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_protect">輸入已知密碼，重製為新的無密碼 PDF</p>
             </div>
             
-            <div class="grid md:grid-cols-2 gap-6">
-                <!-- 加密區 -->
-                <div class="bg-white dark:bg-dark-card rounded-xl shadow p-6 border-t-4 border-blue-500 transition-colors">
-                    <h3 class="font-bold text-lg mb-4 dark:text-white" data-i18n="subtitle_encrypt">加密 (設定密碼)</h3>
-                    <input type="file" id="file-encrypt" class="hidden" accept="application/pdf">
-                    <!-- Drop Zone ID: drop-encrypt -->
-                    <button id="drop-encrypt" onclick="document.getElementById('file-encrypt').click()" class="w-full border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:bg-gray-50 dark:hover:bg-gray-700 mb-4 transition">
-                        <span id="name-encrypt" class="text-gray-600 dark:text-gray-300 block truncate" data-i18n="select_file">選擇或拖曳檔案</span>
-                    </button>
-                    <div class="flex items-stretch gap-2 mb-4">
-                        <input type="password" id="pass-encrypt" class="flex-1 border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded p-2" placeholder="設定密碼" data-i18n="ph_set_pass">
-                        <button type="button" id="toggle-pass-encrypt" class="px-3 border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" data-i18n="show_pass">顯示</button>
-                    </div>
-                    <button id="do-encrypt" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700" data-i18n="btn_encrypt">下載加密檔案</button>
-                </div>
-
-                <!-- 解鎖區 -->
-                <div class="bg-white dark:bg-dark-card rounded-xl shadow p-6 border-t-4 border-red-500 transition-colors">
-                    <h3 class="font-bold text-lg mb-4 dark:text-white" data-i18n="subtitle_unlock">解鎖 (移除密碼)</h3>
+            <div class="bg-white dark:bg-dark-card rounded-xl shadow p-6 transition-colors">
+                    <h3 class="font-bold text-lg mb-4 dark:text-white" data-i18n="subtitle_unlock">移除 PDF 密碼</h3>
+                    <p id="unlock-note" class="text-sm text-gray-500 dark:text-gray-400 mb-4" data-i18n="unlock_note">輸入已知密碼後會重製為新的無密碼 PDF。為了在瀏覽器端完成解鎖，輸出會轉成影像頁面，文字將無法選取。</p>
                     <input type="file" id="file-unlock" class="hidden" accept="application/pdf">
                     <!-- Drop Zone ID: drop-unlock -->
                     <button id="drop-unlock" onclick="document.getElementById('file-unlock').click()" class="w-full border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:bg-gray-50 dark:hover:bg-gray-700 mb-4 transition">
                         <span id="name-unlock" class="text-gray-600 dark:text-gray-300 block truncate" data-i18n="select_file">選擇或拖曳檔案</span>
                     </button>
                     <div class="flex items-stretch gap-2 mb-4">
-                        <input type="password" id="pass-unlock" class="flex-1 border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded p-2" placeholder="輸入原始密碼" data-i18n="ph_org_pass">
+                        <input type="password" id="pass-unlock" class="flex-1 border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded p-2" placeholder="輸入原始密碼" data-i18n="ph_org_pass" aria-describedby="unlock-note">
                         <button type="button" id="toggle-pass-unlock" class="px-3 border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" data-i18n="show_pass">顯示</button>
                     </div>
                     <button id="do-unlock" class="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700" data-i18n="btn_unlock">下載解鎖檔案</button>
-                </div>
+                    <div id="prog-unlock" class="hidden mt-2 text-center text-sm text-gray-600 dark:text-gray-300" data-i18n="processing">處理中...</div>
             </div>
         </section>
 
         <!-- 7. PDF 旋轉 -->
-        <section id="sec-rotate" class="hidden">
+        <section id="sec-rotate" class="hidden" role="tabpanel" aria-labelledby="btn-tab-rotate">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_rotate">PDF 頁面旋轉</h2>
                 <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_rotate">將 PDF 所有頁面進行旋轉</p>
@@ -371,7 +1367,7 @@
         </section>
 
         <!-- 8. HEIC 轉 JPG -->
-        <section id="sec-heic" class="hidden">
+        <section id="sec-heic" class="hidden" role="tabpanel" aria-labelledby="btn-tab-heic">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-bold text-purple-700 dark:text-purple-400" data-i18n="title_heic">HEIC 轉 JPG</h2>
                 <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_heic">iPhone 照片格式轉換為通用 JPG</p>
@@ -395,25 +1391,24 @@
         </section>
 
     </main>
+    </div>
 
     <!-- 關於本站 Modal -->
-    <div id="about-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+    <div id="about-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50 flex items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="about-title">
         <div class="relative p-5 border w-full max-w-md shadow-lg rounded-md bg-white dark:bg-gray-800 dark:border-gray-700">
             <div class="mt-3 text-center">
-                <h3 class="text-lg leading-6 font-bold text-gray-900 dark:text-white mb-4" data-i18n="about_title">關於本站</h3>
+                <h3 id="about-title" class="text-lg leading-6 font-bold text-gray-900 dark:text-white mb-4" data-i18n="about_title">關於本站</h3>
                 <div class="mt-2 px-2 py-3">
                     <p class="text-sm text-gray-500 dark:text-gray-300 text-left leading-relaxed bg-gray-50 dark:bg-gray-700 p-3 rounded" data-i18n="about_content">
                         內容...
                     </p>
                 </div>
-                <div class="mb-4 px-2">
-                    <a href="https://github.com/YenYuY/YYPDFTools" target="_blank" class="inline-flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 w-full transition">
+                <div class="about-actions">
+                    <a href="https://github.com/YenYuY/YYPDFTools" target="_blank" class="about-action border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition">
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" /></svg>
                         <span data-i18n="github_btn">前往 GitHub 專案</span>
                     </a>
-                </div>
-                <div class="items-center px-4 py-3">
-                    <button onclick="document.getElementById('about-modal').classList.add('hidden')" class="px-4 py-2 bg-blue-500 text-white font-medium rounded-md w-full hover:bg-blue-700" data-i18n="btn_close">
+                    <button type="button" onclick="closeAboutModal()" class="about-action bg-blue-500 text-white rounded-md hover:bg-blue-700" data-i18n="btn_close">
                         了解，關閉視窗
                     </button>
                 </div>
@@ -424,6 +1419,9 @@
     <footer class="bg-white dark:bg-dark-card border-t dark:border-dark-border py-6 text-center text-gray-400 text-sm transition-colors">
         &copy; 2026 3Y Tools.
     </footer>
+    <div id="toast" class="toast hidden" role="status" aria-live="polite">
+        <p id="toast-message" class="toast-message"></p>
+    </div>
 
     <!-- 邏輯腳本 -->
     <script>
@@ -432,15 +1430,18 @@
                 site_title: "3Y工具箱",
                 nav_title: "3Y工具箱",
                 nav_about: "關於本站",
+                nav_privacy: "瀏覽器端處理，不上傳檔案",
+                nav_tools: "工具",
                 tab_img: "PDF 轉圖片",
                 tab_img2pdf: "圖片 轉 PDF",
                 tab_merge: "PDF 合併",
                 tab_split: "PDF 分割",
                 tab_compress: "PDF 壓縮",
-                tab_protect: "加密/解鎖",
+                tab_protect: "PDF 解鎖",
                 tab_rotate: "PDF 旋轉",
                 tab_heic: "HEIC 轉 JPG",
                 processing: "處理中...",
+                status_done: "完成，下載已開始",
                 drop_pdf: "點擊或拖曳上傳 PDF",
                 select_file: "選擇或拖曳檔案",
                 // PDF to IMG
@@ -457,7 +1458,7 @@
                 title_merge: "PDF 合併",
                 desc_merge: "將多個 PDF 串接成一個檔案，可拖曳調整順序",
                 drop_pdfs: "點擊或拖曳選擇多個 PDF",
-                drag_hint: "💡 提示：您可以拖曳下方的項目來調整合併順序",
+                drag_hint: "提示：您可以拖曳下方的項目來調整合併順序",
                 btn_merge_dl: "合併並下載",
                 // Split
                 title_split: "PDF 分割",
@@ -477,13 +1478,11 @@
                 note_compress: "此模式會將所有頁面轉為圖片。文字將無法選取，但可大幅減少掃描檔的大小。",
                 lbl_quality: "圖片品質 (越低檔案越小)",
                 btn_compress_dl: "開始壓縮並下載",
-                // Protect
-                title_protect: "PDF 加密與解鎖",
-                desc_protect: "為文件設定密碼，或移除已知密碼",
-                subtitle_encrypt: "加密 (設定密碼)",
-                ph_set_pass: "設定密碼",
-                btn_encrypt: "下載加密檔案",
-                subtitle_unlock: "解鎖 (移除密碼)",
+                // Unlock
+                title_protect: "PDF 解鎖",
+                desc_protect: "輸入已知密碼，重製為新的無密碼 PDF",
+                subtitle_unlock: "移除 PDF 密碼",
+                unlock_note: "輸入已知密碼後會重製為新的無密碼 PDF。為了在瀏覽器端完成解鎖，輸出會轉成影像頁面，文字將無法選取。",
                 ph_org_pass: "輸入原始密碼",
                 btn_unlock: "下載解鎖檔案",
                 show_pass: "顯示",
@@ -510,15 +1509,15 @@
                 err_select_file: "請選擇檔案",
                 err_enter_password: "請輸入密碼",
                 err_password_incorrect: "密碼錯誤或未輸入",
-                err_unlock_unsupported: "此 PDF 的加密方式目前無法解鎖，可能需要擁有者密碼或使用 Acrobat 另存或列印成 PDF 後再處理。",
+                err_unlock_unsupported: "此 PDF 目前無法在瀏覽器端解鎖。請確認密碼正確，或使用 Acrobat 另存或列印成新的 PDF 後再處理。",
                 err_not_heic: "不是 HEIC/HEIF 檔案",
                 err_merge_failed: "PDF 合併失敗：{message}",
                 err_convert_failed: "PDF 轉圖片失敗：{message}",
                 err_img2pdf_failed: "圖片轉 PDF 失敗：{message}",
+                err_img_decode_failed: "圖片解碼失敗，請確認檔案是有效的 JPG 或 PNG",
                 err_split_failed: "PDF 分割失敗：{message}",
                 err_compress_failed: "PDF 壓縮失敗：{message}",
                 err_canvas_export_failed: "無法匯出頁面影像",
-                err_encrypt_failed: "PDF 加密失敗：{message}",
                 err_unlock_failed: "PDF 解鎖失敗：{message}",
                 err_rotate_failed: "PDF 旋轉失敗：{message}",
                 heic_status_ok: "完成",
@@ -535,15 +1534,18 @@
                 site_title: "3Y Tools",
                 nav_title: "3Y Tools",
                 nav_about: "About",
+                nav_privacy: "Local browser processing. No uploads.",
+                nav_tools: "Tools",
                 tab_img: "PDF to Image",
                 tab_img2pdf: "Images to PDF",
                 tab_merge: "Merge PDF",
                 tab_split: "Split PDF",
                 tab_compress: "Compress PDF",
-                tab_protect: "Protect/Unlock",
+                tab_protect: "Unlock PDF",
                 tab_rotate: "Rotate PDF",
                 tab_heic: "HEIC to JPG",
                 processing: "Processing...",
+                status_done: "Done. Your download has started.",
                 drop_pdf: "Click or Drag to Upload PDF",
                 select_file: "Select or Drag File",
                 title_img: "PDF to JPG/PNG",
@@ -557,7 +1559,7 @@
                 title_merge: "Merge PDF",
                 desc_merge: "Combine multiple PDFs into one file and drag to reorder them",
                 drop_pdfs: "Click or drag to select multiple PDFs",
-                drag_hint: "💡 Tip: You can drag the items below to change the merge order",
+                drag_hint: "Tip: You can drag the items below to change the merge order",
                 btn_merge_dl: "Merge and Download",
                 title_split: "Split PDF",
                 desc_split: "Split a PDF into two parts, or split a selected range into single-page PDFs",
@@ -575,12 +1577,10 @@
                 note_compress: "This mode converts all pages into images. Text will no longer be selectable, but it can greatly reduce the size of scanned PDFs.",
                 lbl_quality: "Image Quality (Lower = Smaller)",
                 btn_compress_dl: "Start Compressing and Download",
-                title_protect: "Encrypt & Unlock",
-                desc_protect: "Set a password for the document, or remove a known password",
-                subtitle_encrypt: "Encrypt (Set Password)",
-                ph_set_pass: "Set Password",
-                btn_encrypt: "Download Encrypted File",
-                subtitle_unlock: "Unlock (Remove Password)",
+                title_protect: "Unlock PDF",
+                desc_protect: "Enter a known password and rebuild a new PDF without a password",
+                subtitle_unlock: "Remove PDF Password",
+                unlock_note: "Enter a known password to rebuild a new PDF without a password. To complete this in the browser, the output is rasterized, so text will no longer be selectable.",
                 ph_org_pass: "Enter Original Password",
                 btn_unlock: "Download Unlocked File",
                 show_pass: "Show",
@@ -605,15 +1605,15 @@
                 err_select_file: "Please select a file",
                 err_enter_password: "Please enter a password",
                 err_password_incorrect: "The password is incorrect or missing",
-                err_unlock_unsupported: "This PDF encryption method is not currently supported for unlocking. You may need the owner password, or save or print it as a new PDF in Acrobat before trying again.",
+                err_unlock_unsupported: "This PDF cannot currently be unlocked in the browser. Check the password, or save or print it as a new PDF in Acrobat before trying again.",
                 err_not_heic: "This is not a HEIC/HEIF file",
                 err_merge_failed: "PDF merge failed: {message}",
                 err_convert_failed: "PDF to image failed: {message}",
                 err_img2pdf_failed: "Images to PDF failed: {message}",
+                err_img_decode_failed: "Image decoding failed. Please make sure the file is a valid JPG or PNG.",
                 err_split_failed: "PDF split failed: {message}",
                 err_compress_failed: "PDF compression failed: {message}",
                 err_canvas_export_failed: "Failed to export the page image",
-                err_encrypt_failed: "PDF encryption failed: {message}",
                 err_unlock_failed: "PDF unlock failed: {message}",
                 err_rotate_failed: "PDF rotation failed: {message}",
                 heic_status_ok: "Done",
@@ -629,15 +1629,18 @@
                 site_title: "3Y ツールボックス",
                 nav_title: "3Y ツール",
                 nav_about: "情報",
+                nav_privacy: "ブラウザ内で処理。アップロードなし。",
+                nav_tools: "ツール",
                 tab_img: "PDF 画像変換",
                 tab_img2pdf: "画像 PDF 変換",
                 tab_merge: "PDF 結合",
                 tab_split: "PDF 分割",
                 tab_compress: "PDF 圧縮",
-                tab_protect: "暗号化/解除",
+                tab_protect: "PDF 解除",
                 tab_rotate: "PDF 回転",
                 tab_heic: "HEIC JPG 変換",
                 processing: "処理中...",
+                status_done: "完了しました。ダウンロードを開始しました。",
                 drop_pdf: "PDF をドラッグ＆ドロップ",
                 select_file: "ファイルを選択またはドラッグ",
                 title_img: "PDF 画像変換",
@@ -651,7 +1654,7 @@
                 title_merge: "PDF 結合",
                 desc_merge: "複数の PDF を 1 つのファイルに結合し、ドラッグで順序を変更できます",
                 drop_pdfs: "複数の PDF をドラッグ＆ドロップ",
-                drag_hint: "💡 ヒント：下の項目をドラッグして結合順を変更できます",
+                drag_hint: "ヒント：下の項目をドラッグして結合順を変更できます",
                 btn_merge_dl: "結合してダウンロード",
                 title_split: "PDF 分割",
                 desc_split: "PDF を分割点で 2 つに分けるか、指定範囲をページごとに分割します",
@@ -669,12 +1672,10 @@
                 note_compress: "ページ全体が画像化されます。テキスト選択はできませんが、スキャンデータの圧縮に有効です。",
                 lbl_quality: "画質 (低いほど軽量)",
                 btn_compress_dl: "圧縮してダウンロード",
-                title_protect: "暗号化と解除",
-                desc_protect: "ドキュメントにパスワードを設定するか、既知のパスワードを解除します",
-                subtitle_encrypt: "暗号化 (パスワード設定)",
-                ph_set_pass: "パスワードを設定",
-                btn_encrypt: "暗号化したファイルをダウンロード",
-                subtitle_unlock: "解除 (パスワード削除)",
+                title_protect: "PDF 解除",
+                desc_protect: "既知のパスワードを入力し、パスワードなしの新しい PDF を作成します",
+                subtitle_unlock: "PDF パスワードを削除",
+                unlock_note: "既知のパスワードを入力すると、パスワードなしの新しい PDF として再作成します。ブラウザ内で完了するため、出力は画像ページになり、文字選択はできません。",
                 ph_org_pass: "元のパスワードを入力",
                 btn_unlock: "解除したファイルをダウンロード",
                 show_pass: "表示",
@@ -699,15 +1700,15 @@
                 err_select_file: "ファイルを選択してください",
                 err_enter_password: "パスワードを入力してください",
                 err_password_incorrect: "パスワードが正しくないか、入力されていません",
-                err_unlock_unsupported: "この PDF の暗号化方式は現在解除に対応していません。所有者パスワードが必要な場合や、Acrobat で別名保存または PDF として印刷してから再度お試しいただく必要があります。",
+                err_unlock_unsupported: "この PDF は現在ブラウザ内で解除できません。パスワードを確認するか、Acrobat で別名保存または PDF として印刷してから再度お試しください。",
                 err_not_heic: "HEIC/HEIF ファイルではありません",
                 err_merge_failed: "PDF の結合に失敗しました：{message}",
                 err_convert_failed: "PDF の画像変換に失敗しました：{message}",
                 err_img2pdf_failed: "画像の PDF 変換に失敗しました：{message}",
+                err_img_decode_failed: "画像のデコードに失敗しました。有効な JPG または PNG ファイルか確認してください。",
                 err_split_failed: "PDF の分割に失敗しました：{message}",
                 err_compress_failed: "PDF の圧縮に失敗しました：{message}",
                 err_canvas_export_failed: "ページ画像の書き出しに失敗しました",
-                err_encrypt_failed: "PDF の暗号化に失敗しました：{message}",
                 err_unlock_failed: "PDF の解除に失敗しました：{message}",
                 err_rotate_failed: "PDF の回転に失敗しました：{message}",
                 heic_status_ok: "完了",
@@ -730,13 +1731,61 @@
             });
             return text;
         }
+        let toastTimer = null;
+        function notify(message, type = 'error') {
+            const toast = document.getElementById('toast');
+            const messageEl = document.getElementById('toast-message');
+            if (!toast || !messageEl) {
+                alert(message);
+                return;
+            }
+            messageEl.textContent = message;
+            toast.dataset.type = type;
+            toast.classList.remove('hidden');
+            window.clearTimeout(toastTimer);
+            toastTimer = window.setTimeout(() => toast.classList.add('hidden'), type === 'error' ? 6400 : 3600);
+        }
+        function showError(key, params = {}) {
+            notify(t(key, params), 'error');
+        }
+        function getErrorMessage(error) {
+            return error && error.message ? error.message : String(error || 'Unknown error');
+        }
+        function setBusy(button, busy, labelKey) {
+            if (!button) return;
+            if (busy) {
+                button.dataset.idleText = button.textContent;
+                button.disabled = true;
+                button.textContent = t('processing');
+                return;
+            }
+            button.disabled = false;
+            button.textContent = labelKey ? t(labelKey) : (button.dataset.idleText || button.textContent);
+        }
+        function canvasToBlob(canvas, type, quality) {
+            return new Promise((resolve, reject) => {
+                canvas.toBlob(
+                    blob => blob ? resolve(blob) : reject(new Error(t('err_canvas_export_failed'))),
+                    type,
+                    quality
+                );
+            });
+        }
+        function safeBaseName(file, fallback = 'document') {
+            const raw = (file && file.name ? file.name : fallback).replace(/\.[^.]+$/i, '') || fallback;
+            return raw.replace(/[\\/:*?"<>|]+/g, '_').trim() || fallback;
+        }
+        function isPasswordError(error) {
+            const name = String(error && error.name ? error.name : '');
+            const message = String(error && error.message ? error.message : '');
+            return name === 'PasswordException' || /password/i.test(message);
+        }
         function updatePasswordToggleLabel(btn, input) {
             if(!btn || !input) return;
             const key = input.type === 'password' ? 'show_pass' : 'hide_pass';
             btn.textContent = translations[currentLang][key] || (input.type === 'password' ? 'Show' : 'Hide');
         }
         function updatePasswordToggleLabels() {
-            updatePasswordToggleLabel(document.getElementById('toggle-pass-encrypt'), document.getElementById('pass-encrypt'));
             updatePasswordToggleLabel(document.getElementById('toggle-pass-unlock'), document.getElementById('pass-unlock'));
         }
         function setupPasswordToggle(btnId, inputId) {
@@ -752,11 +1801,13 @@
         function changeLanguage(lang) {
             currentLang = lang;
             document.getElementById('lang-selector').value = lang;
+            const dict = translations[lang] || translations['zh-TW'];
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if (translations[lang][key]) {
-                    if (el.placeholder) el.placeholder = translations[lang][key];
-                    else el.innerHTML = translations[lang][key];
+                if (dict[key]) {
+                    if (el.dataset.dynamicText === 'true') return;
+                    if (el.hasAttribute('placeholder')) el.placeholder = dict[key];
+                    else el.innerHTML = dict[key];
                 }
             });
             updatePasswordToggleLabels();
@@ -766,20 +1817,46 @@
             if (l.startsWith('ja')) changeLanguage('ja');
             else if (l.startsWith('en')) changeLanguage('en');
             else changeLanguage('zh-TW');
-            setupPasswordToggle('toggle-pass-encrypt', 'pass-encrypt');
             setupPasswordToggle('toggle-pass-unlock', 'pass-unlock');
         });
-        function openAboutModal() { document.getElementById('about-modal').classList.remove('hidden'); }
+        function openAboutModal() {
+            const modal = document.getElementById('about-modal');
+            modal.classList.remove('hidden');
+            modal.querySelector('button')?.focus();
+        }
+        function closeAboutModal() { document.getElementById('about-modal').classList.add('hidden'); }
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeAboutModal();
+        });
+        document.getElementById('about-modal').addEventListener('click', e => {
+            if (e.target.id === 'about-modal') closeAboutModal();
+        });
 
         const tabs = ['img', 'img2pdf', 'merge', 'split', 'compress', 'protect', 'rotate', 'heic'];
         function switchTab(t) {
             tabs.forEach(x => {
-                document.getElementById(`sec-${x}`).classList.add('hidden');
-                document.getElementById(`btn-tab-${x}`).classList.remove('active');
+                const section = document.getElementById(`sec-${x}`);
+                const tab = document.getElementById(`btn-tab-${x}`);
+                const active = x === t;
+                section.classList.toggle('hidden', !active);
+                section.classList.toggle('block', active);
+                tab.classList.toggle('active', active);
+                tab.setAttribute('aria-selected', String(active));
+                tab.tabIndex = active ? 0 : -1;
             });
-            document.getElementById(`sec-${t}`).classList.remove('hidden');
-            document.getElementById(`btn-tab-${t}`).classList.add('active');
         }
+        document.getElementById('tab-container').addEventListener('keydown', e => {
+            if (!['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp', 'Home', 'End'].includes(e.key)) return;
+            e.preventDefault();
+            const activeId = tabs.findIndex(x => document.getElementById(`btn-tab-${x}`).classList.contains('active'));
+            let nextIndex = activeId < 0 ? 0 : activeId;
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextIndex = (nextIndex + 1) % tabs.length;
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') nextIndex = (nextIndex - 1 + tabs.length) % tabs.length;
+            if (e.key === 'Home') nextIndex = 0;
+            if (e.key === 'End') nextIndex = tabs.length - 1;
+            switchTab(tabs[nextIndex]);
+            document.getElementById(`btn-tab-${tabs[nextIndex]}`).focus();
+        });
 
         // ================= 通用：拖曳上傳處理函式 =================
         function setupDragDrop(dropZoneId, fileInputId) {
@@ -787,6 +1864,14 @@
             const fileInput = document.getElementById(fileInputId);
 
             if (!dropZone || !fileInput) return;
+            dropZone.setAttribute('role', dropZone.tagName === 'BUTTON' ? 'button' : 'button');
+            if (dropZone.tagName !== 'BUTTON') dropZone.tabIndex = 0;
+            dropZone.addEventListener('keydown', e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    fileInput.click();
+                }
+            });
 
             // 阻止預設行為
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -820,7 +1905,6 @@
             setupDragDrop('drop-merge', 'file-merge');
             setupDragDrop('drop-split', 'file-split');
             setupDragDrop('drop-compress', 'file-compress');
-            setupDragDrop('drop-encrypt', 'file-encrypt');
             setupDragDrop('drop-unlock', 'file-unlock');
             setupDragDrop('drop-rotate', 'file-rotate');
             setupDragDrop('drop-heic', 'file-heic');
@@ -841,7 +1925,7 @@
             if(!pdfImgFile) return;
             const btn = document.getElementById('do-img');
             const prog = document.getElementById('prog-img');
-            btn.disabled = true; btn.textContent = translations[currentLang]['processing'];
+            setBusy(btn, true);
             prog.classList.remove('hidden');
             try {
                 const pdf = await pdfjsLib.getDocument(await pdfImgFile.arrayBuffer()).promise;
@@ -853,14 +1937,65 @@
                     const canvas = document.createElement('canvas');
                     canvas.width = viewport.width; canvas.height = viewport.height;
                     await page.render({canvasContext:canvas.getContext('2d'), viewport}).promise;
-                    const blob = await new Promise(r=>canvas.toBlob(r, `image/${fmt}`, 0.8));
+                    const blob = await canvasToBlob(canvas, `image/${fmt}`, 0.8);
                     zip.file(`page_${i}.${fmt==='jpeg'?'jpg':'png'}`, blob);
                     prog.textContent = `${Math.round(i/pdf.numPages*100)}%`;
                 }
                 saveAs(await zip.generateAsync({type:"blob"}), `${pdfImgFile.name}_images.zip`);
-            } catch(e){ alert(t('err_convert_failed', { message: e.message })); }
-            finally { btn.disabled=false; btn.textContent=translations[currentLang]['btn_convert']; prog.classList.add('hidden'); }
+                notify(t('status_done'), 'success');
+            } catch(e){ showError('err_convert_failed', { message: getErrorMessage(e) }); }
+            finally { setBusy(btn, false, 'btn_convert'); prog.classList.add('hidden'); }
         });
+
+        async function imageFileToCanvas(file) {
+            if (window.createImageBitmap) {
+                try {
+                    const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+                    const canvas = document.createElement('canvas');
+                    canvas.width = bitmap.width;
+                    canvas.height = bitmap.height;
+                    canvas.getContext('2d').drawImage(bitmap, 0, 0);
+                    bitmap.close?.();
+                    return canvas;
+                } catch (error) {
+                    // Fall back to HTMLImageElement decoding below.
+                }
+            }
+
+            const image = await new Promise((resolve, reject) => {
+                const url = URL.createObjectURL(file);
+                const img = new Image();
+                img.onload = () => {
+                    URL.revokeObjectURL(url);
+                    resolve(img);
+                };
+                img.onerror = () => {
+                    URL.revokeObjectURL(url);
+                    reject(new Error(t('err_img_decode_failed')));
+                };
+                img.src = url;
+            });
+
+            const canvas = document.createElement('canvas');
+            canvas.width = image.naturalWidth;
+            canvas.height = image.naturalHeight;
+            canvas.getContext('2d').drawImage(image, 0, 0);
+            return canvas;
+        }
+
+        async function embedImageFileAtOriginalSize(pdfDoc, file) {
+            const canvas = await imageFileToCanvas(file);
+            const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+            const blob = await canvasToBlob(canvas, outputType, 0.95);
+            const bytes = await blob.arrayBuffer();
+            const embeddedImage = outputType === 'image/png'
+                ? await pdfDoc.embedPng(bytes)
+                : await pdfDoc.embedJpg(bytes);
+            const dimensions = { image: embeddedImage, width: canvas.width, height: canvas.height };
+            canvas.width = 0;
+            canvas.height = 0;
+            return dimensions;
+        }
 
         // 2. 圖片 轉 PDF
         let img2pdfFiles = [];
@@ -881,7 +2016,7 @@
             if(img2pdfFiles.length === 0) return;
             const btn = document.getElementById('do-img2pdf');
             const prog = document.getElementById('prog-img2pdf');
-            btn.disabled = true; btn.textContent = translations[currentLang]['processing'];
+            setBusy(btn, true);
             prog.classList.remove('hidden');
 
             try {
@@ -890,23 +2025,26 @@
                 
                 for(let i=0; i<img2pdfFiles.length; i++){
                     const file = img2pdfFiles[i];
-                    const bytes = await file.arrayBuffer();
-                    let img;
-                    if(file.type === 'image/jpeg') img = await pdfDoc.embedJpg(bytes);
-                    else if(file.type === 'image/png') img = await pdfDoc.embedPng(bytes);
-                    else continue; // skip unsupport
+                    if(file.type !== 'image/jpeg' && file.type !== 'image/png') continue;
+                    const originalSizeImage = await embedImageFileAtOriginalSize(pdfDoc, file);
 
-                    const page = pdfDoc.addPage([img.width, img.height]);
-                    page.drawImage(img, { x:0, y:0, width:img.width, height:img.height });
+                    const page = pdfDoc.addPage([originalSizeImage.width, originalSizeImage.height]);
+                    page.drawImage(originalSizeImage.image, {
+                        x: 0,
+                        y: 0,
+                        width: originalSizeImage.width,
+                        height: originalSizeImage.height
+                    });
                     
                     prog.textContent = t('processing_count', { current: i + 1, total: img2pdfFiles.length });
                 }
                 
                 const pdfBytes = await pdfDoc.save();
                 saveAs(new Blob([pdfBytes], {type:'application/pdf'}), 'images_combined.pdf');
+                notify(t('status_done'), 'success');
 
-            } catch(e){ alert(t('err_img2pdf_failed', { message: e.message })); }
-            finally { btn.disabled=false; btn.textContent=translations[currentLang]['btn_img2pdf_dl']; prog.classList.add('hidden'); }
+            } catch(e){ showError('err_img2pdf_failed', { message: getErrorMessage(e) }); }
+            finally { setBusy(btn, false, 'btn_img2pdf_dl'); prog.classList.add('hidden'); }
         });
 
         // 3. PDF 合併 (含拖曳排序)
@@ -999,9 +2137,9 @@
         }
 
         document.getElementById('do-merge').addEventListener('click', async () => {
-            if(mergeFiles.length < 2) return alert(t('err_select_at_least_two_pdfs'));
+            if(mergeFiles.length < 2) return showError('err_select_at_least_two_pdfs');
             const btn = document.getElementById('do-merge');
-            btn.textContent = translations[currentLang]['processing'];
+            setBusy(btn, true);
             try {
                 const { PDFDocument } = PDFLib;
                 const merged = await PDFDocument.create();
@@ -1011,8 +2149,9 @@
                     pages.forEach(p => merged.addPage(p));
                 }
                 saveAs(new Blob([await merged.save()], {type:'application/pdf'}), 'merged.pdf');
-            } catch(e) { alert(t('err_merge_failed', { message: e.message })); }
-            finally { btn.textContent = translations[currentLang]['btn_merge_dl']; }
+                notify(t('status_done'), 'success');
+            } catch(e) { showError('err_merge_failed', { message: getErrorMessage(e) }); }
+            finally { setBusy(btn, false, 'btn_merge_dl'); }
         });
 
         // 4. Split
@@ -1077,7 +2216,7 @@
                 } catch (err) {
                     resetSplitState();
                     e.target.value = '';
-                    alert(t('err_split_failed', { message: err.message }));
+                    showError('err_split_failed', { message: getErrorMessage(err) });
                 }
             }
         });
@@ -1090,8 +2229,7 @@
 
             const baseName = splitFile.name.replace(/\.pdf$/i, '') || 'split';
 
-            btn.disabled = true;
-            btn.textContent = translations[currentLang]['processing'];
+            setBusy(btn, true);
 
             try {
                 const { PDFDocument } = PDFLib;
@@ -1104,16 +2242,16 @@
 
                 if (mode === 'two') {
                     if (totalPages < 2) {
-                        return alert(t('err_split_requires_two_pages'));
+                        return showError('err_split_requires_two_pages');
                     }
 
                     const splitAfter = parseInt(splitAfterInput.value, 10);
                     const lastSplitPage = totalPages - 1;
                     if (Number.isNaN(splitAfter)) {
-                        return alert(t('err_invalid_page_number'));
+                        return showError('err_invalid_page_number');
                     }
                     if (splitAfter < 1 || splitAfter > lastSplitPage) {
-                        return alert(t('err_split_after_range', { lastSplitPage }));
+                        return showError('err_split_after_range', { lastSplitPage });
                     }
 
                     const zip = new JSZip();
@@ -1129,6 +2267,7 @@
                         await buildPdfFromIndices(secondPartIndices)
                     );
                     saveAs(await zip.generateAsync({ type: 'blob' }), `${baseName}_split_two_parts.zip`);
+                    notify(t('status_done'), 'success');
                     return;
                 }
 
@@ -1136,13 +2275,13 @@
                 const end = parseInt(splitEndInput.value, 10);
 
                 if (Number.isNaN(start) || Number.isNaN(end)) {
-                    return alert(t('err_invalid_page_number'));
+                    return showError('err_invalid_page_number');
                 }
                 if (start < 1 || end < 1 || start > totalPages || end > totalPages) {
-                    return alert(t('err_page_range', { totalPages }));
+                    return showError('err_page_range', { totalPages });
                 }
                 if (start > end) {
-                    return alert(t('err_start_greater_than_end'));
+                    return showError('err_start_greater_than_end');
                 }
 
                 const pageNumbers = [];
@@ -1153,6 +2292,7 @@
                         new Blob([await buildPdfFromIndices([pageNumbers[0] - 1])], { type: 'application/pdf' }),
                         `${baseName}_page_${pageNumbers[0]}.pdf`
                     );
+                    notify(t('status_done'), 'success');
                     return;
                 }
 
@@ -1165,10 +2305,10 @@
                     await zip.generateAsync({ type: 'blob' }),
                     `${baseName}_pages_${start}-${end}.zip`
                 );
-            } catch(e){ alert(t('err_split_failed', { message: e.message })); }
+                notify(t('status_done'), 'success');
+            } catch(e){ showError('err_split_failed', { message: getErrorMessage(e) }); }
             finally {
-                btn.disabled = false;
-                btn.textContent = translations[currentLang]['btn_split_dl'];
+                setBusy(btn, false, 'btn_split_dl');
             }
         });
 
@@ -1187,7 +2327,7 @@
             const prog = document.getElementById('prog-compress');
             const quality = parseFloat(document.getElementById('compress-quality').value);
             
-            btn.disabled = true; btn.textContent = translations[currentLang]['processing'];
+            setBusy(btn, true);
             prog.classList.remove('hidden');
 
             try {
@@ -1206,13 +2346,7 @@
                     
                     await page.render({canvasContext: canvas.getContext('2d'), viewport}).promise;
                     
-                    const imgBlob = await new Promise((resolve, reject) => {
-                        canvas.toBlob(
-                            blob => blob ? resolve(blob) : reject(new Error(t('err_canvas_export_failed'))),
-                            'image/jpeg',
-                            quality
-                        );
-                    });
+                    const imgBlob = await canvasToBlob(canvas, 'image/jpeg', quality);
                     const imgBytes = await imgBlob.arrayBuffer();
                     
                     const jpgImage = await newPdf.embedJpg(imgBytes);
@@ -1228,71 +2362,77 @@
                 
                 const pdfBytes = await newPdf.save();
                 saveAs(new Blob([pdfBytes], {type: 'application/pdf'}), `compressed_${compressFile.name}`);
+                notify(t('status_done'), 'success');
 
-            } catch(e){ console.error(e); alert(t('err_compress_failed', { message: e.message })); }
-            finally { btn.disabled=false; btn.textContent=translations[currentLang]['btn_compress_dl']; prog.classList.add('hidden'); }
+            } catch(e){ showError('err_compress_failed', { message: getErrorMessage(e) }); }
+            finally { setBusy(btn, false, 'btn_compress_dl'); prog.classList.add('hidden'); }
         });
 
-        // 6. Protect
-        let encryptFile = null;
-        document.getElementById('file-encrypt').addEventListener('change', e => {
-            if(e.target.files[0]) {
-                encryptFile = e.target.files[0];
-                document.getElementById('name-encrypt').textContent = encryptFile.name;
+        async function renderPdfProxyToPdfBytes(pdf, { progressEl, scale = 2, quality = 0.92 } = {}) {
+            const { PDFDocument } = PDFLib;
+            const newPdf = await PDFDocument.create();
+
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const viewport = page.getViewport({ scale });
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.ceil(viewport.width);
+                canvas.height = Math.ceil(viewport.height);
+                const context = canvas.getContext('2d', { alpha: false });
+
+                await page.render({ canvasContext: context, viewport, background: 'white' }).promise;
+                const imgBlob = await canvasToBlob(canvas, 'image/jpeg', quality);
+                const imgBytes = await imgBlob.arrayBuffer();
+                const jpgImage = await newPdf.embedJpg(imgBytes);
+                const newPage = newPdf.addPage([viewport.width / scale, viewport.height / scale]);
+                newPage.drawImage(jpgImage, {
+                    x: 0,
+                    y: 0,
+                    width: viewport.width / scale,
+                    height: viewport.height / scale
+                });
+
+                canvas.width = 0;
+                canvas.height = 0;
+                if (progressEl) progressEl.textContent = t('progress_page', { current: i, total: pdf.numPages });
             }
-        });
-        document.getElementById('do-encrypt').addEventListener('click', async () => {
-            if(!encryptFile) return alert(t('err_select_file'));
-            const pwd = document.getElementById('pass-encrypt').value;
-            if(!pwd) return alert(t('err_enter_password'));
-            try {
-                const { PDFDocument } = PDFLib;
-                const pdf = await PDFDocument.load(await encryptFile.arrayBuffer());
-                pdf.encrypt({ userPassword: pwd, ownerPassword: pwd });
-                saveAs(new Blob([await pdf.save()], {type:'application/pdf'}), `encrypted_${encryptFile.name}`);
-            } catch(e){ alert(t('err_encrypt_failed', { message: e.message })); }
-        });
-        
+
+            return newPdf.save();
+        }
+
+        // 6. Unlock
         let unlockFile = null;
         document.getElementById('file-unlock').addEventListener('change', e => {
             if(e.target.files[0]) {
                 unlockFile = e.target.files[0];
-                document.getElementById('name-unlock').textContent = unlockFile.name;
+                const nameEl = document.getElementById('name-unlock');
+                nameEl.textContent = unlockFile.name;
+                nameEl.dataset.dynamicText = 'true';
             }
         });
         document.getElementById('do-unlock').addEventListener('click', async () => {
-            if(!unlockFile) return alert(t('err_select_file'));
-            const rawPwd = document.getElementById('pass-unlock').value;
-            const pwd = rawPwd.trim();
-            if(!pwd) return alert(t('err_enter_password'));
+            if(!unlockFile) return showError('err_select_file');
+            const pwd = document.getElementById('pass-unlock').value;
+            if(!pwd) return showError('err_enter_password');
+            const btn = document.getElementById('do-unlock');
+            const prog = document.getElementById('prog-unlock');
+            setBusy(btn, true);
+            prog.classList.remove('hidden');
+            prog.textContent = t('processing');
             try {
-                const { PDFDocument } = PDFLib;
                 const arr = await unlockFile.arrayBuffer();
-                let pdf;
-                try {
-                    pdf = await PDFDocument.load(arr, { password: pwd });
-                    saveAs(new Blob([await pdf.save()], {type:'application/pdf'}), `unlocked_${unlockFile.name}`);
-                    return;
-                } catch(err) {
-                    if(err.message && err.message.includes('Password')) {
-                        return alert(t('err_password_incorrect'));
-                    }
-                    if(err.message && err.message.includes('is encrypted')) {
-                        // Some PDFs use encryption modes pdf-lib cannot fully decrypt.
-                        try {
-                            const encryptedDoc = await PDFDocument.load(arr, { ignoreEncryption: true });
-                            const newDoc = await PDFDocument.create();
-                            const pages = await newDoc.copyPages(encryptedDoc, encryptedDoc.getPageIndices());
-                            pages.forEach(p => newDoc.addPage(p));
-                            saveAs(new Blob([await newDoc.save()], {type:'application/pdf'}), `unlocked_${unlockFile.name}`);
-                            return;
-                        } catch(copyErr) {
-                            return alert(t('err_unlock_unsupported'));
-                        }
-                    }
-                    throw err;
-                }
-            } catch(e){ alert(t('err_unlock_failed', { message: e.message })); }
+                const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arr), password: pwd });
+                const pdf = await loadingTask.promise;
+                const pdfBytes = await renderPdfProxyToPdfBytes(pdf, { progressEl: prog });
+                saveAs(new Blob([pdfBytes], {type:'application/pdf'}), `unlocked_${safeBaseName(unlockFile, 'pdf')}.pdf`);
+                notify(t('status_done'), 'success');
+            } catch(e){
+                if (isPasswordError(e)) showError('err_password_incorrect');
+                else showError('err_unlock_failed', { message: getErrorMessage(e) });
+            } finally {
+                setBusy(btn, false, 'btn_unlock');
+                prog.classList.add('hidden');
+            }
         });
 
         // 7. Rotate
@@ -1308,23 +2448,23 @@
             rotateDeg=d;
             document.querySelectorAll('.rotate-opt').forEach(b=>{
                 const on = parseInt(b.dataset.deg)===d;
-                // 處理 Dark mode class
-                if (on) {
-                    b.className = 'rotate-opt bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 py-2 rounded border border-blue-500 text-blue-700 dark:text-blue-300';
-                } else {
-                    b.className = 'rotate-opt bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 py-2 rounded border border-gray-200 dark:border-gray-600 dark:text-white';
-                }
+                b.classList.toggle('is-selected', on);
+                b.setAttribute('aria-pressed', String(on));
             });
         };
         setRotate(90);
         document.getElementById('do-rotate').addEventListener('click', async () => {
             if(!rotateFile) return;
+            const btn = document.getElementById('do-rotate');
+            setBusy(btn, true);
             try {
                 const { PDFDocument, degrees } = PDFLib;
                 const pdf = await PDFDocument.load(await rotateFile.arrayBuffer());
                 pdf.getPages().forEach(p => p.setRotation(degrees(p.getRotation().angle + rotateDeg)));
                 saveAs(new Blob([await pdf.save()],{type:'application/pdf'}), `rotated.pdf`);
-            } catch(e){ alert(t('err_rotate_failed', { message: e.message })); }
+                notify(t('status_done'), 'success');
+            } catch(e){ showError('err_rotate_failed', { message: getErrorMessage(e) }); }
+            finally { setBusy(btn, false, 'btn_rotate_dl'); }
         });
 
         // 8. HEIC
@@ -1338,7 +2478,7 @@
             area.classList.remove('hidden');
             list.innerHTML = '';
             btnAll.classList.add('hidden');
-            document.getElementById('status-heic').textContent = translations[currentLang]['processing'];
+            document.getElementById('status-heic').textContent = t('processing');
             if (currentHeicPreviewUrl) {
                 URL.revokeObjectURL(currentHeicPreviewUrl);
                 currentHeicPreviewUrl = null;
@@ -1357,7 +2497,7 @@
                 left.appendChild(status);
                 const dlBtn = document.createElement('button');
                 dlBtn.className = 'px-3 py-1 rounded bg-green-600 text-white text-xs hover:bg-green-700 disabled:opacity-50';
-                dlBtn.textContent = translations[currentLang]['btn_dl_jpg'];
+                dlBtn.textContent = t('btn_dl_jpg');
                 dlBtn.disabled = true;
                 row.appendChild(left);
                 row.appendChild(dlBtn);
