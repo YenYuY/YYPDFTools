@@ -14,7 +14,7 @@
   <img alt="三語介面" src="https://img.shields.io/badge/介面-中・英・日-7c3aed">
 </p>
 
-![3Y 工具箱繁體中文首頁](docs/images/yyypdftools-home.jpg)
+![3Y 工具箱繁體中文桌面版首頁](docs/images/yyypdftools-desktop-zh-tw.jpg)
 
 ## 專案簡介
 
@@ -92,7 +92,9 @@ YYPDFTools/
 ├── README.en.md               # English
 ├── README.ja.md               # 日本語
 └── docs/images/
-    └── yyypdftools-home.jpg   # README 介面截圖
+    ├── yyypdftools-desktop-zh-tw.jpg # 繁體中文桌面版截圖
+    ├── yyypdftools-desktop-en.jpg    # 英文桌面版截圖
+    └── yyypdftools-desktop-ja.jpg    # 日文桌面版截圖
 ```
 
 ## 瀏覽器需求與限制

@@ -14,7 +14,7 @@
   <img alt="3言語対応" src="https://img.shields.io/badge/UI-中・英・日-7c3aed">
 </p>
 
-![3Y ツールボックスの繁体字中国語ホーム画面](docs/images/yyypdftools-home.jpg)
+![3Y ツールボックスの日本語デスクトップ画面](docs/images/yyypdftools-desktop-ja.jpg)
 
 ## 概要
 
@@ -92,7 +92,9 @@ YYPDFTools/
 ├── README.en.md               # 英語
 ├── README.ja.md               # 日本語
 └── docs/images/
-    └── yyypdftools-home.jpg   # README 用画面キャプチャ
+    ├── yyypdftools-desktop-zh-tw.jpg # 繁体字中国語のデスクトップ画面
+    ├── yyypdftools-desktop-en.jpg    # 英語のデスクトップ画面
+    └── yyypdftools-desktop-ja.jpg    # 日本語のデスクトップ画面
 ```
 
 ## ブラウザ要件と制限

@@ -14,7 +14,7 @@
   <img alt="Three languages" src="https://img.shields.io/badge/UI-ZH・EN・JA-7c3aed">
 </p>
 
-![3Y Toolbox home screen in Traditional Chinese](docs/images/yyypdftools-home.jpg)
+![3Y Toolbox English desktop home screen](docs/images/yyypdftools-desktop-en.jpg)
 
 ## Overview
 
@@ -92,7 +92,9 @@ YYPDFTools/
 ├── README.en.md               # English
 ├── README.ja.md               # Japanese
 └── docs/images/
-    └── yyypdftools-home.jpg   # README interface screenshot
+    ├── yyypdftools-desktop-zh-tw.jpg # Traditional Chinese desktop screenshot
+    ├── yyypdftools-desktop-en.jpg    # English desktop screenshot
+    └── yyypdftools-desktop-ja.jpg    # Japanese desktop screenshot
 ```
 
 ## Browser Requirements and Limitations
