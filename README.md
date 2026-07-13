@@ -86,7 +86,6 @@
 YYPDFTools/
 ├── index.html                 # 主要應用程式與預設入口
 ├── index-layout-v2.html       # 版面設計備選版本
-├── inden-1.html               # 早期版面備份
 ├── PRODUCT.md                 # 產品定位與設計原則
 ├── README.md                  # 繁體中文（GitHub 預設顯示）
 ├── README.en.md               # English
