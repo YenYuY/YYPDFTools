@@ -86,7 +86,6 @@ Your PDFs and images still remain on your device and are processed locally by th
 YYPDFTools/
 ├── index.html                 # Main application and default entry point
 ├── index-layout-v2.html       # Alternative layout iteration
-├── inden-1.html               # Earlier layout backup
 ├── PRODUCT.md                 # Product direction and design principles
 ├── README.md                  # Traditional Chinese (GitHub default)
 ├── README.en.md               # English
