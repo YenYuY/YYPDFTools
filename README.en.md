@@ -62,19 +62,13 @@ The page loads its frontend libraries from CDNs on first visit, so an internet c
 
 Everything happens on the current device. Large or high-resolution documents may take more time and memory depending on device performance, page count, and image dimensions.
 
-## Run Locally
+## Use Online
 
-This is a static site with no build step or npm installation. Clone it and start any simple HTTP server:
+No download or installation is required. Open the hosted version and start using it immediately:
 
-```bash
-git clone https://github.com/YenYuY/YYPDFTools.git
-cd YYPDFTools
-python3 -m http.server 8000
-```
+### [Open 3Y Toolbox →](https://yenyuy.github.io/YYPDFTools/)
 
-Then visit [http://localhost:8000](http://localhost:8000). VS Code Live Server, Caddy, Nginx, or any other static server will also work.
-
-Opening `index.html` through `file://` is not recommended because some browsers restrict Workers, downloads, or cross-origin resources in that mode.
+Your PDFs and images still remain on your device and are processed locally by the browser. They are never uploaded to a server.
 
 ## Technology
 
