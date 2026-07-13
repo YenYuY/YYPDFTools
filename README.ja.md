@@ -62,19 +62,13 @@
 
 すべての操作は現在の端末で完結します。大容量または高解像度の文書では、端末性能、ページ数、画像サイズに応じて時間とメモリを多く使用する場合があります。
 
-## ローカルで実行
+## オンラインで使用
 
-ビルドや npm のインストールが不要な静的サイトです。リポジトリを取得し、簡易 HTTP サーバーを起動します。
+ダウンロードやインストールは不要です。公開版を開いてすぐに利用できます。
 
-```bash
-git clone https://github.com/YenYuY/YYPDFTools.git
-cd YYPDFTools
-python3 -m http.server 8000
-```
+### [3Y ツールボックスを開く →](https://yenyuy.github.io/YYPDFTools/)
 
-その後、[http://localhost:8000](http://localhost:8000) を開いてください。VS Code Live Server、Caddy、Nginx などの静的サーバーも利用できます。
-
-`file://` で `index.html` を直接開く方法は、ブラウザによって Worker、ダウンロード、クロスオリジンリソースが制限されるため推奨しません。
+PDF と画像は引き続き端末内に保持され、ブラウザでローカル処理されます。サーバーへアップロードされることはありません。
 
 ## 技術構成
 

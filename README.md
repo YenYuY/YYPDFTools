@@ -62,19 +62,13 @@
 
 所有操作都在目前裝置完成。處理大型或高解析度文件時，所需時間與記憶體會依裝置效能、頁數及影像尺寸而不同。
 
-## 本機執行
+## 線上使用
 
-這是純靜態網站，不需要建置或安裝 npm 套件。下載專案後，可直接用簡易 HTTP 伺服器啟動：
+無需下載或安裝，直接開啟線上版即可開始使用：
 
-```bash
-git clone https://github.com/YenYuY/YYPDFTools.git
-cd YYPDFTools
-python3 -m http.server 8000
-```
+### [立即使用 3Y 工具箱 →](https://yenyuy.github.io/YYPDFTools/)
 
-接著開啟 [http://localhost:8000](http://localhost:8000)。也可以使用任何靜態網站伺服器，例如 VS Code Live Server、Caddy 或 Nginx。
-
-不建議直接以 `file://` 開啟 `index.html`，因為部分瀏覽器會限制 Worker、下載或跨來源資源。
+所有 PDF 與圖片仍會留在你的裝置上，並由瀏覽器在本機完成處理，不會上傳到伺服器。
 
 ## 技術組成
 
