@@ -6,11 +6,11 @@ product
 
 ## Users
 
-People who need quick PDF and image utilities in the browser, especially users who care about keeping files local instead of uploading documents to a server. They are usually completing a specific task such as merging, splitting, compressing, protecting, unlocking, rotating, or converting files.
+People who need quick PDF, image, and video utilities in the browser, especially users who care about keeping files local instead of uploading them to a server. They are usually completing a specific task such as merging, splitting, compressing, trimming, unlocking, rotating, or converting files.
 
 ## Product Purpose
 
-3Y Toolbox provides privacy-first PDF and image tools that run in the browser. Success means users can identify the right tool quickly, upload files with confidence, understand processing state, recover from errors, and download the expected output without leaving the page.
+3Y Toolbox provides privacy-first PDF, image, and video tools that run in the browser. Success means users can identify the right tool quickly, select files with confidence, understand processing state, recover from errors, and download the expected output without leaving the page.
 
 ## Brand Personality
 
