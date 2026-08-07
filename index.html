@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="background-removal.css">
     <!-- 標題 -->
     <title data-i18n="site_title">3Y工具箱</title>
     
@@ -1165,6 +1166,7 @@
                 <button type="button" onclick="switchTab('protect')" class="tab-btn" id="btn-tab-protect" role="tab" aria-controls="sec-protect" aria-selected="false" tabindex="-1" data-short="UNL" data-i18n="tab_protect">PDF 解鎖</button>
                 <button type="button" onclick="switchTab('rotate')" class="tab-btn" id="btn-tab-rotate" role="tab" aria-controls="sec-rotate" aria-selected="false" tabindex="-1" data-short="ROT" data-i18n="tab_rotate">PDF 旋轉</button>
                 <button type="button" onclick="switchTab('heic')" class="tab-btn" id="btn-tab-heic" role="tab" aria-controls="sec-heic" aria-selected="false" tabindex="-1" data-short="JPG" data-i18n="tab_heic">HEIC 轉 JPG</button>
+                <button type="button" onclick="switchTab('removebg')" class="tab-btn" id="btn-tab-removebg" role="tab" aria-controls="sec-removebg" aria-selected="false" tabindex="-1" data-short="BGR" data-i18n="tab_removebg">圖片去背</button>
             </div>
         </div>
     </aside>
@@ -1390,6 +1392,98 @@
             </div>
         </section>
 
+        <!-- 9. 圖片去背 -->
+        <section id="sec-removebg" class="hidden" role="tabpanel" aria-labelledby="btn-tab-removebg">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_removebg">自動＋手動圖片去背</h2>
+                <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_removebg">AI 自動移除背景，再用筆刷精修邊緣</p>
+            </div>
+
+            <div class="bg-white dark:bg-dark-card rounded-xl shadow p-4 sm:p-6 transition-colors removebg-shell">
+                <input type="file" id="file-removebg" class="hidden" accept="image/jpeg,image/png,image/webp,.heic,.heif">
+
+                <div id="removebg-upload-panel">
+                    <button type="button" id="drop-removebg" class="removebg-upload" onclick="document.getElementById('file-removebg').click()">
+                        <span>
+                            <span class="removebg-upload-icon" aria-hidden="true">
+                                <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16l4.6-4.6a2 2 0 012.8 0L16 16m-2-2 1.6-1.6a2 2 0 012.8 0L20 14M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2zM15 8h.01"/></svg>
+                            </span>
+                            <strong class="block text-lg" data-i18n="removebg_upload_title">選擇圖片開始去背</strong>
+                            <span class="block mt-2 text-sm text-gray-500 dark:text-gray-400" data-i18n="removebg_upload_hint">拖放、點擊選擇，或直接貼上圖片</span>
+                            <span class="block mt-1 text-xs text-gray-400" data-i18n="removebg_formats">支援 JPG、PNG、WebP、HEIC</span>
+                        </span>
+                    </button>
+                    <p class="removebg-privacy-note">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m5-3.5A11.9 11.9 0 0112 3a11.9 11.9 0 01-8 3.5c0 5.6 3.4 10.7 8 12.5 4.6-1.8 8-6.9 8-12.5z"/></svg>
+                        <span data-i18n="removebg_privacy">圖片只在瀏覽器內處理，不會上傳</span>
+                    </p>
+                </div>
+
+                <div id="removebg-editor" class="removebg-editor hidden">
+                    <div class="removebg-statusbar">
+                        <div class="removebg-status-copy">
+                            <p id="removebg-status" class="removebg-status" aria-live="polite">準備就緒</p>
+                            <div id="removebg-progress-track" class="removebg-progress-track hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                                <div id="removebg-progress-bar" class="removebg-progress-bar"></div>
+                            </div>
+                        </div>
+                        <button type="button" id="removebg-new" class="removebg-action px-4" data-i18n="removebg_new">更換圖片</button>
+                    </div>
+
+                    <div class="removebg-workbench">
+                        <div class="removebg-canvas-frame">
+                            <div id="removebg-stage" class="removebg-stage" data-tool="erase">
+                                <canvas id="removebg-canvas" aria-label="去背編輯器" data-i18n-aria-label="removebg_editor_aria"></canvas>
+                            </div>
+                        </div>
+
+                        <aside class="removebg-sidebar" aria-label="去背控制項" data-i18n-aria-label="removebg_controls_aria">
+                            <div class="removebg-panel">
+                                <span class="removebg-panel-title" data-i18n="removebg_auto_title">AI 自動去背</span>
+                                <button type="button" id="removebg-auto" class="removebg-primary" data-i18n="removebg_auto_again">重新自動去背</button>
+                                <button type="button" id="removebg-compare" class="removebg-action w-full mt-2" data-i18n="removebg_compare">按住查看原圖</button>
+                            </div>
+
+                            <div class="removebg-panel">
+                                <span class="removebg-panel-title" data-i18n="removebg_manual_title">手動精修</span>
+                                <div class="removebg-button-grid">
+                                    <button type="button" class="removebg-tool is-active" data-removebg-tool="erase" aria-pressed="true" data-i18n="removebg_erase">擦除</button>
+                                    <button type="button" class="removebg-tool" data-removebg-tool="restore" aria-pressed="false" data-i18n="removebg_restore">還原</button>
+                                    <button type="button" class="removebg-tool" data-removebg-tool="pan" aria-pressed="false" data-i18n="removebg_pan">移動畫布</button>
+                                    <button type="button" id="removebg-reset" class="removebg-action" data-i18n="removebg_reset">重設結果</button>
+                                </div>
+
+                                <label class="removebg-panel-title mt-4" for="removebg-brush-size" data-i18n="removebg_brush_size">筆刷大小</label>
+                                <div class="removebg-range-row">
+                                    <input id="removebg-brush-size" type="range" min="5" max="160" value="48" step="1">
+                                    <output id="removebg-brush-value" class="removebg-range-value" for="removebg-brush-size">48 px</output>
+                                </div>
+
+                                <div class="removebg-button-grid mt-3">
+                                    <button type="button" id="removebg-undo" class="removebg-action" data-i18n="removebg_undo">復原</button>
+                                    <button type="button" id="removebg-redo" class="removebg-action" data-i18n="removebg_redo">重做</button>
+                                </div>
+                            </div>
+
+                            <div class="removebg-panel">
+                                <span class="removebg-panel-title" data-i18n="removebg_view_title">檢視與輸出</span>
+                                <div class="removebg-zoom-row mb-3">
+                                    <button type="button" id="removebg-zoom-out" class="removebg-zoom-button" aria-label="縮小" data-i18n-aria-label="removebg_zoom_out_aria">−</button>
+                                    <output id="removebg-zoom-value" class="removebg-zoom-value">100%</output>
+                                    <button type="button" id="removebg-zoom-in" class="removebg-zoom-button" aria-label="放大" data-i18n-aria-label="removebg_zoom_in_aria">＋</button>
+                                </div>
+                                <button type="button" id="removebg-download" class="removebg-download" data-i18n="removebg_download">下載透明 PNG</button>
+                                <p class="removebg-license mt-3">
+                                    <span data-i18n="removebg_model_note">首次使用需下載約 40 MB AI 模型，之後由瀏覽器快取。</span>
+                                    <a href="https://github.com/imgly/background-removal-js" target="_blank" rel="noopener">IMG.LY · AGPL</a>
+                                </p>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
     </div>
 
@@ -1440,6 +1534,7 @@
                 tab_protect: "PDF 解鎖",
                 tab_rotate: "PDF 旋轉",
                 tab_heic: "HEIC 轉 JPG",
+                tab_removebg: "圖片去背",
                 processing: "處理中...",
                 status_done: "完成，下載已開始",
                 drop_pdf: "點擊或拖曳上傳 PDF",
@@ -1498,6 +1593,43 @@
                 drop_heic: "點擊或拖曳上傳 HEIC 檔案",
                 btn_dl_jpg: "下載 JPG",
                 btn_dl_all_jpg: "下載全部 JPG",
+                title_removebg: "自動＋手動圖片去背",
+                desc_removebg: "AI 自動移除背景，再用筆刷精修邊緣",
+                removebg_upload_title: "選擇圖片開始去背",
+                removebg_upload_hint: "拖放、點擊選擇，或直接貼上圖片",
+                removebg_formats: "支援 JPG、PNG、WebP、HEIC",
+                removebg_privacy: "圖片只在瀏覽器內處理，不會上傳",
+                removebg_new: "更換圖片",
+                removebg_auto_title: "AI 自動去背",
+                removebg_auto_again: "重新自動去背",
+                removebg_compare: "按住查看原圖",
+                removebg_manual_title: "手動精修",
+                removebg_erase: "擦除",
+                removebg_restore: "還原",
+                removebg_pan: "移動畫布",
+                removebg_reset: "重設結果",
+                removebg_brush_size: "筆刷大小",
+                removebg_undo: "復原",
+                removebg_redo: "重做",
+                removebg_view_title: "檢視與輸出",
+                removebg_download: "下載透明 PNG",
+                removebg_model_note: "首次使用需下載約 40 MB AI 模型，之後由瀏覽器快取。",
+                removebg_editor_aria: "去背編輯器",
+                removebg_controls_aria: "去背控制項",
+                removebg_zoom_out_aria: "縮小",
+                removebg_zoom_in_aria: "放大",
+                removebg_status_ready: "準備就緒",
+                removebg_status_decoding: "正在讀取圖片…",
+                removebg_status_model: "正在下載 AI 模型… {percent}%",
+                removebg_status_processing: "正在本機自動去背… {percent}%",
+                removebg_status_done: "自動去背完成，可使用筆刷精修",
+                removebg_status_manual: "手動修改已套用",
+                removebg_status_failed: "自動去背失敗，仍可使用手動筆刷",
+                removebg_error_type: "請選擇 JPG、PNG、WebP 或 HEIC 圖片",
+                removebg_error_decode: "無法解碼這張圖片",
+                removebg_error_heic: "HEIC 解碼器尚未載入",
+                removebg_error_load: "圖片載入失敗：{message}",
+                removebg_error_auto: "自動去背失敗：{message}",
                 processing_count: "處理中 {current}/{total}",
                 progress_page: "第 {current}/{total} 頁",
                 err_select_at_least_two_pdfs: "請至少選擇 2 個 PDF 檔案",
@@ -1544,6 +1676,7 @@
                 tab_protect: "Unlock PDF",
                 tab_rotate: "Rotate PDF",
                 tab_heic: "HEIC to JPG",
+                tab_removebg: "Remove Background",
                 processing: "Processing...",
                 status_done: "Done. Your download has started.",
                 drop_pdf: "Click or Drag to Upload PDF",
@@ -1594,6 +1727,43 @@
                 drop_heic: "Click or Drag to Upload HEIC",
                 btn_dl_jpg: "Download JPG",
                 btn_dl_all_jpg: "Download All JPGs",
+                title_removebg: "Automatic + Manual Background Removal",
+                desc_removebg: "Remove the background with local AI, then refine the edges with brushes",
+                removebg_upload_title: "Choose an image to remove its background",
+                removebg_upload_hint: "Drop, browse, or paste an image",
+                removebg_formats: "Supports JPG, PNG, WebP, and HEIC",
+                removebg_privacy: "Your image stays in this browser and is never uploaded",
+                removebg_new: "Change image",
+                removebg_auto_title: "AI Background Removal",
+                removebg_auto_again: "Run AI removal again",
+                removebg_compare: "Hold to view original",
+                removebg_manual_title: "Manual Refinement",
+                removebg_erase: "Erase",
+                removebg_restore: "Restore",
+                removebg_pan: "Pan canvas",
+                removebg_reset: "Reset result",
+                removebg_brush_size: "Brush size",
+                removebg_undo: "Undo",
+                removebg_redo: "Redo",
+                removebg_view_title: "View and Export",
+                removebg_download: "Download Transparent PNG",
+                removebg_model_note: "The first use downloads an AI model of about 40 MB. Your browser caches it afterward.",
+                removebg_editor_aria: "Background removal editor",
+                removebg_controls_aria: "Background removal controls",
+                removebg_zoom_out_aria: "Zoom out",
+                removebg_zoom_in_aria: "Zoom in",
+                removebg_status_ready: "Ready",
+                removebg_status_decoding: "Reading image…",
+                removebg_status_model: "Downloading AI model… {percent}%",
+                removebg_status_processing: "Removing background locally… {percent}%",
+                removebg_status_done: "Automatic removal complete; refine it with the brushes",
+                removebg_status_manual: "Manual edit applied",
+                removebg_status_failed: "Automatic removal failed; manual brushes are still available",
+                removebg_error_type: "Choose a JPG, PNG, WebP, or HEIC image",
+                removebg_error_decode: "This image could not be decoded",
+                removebg_error_heic: "The HEIC decoder is not available",
+                removebg_error_load: "Image loading failed: {message}",
+                removebg_error_auto: "Automatic background removal failed: {message}",
                 processing_count: "Processing {current}/{total}",
                 progress_page: "Page {current}/{total}",
                 err_select_at_least_two_pdfs: "Please select at least 2 PDF files",
@@ -1639,6 +1809,7 @@
                 tab_protect: "PDF 解除",
                 tab_rotate: "PDF 回転",
                 tab_heic: "HEIC JPG 変換",
+                tab_removebg: "画像背景削除",
                 processing: "処理中...",
                 status_done: "完了しました。ダウンロードを開始しました。",
                 drop_pdf: "PDF をドラッグ＆ドロップ",
@@ -1689,6 +1860,43 @@
                 drop_heic: "HEIC をドラッグ＆ドロップ",
                 btn_dl_jpg: "JPG をダウンロード",
                 btn_dl_all_jpg: "すべての JPG をダウンロード",
+                title_removebg: "自動＋手動の背景削除",
+                desc_removebg: "ローカル AI で背景を削除し、ブラシで輪郭を細かく調整します",
+                removebg_upload_title: "画像を選択して背景を削除",
+                removebg_upload_hint: "ドラッグ、クリック、または貼り付けで画像を追加",
+                removebg_formats: "JPG、PNG、WebP、HEIC に対応",
+                removebg_privacy: "画像はブラウザ内だけで処理され、アップロードされません",
+                removebg_new: "画像を変更",
+                removebg_auto_title: "AI 自動背景削除",
+                removebg_auto_again: "AI 背景削除を再実行",
+                removebg_compare: "押している間、元画像を表示",
+                removebg_manual_title: "手動調整",
+                removebg_erase: "消去",
+                removebg_restore: "復元",
+                removebg_pan: "キャンバス移動",
+                removebg_reset: "結果をリセット",
+                removebg_brush_size: "ブラシサイズ",
+                removebg_undo: "元に戻す",
+                removebg_redo: "やり直す",
+                removebg_view_title: "表示と書き出し",
+                removebg_download: "透明 PNG をダウンロード",
+                removebg_model_note: "初回は約 40 MB の AI モデルをダウンロードします。以後はブラウザにキャッシュされます。",
+                removebg_editor_aria: "背景削除エディター",
+                removebg_controls_aria: "背景削除コントロール",
+                removebg_zoom_out_aria: "縮小",
+                removebg_zoom_in_aria: "拡大",
+                removebg_status_ready: "準備完了",
+                removebg_status_decoding: "画像を読み込んでいます…",
+                removebg_status_model: "AI モデルをダウンロード中… {percent}%",
+                removebg_status_processing: "ブラウザ内で背景を削除中… {percent}%",
+                removebg_status_done: "自動背景削除が完了しました。ブラシで調整できます",
+                removebg_status_manual: "手動変更を適用しました",
+                removebg_status_failed: "自動背景削除に失敗しました。手動ブラシは使用できます",
+                removebg_error_type: "JPG、PNG、WebP、または HEIC 画像を選択してください",
+                removebg_error_decode: "画像を読み込めませんでした",
+                removebg_error_heic: "HEIC デコーダーを利用できません",
+                removebg_error_load: "画像の読み込みに失敗しました：{message}",
+                removebg_error_auto: "自動背景削除に失敗しました：{message}",
                 processing_count: "処理中 {current}/{total}",
                 progress_page: "{current}/{total} ページ",
                 err_select_at_least_two_pdfs: "少なくとも 2 つの PDF ファイルを選択してください",
@@ -1800,17 +2008,21 @@
         }
         function changeLanguage(lang) {
             currentLang = lang;
+            document.documentElement.lang = lang;
             document.getElementById('lang-selector').value = lang;
             const dict = translations[lang] || translations['zh-TW'];
-            document.querySelectorAll('[data-i18n]').forEach(el => {
+            document.querySelectorAll('[data-i18n], [data-i18n-aria-label]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if (dict[key]) {
+                const ariaKey = el.getAttribute('data-i18n-aria-label');
+                if (ariaKey && dict[ariaKey]) el.setAttribute('aria-label', dict[ariaKey]);
+                if (key && dict[key]) {
                     if (el.dataset.dynamicText === 'true') return;
                     if (el.hasAttribute('placeholder')) el.placeholder = dict[key];
                     else el.innerHTML = dict[key];
                 }
             });
             updatePasswordToggleLabels();
+            window.dispatchEvent(new CustomEvent('yyy:languagechange', { detail: { lang } }));
         }
         window.addEventListener('load', () => {
             const l = navigator.language || navigator.userLanguage;
@@ -1832,7 +2044,7 @@
             if (e.target.id === 'about-modal') closeAboutModal();
         });
 
-        const tabs = ['img', 'img2pdf', 'merge', 'split', 'compress', 'protect', 'rotate', 'heic'];
+        const tabs = ['img', 'img2pdf', 'merge', 'split', 'compress', 'protect', 'rotate', 'heic', 'removebg'];
         function switchTab(t) {
             tabs.forEach(x => {
                 const section = document.getElementById(`sec-${x}`);
@@ -1908,6 +2120,7 @@
             setupDragDrop('drop-unlock', 'file-unlock');
             setupDragDrop('drop-rotate', 'file-rotate');
             setupDragDrop('drop-heic', 'file-heic');
+            setupDragDrop('drop-removebg', 'file-removebg');
         });
 
         // ================= 功能邏輯 =================
@@ -2536,6 +2749,8 @@
             })().catch(e=>document.getElementById('status-heic').textContent = t('heic_status_error_with_message', { message: e.message }));
         });
 
+        window.YYYTools = { t, notify, safeBaseName };
     </script>
+    <script type="module" src="background-removal.js"></script>
 </body>
 </html>

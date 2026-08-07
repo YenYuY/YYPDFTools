@@ -34,6 +34,7 @@
 | PDF 解鎖 | 輸入已知密碼後，重建為無密碼 PDF | PDF |
 | PDF 旋轉 | 將所有頁面順時針旋轉 90°、180° 或 270° | PDF |
 | HEIC 轉 JPG | 將一張或多張 HEIC／HEIF 照片轉為 JPG | JPG |
+| 圖片去背 | 使用瀏覽器內 AI 自動去背，並以擦除／還原筆刷精修 | 透明 PNG |
 
 其他介面特色：
 
@@ -49,6 +50,8 @@
 所有檔案內容都在目前的瀏覽器分頁中處理。專案沒有上傳 API，也不需要建立帳號。
 
 頁面第一次載入時會從 CDN 取得前端函式庫，因此首次開啟仍需要網路；資源載入完成後，檔案處理本身在本機進行。若要打造完全離線的版本，可將下方列出的 CDN 相依套件下載並改用本機路徑。
+
+圖片去背功能會在第一次使用時額外下載約 40 MB 的 AI 模型；模型會由瀏覽器快取，圖片內容不會傳送給模型主機或其他伺服器。
 
 > [!IMPORTANT]
 > 「PDF 壓縮」與「PDF 解鎖」會把每一頁轉成影像後重建 PDF。這能在瀏覽器中完成處理，但輸出的文字將無法選取或搜尋。解鎖功能只適用於你已知原始密碼、且瀏覽器 PDF 引擎能讀取的文件。
@@ -79,12 +82,17 @@
 - [JSZip](https://stuk.github.io/jszip/)：封裝多檔下載
 - [FileSaver.js](https://github.com/eligrey/FileSaver.js/)：儲存瀏覽器產生的檔案
 - [heic-to](https://github.com/hoppergee/heic-to)：HEIC／HEIF 轉 JPG
+- [IMG.LY background-removal](https://github.com/imgly/background-removal-js)：透過 ONNX Runtime Web 與 WebAssembly 在瀏覽器內自動去背（AGPL-3.0）
 
 ## 專案結構
 
 ```text
 YYPDFTools/
 ├── index.html                 # 主要應用程式與預設入口
+├── background-removal.js     # 自動去背與手動編輯器
+├── background-removal-core.js # 可測試的編輯器工具函式
+├── background-removal.css    # 去背工作區樣式
+├── tests/                    # 瀏覽器工具的單元測試
 ├── PRODUCT.md                 # 產品定位與設計原則
 ├── README.md                  # 繁體中文（GitHub 預設顯示）
 ├── README.en.md               # English
@@ -101,7 +109,8 @@ YYPDFTools/
 - 大型 PDF 會佔用較多記憶體；若瀏覽器分頁被系統終止，請減少頁數或分批處理。
 - 加密 PDF 的支援程度取決於 PDF.js；部分加密方式可能無法在瀏覽器中解鎖。
 - 點陣化壓縮較適合掃描型 PDF；以文字為主的 PDF 不一定會變小。
-- HEIC 支援取決於瀏覽器對 WebAssembly／影像解碼功能的支援程度。
+- HEIC 支援取決於瀏覽器與影像解碼套件的相容性。
+- 自動去背需要支援 WebAssembly 的現代瀏覽器；第一次使用需下載 AI 模型。
 
 ## 貢獻
 

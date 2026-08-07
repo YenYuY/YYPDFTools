@@ -34,6 +34,7 @@ It works well for quick everyday document tasks and can be deployed as a static 
 | Unlock PDF | Uses a known password to rebuild an unprotected PDF | PDF |
 | Rotate PDF | Rotates every page clockwise by 90°, 180°, or 270° | PDF |
 | HEIC to JPG | Converts one or more HEIC/HEIF photos to JPG | JPG |
+| Remove Background | Runs local AI removal, then provides erase and restore brushes for refinement | Transparent PNG |
 
 Interface highlights:
 
@@ -49,6 +50,8 @@ Interface highlights:
 All file content is processed in the current browser tab. The project has no upload API and requires no account.
 
 The page loads its frontend libraries from CDNs on first visit, so an internet connection is still required for the initial load. Once those resources are loaded, document processing itself is local. For a fully offline build, download the CDN dependencies listed below and replace their URLs with local paths.
+
+The background removal tool downloads an AI model of about 40 MB on first use. The browser caches the model, and the image itself is never sent to the model host or another server.
 
 > [!IMPORTANT]
 > **Compress PDF** and **Unlock PDF** rasterize every page before rebuilding the document. This makes browser-only processing possible, but text in the output can no longer be selected or searched. Unlocking only works when you know the original password and the browser PDF engine supports that document.
@@ -79,12 +82,17 @@ Your PDFs and images still remain on your device and are processed locally by th
 - [JSZip](https://stuk.github.io/jszip/) for multi-file archives
 - [FileSaver.js](https://github.com/eligrey/FileSaver.js/) for saving generated files
 - [heic-to](https://github.com/hoppergee/heic-to) for HEIC/HEIF conversion
+- [IMG.LY background-removal](https://github.com/imgly/background-removal-js) for in-browser ONNX Runtime Web and WebAssembly background removal (AGPL-3.0)
 
 ## Project Structure
 
 ```text
 YYPDFTools/
 ├── index.html                 # Main application and default entry point
+├── background-removal.js     # Automatic removal and manual editor
+├── background-removal-core.js # Testable editor utility functions
+├── background-removal.css    # Background-removal workspace styles
+├── tests/                    # Browser-tool unit tests
 ├── PRODUCT.md                 # Product direction and design principles
 ├── README.md                  # Traditional Chinese (GitHub default)
 ├── README.en.md               # English
@@ -101,7 +109,8 @@ YYPDFTools/
 - Large PDFs can consume significant memory. If the browser tab is terminated, process fewer pages or split the work into batches.
 - Encrypted PDF support depends on PDF.js; some encryption methods cannot be unlocked in the browser.
 - Rasterized compression is most useful for scanned PDFs and may not reduce text-heavy documents.
-- HEIC support depends on the browser's WebAssembly and image-decoding capabilities.
+- HEIC support depends on browser and decoder compatibility.
+- Automatic background removal requires a modern browser with WebAssembly support and downloads its AI model on first use.
 
 ## Contributing
 
