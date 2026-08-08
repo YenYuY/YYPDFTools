@@ -1,7 +1,7 @@
 # 3Y 工具箱（YYPDFTools）
 
 <p align="center">
-  <strong>隱私優先、完全在瀏覽器中執行的 PDF 與圖片工具箱</strong>
+  <strong>隱私優先、完全在瀏覽器中執行的 PDF、圖片與影片工具箱</strong>
 </p>
 
 <p align="center">
@@ -18,7 +18,7 @@
 
 ## 專案簡介
 
-3Y 工具箱是一套單頁式 PDF／圖片處理工具。使用者選取的檔案會留在自己的裝置上，轉換、合併與重新輸出都由瀏覽器端 JavaScript 完成，不需要把文件傳送到後端伺服器。
+3Y 工具箱是一套單頁式 PDF／圖片／影片處理工具。使用者選取的檔案會留在自己的裝置上，轉換、合併、壓縮、剪輯與重新輸出都由瀏覽器端 JavaScript 完成，不需要把檔案傳送到後端伺服器。
 
 專案適合快速處理日常文件，也適合直接部署為靜態網站。介面支援繁體中文、英文與日文，並會依作業系統設定自動切換亮色或深色模式。
 
@@ -34,6 +34,10 @@
 | PDF 解鎖 | 輸入已知密碼後，重建為無密碼 PDF | PDF |
 | PDF 旋轉 | 將所有頁面順時針旋轉 90°、180° 或 270° | PDF |
 | HEIC 轉 JPG | 將一張或多張 HEIC／HEIF 照片轉為 JPG | JPG |
+| 圖片去背 | 使用瀏覽器內 AI 自動去背，並以擦除／還原筆刷精修 | 透明 PNG |
+| 影片轉換 | 將影片轉為 MP4、WebM、MOV、MKV、AVI、TS、GIF 或常用音訊 | 影片、GIF 或音訊 |
+| 影片壓縮 | 依畫質、最高解析度及 H.264／H.265／VP9 編碼重新壓縮 | MP4 或 WebM |
+| 影片剪輯 | 預覽影片並以時間範圍精確截取片段 | MP4 |
 
 其他介面特色：
 
@@ -50,6 +54,10 @@
 
 頁面第一次載入時會從 CDN 取得前端函式庫，因此首次開啟仍需要網路；資源載入完成後，檔案處理本身在本機進行。若要打造完全離線的版本，可將下方列出的 CDN 相依套件下載並改用本機路徑。
 
+圖片去背功能會在第一次使用時額外下載約 40 MB 的 AI 模型；模型會由瀏覽器快取，圖片內容不會傳送給模型主機或其他伺服器。
+
+影片工具會在第一次處理時額外下載約 32 MB 的 FFmpeg WebAssembly 核心。影片內容只會寫入瀏覽器內的暫存檔案系統；處理完成後即清除。
+
 > [!IMPORTANT]
 > 「PDF 壓縮」與「PDF 解鎖」會把每一頁轉成影像後重建 PDF。這能在瀏覽器中完成處理，但輸出的文字將無法選取或搜尋。解鎖功能只適用於你已知原始密碼、且瀏覽器 PDF 引擎能讀取的文件。
 
@@ -58,7 +66,7 @@
 1. 開啟工具箱，從上方工具列選擇要執行的功能。
 2. 點擊上傳區，或將檔案拖放到頁面中。
 3. 依功能設定格式、頁碼範圍、畫質、密碼或旋轉角度。
-4. 按下處理按鈕；完成後瀏覽器會下載結果。
+4. 按下處理按鈕；完成後可在瀏覽器支援時預覽，並下載結果。
 
 所有操作都在目前裝置完成。處理大型或高解析度文件時，所需時間與記憶體會依裝置效能、頁數及影像尺寸而不同。
 
@@ -68,7 +76,7 @@
 
 ### [立即使用 3Y 工具箱 →](https://yenyuy.github.io/YYPDFTools/)
 
-所有 PDF 與圖片仍會留在你的裝置上，並由瀏覽器在本機完成處理，不會上傳到伺服器。
+所有 PDF、圖片與影片仍會留在你的裝置上，並由瀏覽器在本機完成處理，不會上傳到伺服器。
 
 ## 技術組成
 
@@ -79,12 +87,22 @@
 - [JSZip](https://stuk.github.io/jszip/)：封裝多檔下載
 - [FileSaver.js](https://github.com/eligrey/FileSaver.js/)：儲存瀏覽器產生的檔案
 - [heic-to](https://github.com/hoppergee/heic-to)：HEIC／HEIF 轉 JPG
+- [IMG.LY background-removal](https://github.com/imgly/background-removal-js)：透過 ONNX Runtime Web 與 WebAssembly 在瀏覽器內自動去背（AGPL-3.0）
+- [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)：瀏覽器內影片轉換、壓縮與剪輯（WebAssembly）
 
 ## 專案結構
 
 ```text
 YYPDFTools/
 ├── index.html                 # 主要應用程式與預設入口
+├── background-removal.js     # 自動去背與手動編輯器
+├── background-removal-core.js # 可測試的編輯器工具函式
+├── background-removal.css    # 去背工作區樣式
+├── video-tools.js            # 共用 FFmpeg 引擎與三個影片工具
+├── video-tools-core.js       # 可測試的影片命令與格式工具
+├── video-tools.css           # 影片工作區樣式
+├── vendor/ffmpeg/            # 本機託管的 ffmpeg.wasm JavaScript 包裝器
+├── tests/                    # 瀏覽器工具的單元測試
 ├── PRODUCT.md                 # 產品定位與設計原則
 ├── README.md                  # 繁體中文（GitHub 預設顯示）
 ├── README.en.md               # English
@@ -101,7 +119,10 @@ YYPDFTools/
 - 大型 PDF 會佔用較多記憶體；若瀏覽器分頁被系統終止，請減少頁數或分批處理。
 - 加密 PDF 的支援程度取決於 PDF.js；部分加密方式可能無法在瀏覽器中解鎖。
 - 點陣化壓縮較適合掃描型 PDF；以文字為主的 PDF 不一定會變小。
-- HEIC 支援取決於瀏覽器對 WebAssembly／影像解碼功能的支援程度。
+- HEIC 支援取決於瀏覽器與影像解碼套件的相容性。
+- 自動去背需要支援 WebAssembly 的現代瀏覽器；第一次使用需下載 AI 模型。
+- 影片處理需要 WebAssembly，且編碼速度通常慢於桌面版 FFmpeg；大型影片會使用較多記憶體，建議先以 750 MB 以下檔案操作。
+- 影片剪輯器需要瀏覽器能預覽來源影片，建議使用 MP4、WebM 或 MOV。
 
 ## 貢獻
 

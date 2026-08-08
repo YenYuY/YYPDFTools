@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="background-removal.css">
+    <link rel="stylesheet" href="video-tools.css">
     <!-- 標題 -->
     <title data-i18n="site_title">3Y工具箱</title>
     
@@ -741,19 +743,26 @@
             grid-template-columns: 15rem minmax(0, 1fr);
             gap: 0;
             padding: 1.25rem 0 2.5rem;
-            align-items: start;
+            align-items: stretch;
         }
 
         .layout-v3 .tool-nav-shell {
-            top: 5.25rem;
-        }
-
-        .layout-v3 .tool-nav-inner {
-            min-height: 29rem;
+            position: relative;
+            top: auto;
+            align-self: stretch;
             border: 1px solid var(--line);
             border-right: 0;
             border-radius: 10px 0 0 10px;
             background: var(--surface-2);
+        }
+
+        .layout-v3 .tool-nav-inner {
+            position: sticky;
+            top: 5.25rem;
+            min-height: 29rem;
+            border: 0;
+            border-radius: inherit;
+            background: transparent;
             box-shadow: none;
             padding: 0.5rem;
         }
@@ -1034,12 +1043,17 @@
             .layout-v3 .tool-nav-shell {
                 position: sticky;
                 top: 3.75rem;
+                align-self: auto;
+                border: 0;
                 border-bottom: 1px solid var(--line);
+                border-radius: 0;
                 background: var(--surface);
                 backdrop-filter: none;
             }
 
             .layout-v3 .tool-nav-inner {
+                position: static;
+                top: auto;
                 min-height: 0;
                 border: 0;
                 border-radius: 0;
@@ -1165,6 +1179,10 @@
                 <button type="button" onclick="switchTab('protect')" class="tab-btn" id="btn-tab-protect" role="tab" aria-controls="sec-protect" aria-selected="false" tabindex="-1" data-short="UNL" data-i18n="tab_protect">PDF 解鎖</button>
                 <button type="button" onclick="switchTab('rotate')" class="tab-btn" id="btn-tab-rotate" role="tab" aria-controls="sec-rotate" aria-selected="false" tabindex="-1" data-short="ROT" data-i18n="tab_rotate">PDF 旋轉</button>
                 <button type="button" onclick="switchTab('heic')" class="tab-btn" id="btn-tab-heic" role="tab" aria-controls="sec-heic" aria-selected="false" tabindex="-1" data-short="JPG" data-i18n="tab_heic">HEIC 轉 JPG</button>
+                <button type="button" onclick="switchTab('removebg')" class="tab-btn" id="btn-tab-removebg" role="tab" aria-controls="sec-removebg" aria-selected="false" tabindex="-1" data-short="BGR" data-i18n="tab_removebg">圖片去背</button>
+                <button type="button" onclick="switchTab('video-converter')" class="tab-btn" id="btn-tab-video-converter" role="tab" aria-controls="sec-video-converter" aria-selected="false" tabindex="-1" data-short="VCT" data-i18n="tab_video_converter">影片轉換</button>
+                <button type="button" onclick="switchTab('video-compressor')" class="tab-btn" id="btn-tab-video-compressor" role="tab" aria-controls="sec-video-compressor" aria-selected="false" tabindex="-1" data-short="VCM" data-i18n="tab_video_compressor">影片壓縮</button>
+                <button type="button" onclick="switchTab('video-trimmer')" class="tab-btn" id="btn-tab-video-trimmer" role="tab" aria-controls="sec-video-trimmer" aria-selected="false" tabindex="-1" data-short="CUT" data-i18n="tab_video_trimmer">影片剪輯</button>
             </div>
         </div>
     </aside>
@@ -1390,6 +1408,339 @@
             </div>
         </section>
 
+        <!-- 9. 圖片去背 -->
+        <section id="sec-removebg" class="hidden" role="tabpanel" aria-labelledby="btn-tab-removebg">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_removebg">自動＋手動圖片去背</h2>
+                <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_removebg">AI 自動移除背景，再用筆刷精修邊緣</p>
+            </div>
+
+            <div class="bg-white dark:bg-dark-card rounded-xl shadow p-4 sm:p-6 transition-colors removebg-shell">
+                <input type="file" id="file-removebg" class="hidden" accept="image/jpeg,image/png,image/webp,.heic,.heif">
+
+                <div id="removebg-upload-panel">
+                    <button type="button" id="drop-removebg" class="removebg-upload" onclick="document.getElementById('file-removebg').click()">
+                        <span>
+                            <span class="removebg-upload-icon" aria-hidden="true">
+                                <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16l4.6-4.6a2 2 0 012.8 0L16 16m-2-2 1.6-1.6a2 2 0 012.8 0L20 14M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2zM15 8h.01"/></svg>
+                            </span>
+                            <strong class="block text-lg" data-i18n="removebg_upload_title">選擇圖片開始去背</strong>
+                            <span class="block mt-2 text-sm text-gray-500 dark:text-gray-400" data-i18n="removebg_upload_hint">拖放、點擊選擇，或直接貼上圖片</span>
+                            <span class="block mt-1 text-xs text-gray-400" data-i18n="removebg_formats">支援 JPG、PNG、WebP、HEIC</span>
+                        </span>
+                    </button>
+                    <p class="removebg-privacy-note">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m5-3.5A11.9 11.9 0 0112 3a11.9 11.9 0 01-8 3.5c0 5.6 3.4 10.7 8 12.5 4.6-1.8 8-6.9 8-12.5z"/></svg>
+                        <span data-i18n="removebg_privacy">圖片只在瀏覽器內處理，不會上傳</span>
+                    </p>
+                </div>
+
+                <div id="removebg-editor" class="removebg-editor hidden">
+                    <div class="removebg-statusbar">
+                        <div class="removebg-status-copy">
+                            <p id="removebg-status" class="removebg-status" aria-live="polite">準備就緒</p>
+                            <div id="removebg-progress-track" class="removebg-progress-track hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                                <div id="removebg-progress-bar" class="removebg-progress-bar"></div>
+                            </div>
+                        </div>
+                        <button type="button" id="removebg-new" class="removebg-action px-4" data-i18n="removebg_new">更換圖片</button>
+                    </div>
+
+                    <div class="removebg-workbench">
+                        <div class="removebg-canvas-frame">
+                            <div id="removebg-stage" class="removebg-stage" data-tool="erase">
+                                <canvas id="removebg-canvas" tabindex="0" aria-label="去背編輯器" aria-describedby="removebg-pan-hint" data-i18n-aria-label="removebg_editor_aria"></canvas>
+                            </div>
+                        </div>
+
+                        <aside class="removebg-sidebar" aria-label="去背控制項" data-i18n-aria-label="removebg_controls_aria">
+                            <div class="removebg-panel">
+                                <span class="removebg-panel-title" data-i18n="removebg_auto_title">AI 自動去背</span>
+                                <button type="button" id="removebg-auto" class="removebg-primary" data-i18n="removebg_auto_again">重新自動去背</button>
+                                <button type="button" id="removebg-compare" class="removebg-action w-full mt-2" data-i18n="removebg_compare">按住查看原圖</button>
+                            </div>
+
+                            <div class="removebg-panel">
+                                <span class="removebg-panel-title" data-i18n="removebg_manual_title">手動精修</span>
+                                <div class="removebg-button-grid">
+                                    <button type="button" class="removebg-tool is-active" data-removebg-tool="erase" aria-pressed="true" data-i18n="removebg_erase">擦除</button>
+                                    <button type="button" class="removebg-tool" data-removebg-tool="restore" aria-pressed="false" data-i18n="removebg_restore">還原</button>
+                                    <button type="button" class="removebg-tool" data-removebg-tool="pan" aria-pressed="false" data-i18n="removebg_pan">抓手</button>
+                                    <button type="button" id="removebg-reset" class="removebg-action" data-i18n="removebg_reset">重設結果</button>
+                                </div>
+                                <p id="removebg-pan-hint" class="removebg-pan-hint" data-i18n="removebg_pan_hint">選擇抓手拖動畫布；也可按住空白鍵暫時使用抓手，方向鍵可微調。</p>
+
+                                <label class="removebg-panel-title mt-4" for="removebg-brush-size" data-i18n="removebg_brush_size">筆刷大小</label>
+                                <div class="removebg-range-row">
+                                    <input id="removebg-brush-size" type="range" min="5" max="160" value="48" step="1">
+                                    <output id="removebg-brush-value" class="removebg-range-value" for="removebg-brush-size">48 px</output>
+                                </div>
+
+                                <div class="removebg-button-grid mt-3">
+                                    <button type="button" id="removebg-undo" class="removebg-action" data-i18n="removebg_undo">復原</button>
+                                    <button type="button" id="removebg-redo" class="removebg-action" data-i18n="removebg_redo">重做</button>
+                                </div>
+                            </div>
+
+                            <div class="removebg-panel">
+                                <span class="removebg-panel-title" data-i18n="removebg_view_title">檢視與輸出</span>
+                                <div class="removebg-zoom-row mb-3">
+                                    <button type="button" id="removebg-zoom-out" class="removebg-zoom-button" aria-label="縮小" data-i18n-aria-label="removebg_zoom_out_aria">−</button>
+                                    <output id="removebg-zoom-value" class="removebg-zoom-value">100%</output>
+                                    <button type="button" id="removebg-zoom-in" class="removebg-zoom-button" aria-label="放大" data-i18n-aria-label="removebg_zoom_in_aria">＋</button>
+                                </div>
+                                <button type="button" id="removebg-fit" class="removebg-action w-full mb-2" data-i18n="removebg_fit">適合畫面</button>
+                                <button type="button" id="removebg-download" class="removebg-download" data-i18n="removebg_download">下載透明 PNG</button>
+                                <p class="removebg-license mt-3">
+                                    <span id="removebg-model-note" data-i18n="removebg_model_note">首次使用需下載約 40 MB AI 模型；同一頁只初始化一次，之後優先使用瀏覽器快取。</span>
+                                    <a href="https://github.com/imgly/background-removal-js" target="_blank" rel="noopener">IMG.LY · AGPL</a>
+                                </p>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 10. 影片轉換 -->
+        <section id="sec-video-converter" class="hidden" role="tabpanel" aria-labelledby="btn-tab-video-converter">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_video_converter">影片轉換器</h2>
+                <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_video_converter">在常用影片與音訊格式之間轉換</p>
+            </div>
+            <div class="bg-white dark:bg-dark-card rounded-xl shadow p-4 sm:p-6 transition-colors video-tool-shell">
+                <input type="file" id="file-video-converter" class="hidden" accept="video/*,.mkv,.avi,.wmv,.flv,.mpeg,.mpg,.3gp">
+                <button type="button" id="drop-video-converter" class="video-upload" onclick="document.getElementById('file-video-converter').click()">
+                    <span>
+                        <span class="video-upload-icon" aria-hidden="true">
+                            <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 8h10M7 12h7m-7 4h10M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>
+                        </span>
+                        <strong class="block text-lg" data-i18n="video_converter_upload">選擇影片開始轉換</strong>
+                        <span class="block mt-2 text-sm text-gray-500 dark:text-gray-400" data-i18n="video_upload_hint">拖放或點擊選擇影片</span>
+                        <span class="block mt-1 text-xs text-gray-400" data-i18n="video_input_formats">支援 MP4、MOV、WebM、MKV、AVI 等格式</span>
+                    </span>
+                </button>
+                <p class="video-privacy-note"><span aria-hidden="true">🔒</span><span data-i18n="video_privacy">影片只在瀏覽器內處理，不會上傳</span></p>
+
+                <div id="video-converter-controls" class="video-controls hidden">
+                    <div class="video-filebar">
+                        <div class="video-file-copy">
+                            <p id="video-converter-filename" class="video-filename"></p>
+                            <p id="video-converter-filemeta" class="video-filemeta"></p>
+                        </div>
+                        <button type="button" class="video-secondary" data-video-processing-lock onclick="document.getElementById('file-video-converter').click()" data-i18n="video_change_file">更換影片</button>
+                    </div>
+                    <div class="video-workbench">
+                        <div class="video-preview-panel">
+                            <span class="video-panel-title" data-i18n="video_input_preview">原始影片預覽</span>
+                            <video id="video-converter-input-preview" class="video-preview hidden" controls playsinline></video>
+                        </div>
+                        <div class="video-settings-panel">
+                            <span class="video-panel-title" data-i18n="video_output_settings">輸出設定</span>
+                            <div class="video-setting">
+                                <label for="video-converter-format" data-i18n="video_output_format">輸出格式</label>
+                                <select id="video-converter-format" data-video-processing-lock>
+                                    <option value="mp4" data-i18n="video_format_mp4">MP4 · H.264 / AAC</option>
+                                    <option value="webm" data-i18n="video_format_webm">WebM · VP9 / Opus</option>
+                                    <option value="mov" data-i18n="video_format_mov">MOV · H.264 / AAC</option>
+                                    <option value="mkv" data-i18n="video_format_mkv">MKV · H.264 / AAC</option>
+                                    <option value="avi" data-i18n="video_format_avi">AVI · MPEG-4 / MP3</option>
+                                    <option value="ts" data-i18n="video_format_ts">TS · H.264 / AAC</option>
+                                    <option value="gif" data-i18n="video_format_gif">GIF 動圖</option>
+                                    <option value="mp3" data-i18n="video_format_mp3">MP3 音訊</option>
+                                    <option value="m4a" data-i18n="video_format_m4a">M4A · AAC 音訊</option>
+                                    <option value="aac" data-i18n="video_format_aac">AAC 音訊</option>
+                                    <option value="ogg" data-i18n="video_format_ogg">OGG · Vorbis 音訊</option>
+                                    <option value="flac" data-i18n="video_format_flac">FLAC 無損音訊</option>
+                                    <option value="wav" data-i18n="video_format_wav">WAV 無損音訊</option>
+                                </select>
+                            </div>
+                            <div class="video-action-row">
+                                <button type="button" id="video-converter-process" class="video-primary" data-i18n="video_converter_start">開始轉換</button>
+                                <button type="button" id="video-converter-cancel" class="video-secondary hidden" data-i18n="video_cancel">取消</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="video-statusbar">
+                        <div class="video-status-copy">
+                            <p id="video-converter-status" class="video-status" data-dynamic-text="true" aria-live="polite">準備就緒</p>
+                            <div id="video-converter-progress-track" class="video-progress-track hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                                <div id="video-converter-progress-bar" class="video-progress-bar"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="video-converter-result" class="video-result hidden">
+                        <div class="video-result-head">
+                            <div><span class="video-panel-title" data-i18n="video_result">處理結果</span><p id="video-converter-result-meta" class="video-result-meta"></p></div>
+                            <button type="button" id="video-converter-download" class="video-download" data-i18n="video_download">下載檔案</button>
+                        </div>
+                        <video class="video-preview hidden" data-video-output-preview="video" controls playsinline></video>
+                        <audio class="w-full hidden" data-video-output-preview="audio" controls></audio>
+                        <img class="video-preview hidden" data-video-output-preview="image" alt="" data-i18n-aria-label="video_result_preview_aria">
+                        <p class="video-filemeta hidden" data-video-preview-unavailable data-i18n="video_preview_unavailable">檔案已成功產生，但此瀏覽器無法預覽這個格式；仍可直接下載。</p>
+                    </div>
+                </div>
+                <p class="video-engine-note"><span data-i18n="video_engine_note">首次處理會下載約 32 MB 的 FFmpeg WebAssembly 核心，之後由瀏覽器快取。</span> <a href="https://ffmpegwasm.netlify.app/" target="_blank" rel="noopener">ffmpeg.wasm</a></p>
+            </div>
+        </section>
+
+        <!-- 11. 影片壓縮 -->
+        <section id="sec-video-compressor" class="hidden" role="tabpanel" aria-labelledby="btn-tab-video-compressor">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_video_compressor">影片壓縮器</h2>
+                <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_video_compressor">調整畫質與解析度，縮小影片檔案</p>
+            </div>
+            <div class="bg-white dark:bg-dark-card rounded-xl shadow p-4 sm:p-6 transition-colors video-tool-shell">
+                <input type="file" id="file-video-compressor" class="hidden" accept="video/*,.mkv,.avi,.wmv,.flv,.mpeg,.mpg,.3gp">
+                <button type="button" id="drop-video-compressor" class="video-upload" onclick="document.getElementById('file-video-compressor').click()">
+                    <span>
+                        <span class="video-upload-icon" aria-hidden="true">
+                            <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 3v4H4m12-4v4h4M8 21v-4H4m12 4v-4h4M9 9h6v6H9z"/></svg>
+                        </span>
+                        <strong class="block text-lg" data-i18n="video_compressor_upload">選擇影片開始壓縮</strong>
+                        <span class="block mt-2 text-sm text-gray-500 dark:text-gray-400" data-i18n="video_upload_hint">拖放或點擊選擇影片</span>
+                        <span class="block mt-1 text-xs text-gray-400" data-i18n="video_input_formats">支援 MP4、MOV、WebM、MKV、AVI 等格式</span>
+                    </span>
+                </button>
+                <p class="video-privacy-note"><span aria-hidden="true">🔒</span><span data-i18n="video_privacy">影片只在瀏覽器內處理，不會上傳</span></p>
+
+                <div id="video-compressor-controls" class="video-controls hidden">
+                    <div class="video-filebar">
+                        <div class="video-file-copy"><p id="video-compressor-filename" class="video-filename"></p><p id="video-compressor-filemeta" class="video-filemeta"></p></div>
+                        <button type="button" class="video-secondary" data-video-processing-lock onclick="document.getElementById('file-video-compressor').click()" data-i18n="video_change_file">更換影片</button>
+                    </div>
+                    <div class="video-workbench">
+                        <div class="video-preview-panel">
+                            <span class="video-panel-title" data-i18n="video_input_preview">原始影片預覽</span>
+                            <video id="video-compressor-input-preview" class="video-preview hidden" controls playsinline></video>
+                        </div>
+                        <div class="video-settings-panel">
+                            <span class="video-panel-title" data-i18n="video_compression_settings">壓縮設定</span>
+                            <div class="video-setting">
+                                <label for="video-compressor-codec" data-i18n="video_codec">影片編碼</label>
+                                <select id="video-compressor-codec" data-video-processing-lock>
+                                    <option value="h264" data-i18n="video_codec_h264">H.264 · 相容性最佳</option>
+                                    <option value="h265" data-i18n="video_codec_h265">H.265 · 更小但較慢</option>
+                                    <option value="vp9" data-i18n="video_codec_vp9">VP9 · WebM 開放格式</option>
+                                </select>
+                            </div>
+                            <div class="video-setting">
+                                <label for="video-compressor-quality" data-i18n="video_quality">畫質</label>
+                                <select id="video-compressor-quality" data-video-processing-lock>
+                                    <option value="high" data-i18n="video_quality_high">高畫質 · 較大檔案</option>
+                                    <option value="balanced" selected data-i18n="video_quality_balanced">平衡 · 建議</option>
+                                    <option value="small" data-i18n="video_quality_small">最小檔案 · 畫質較低</option>
+                                </select>
+                            </div>
+                            <div class="video-setting">
+                                <label for="video-compressor-resolution" data-i18n="video_resolution">最高解析度</label>
+                                <select id="video-compressor-resolution" data-video-processing-lock>
+                                    <option value="original" data-i18n="video_resolution_original">維持原始解析度</option>
+                                    <option value="1080">1080p</option>
+                                    <option value="720">720p</option>
+                                    <option value="480">480p</option>
+                                </select>
+                            </div>
+                            <div class="video-action-row">
+                                <button type="button" id="video-compressor-process" class="video-primary" data-i18n="video_compressor_start">開始壓縮</button>
+                                <button type="button" id="video-compressor-cancel" class="video-secondary hidden" data-i18n="video_cancel">取消</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="video-statusbar"><div class="video-status-copy">
+                        <p id="video-compressor-status" class="video-status" data-dynamic-text="true" aria-live="polite">準備就緒</p>
+                        <div id="video-compressor-progress-track" class="video-progress-track hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="video-compressor-progress-bar" class="video-progress-bar"></div></div>
+                    </div></div>
+                    <div id="video-compressor-result" class="video-result hidden">
+                        <div class="video-result-head">
+                            <div><span class="video-panel-title" data-i18n="video_result">處理結果</span><p id="video-compressor-result-meta" class="video-result-meta"></p></div>
+                            <button type="button" id="video-compressor-download" class="video-download" data-i18n="video_download">下載檔案</button>
+                        </div>
+                        <video class="video-preview hidden" data-video-output-preview="video" controls playsinline></video>
+                        <audio class="w-full hidden" data-video-output-preview="audio" controls></audio>
+                        <img class="video-preview hidden" data-video-output-preview="image" alt="" data-i18n-aria-label="video_result_preview_aria">
+                        <p class="video-filemeta hidden" data-video-preview-unavailable data-i18n="video_preview_unavailable">檔案已成功產生，但此瀏覽器無法預覽這個格式；仍可直接下載。</p>
+                    </div>
+                </div>
+                <p class="video-engine-note"><span data-i18n="video_engine_note">首次處理會下載約 32 MB 的 FFmpeg WebAssembly 核心，之後由瀏覽器快取。</span> <a href="https://ffmpegwasm.netlify.app/" target="_blank" rel="noopener">ffmpeg.wasm</a></p>
+            </div>
+        </section>
+
+        <!-- 12. 影片剪輯 -->
+        <section id="sec-video-trimmer" class="hidden" role="tabpanel" aria-labelledby="btn-tab-video-trimmer">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold dark:text-white" data-i18n="title_video_trimmer">影片剪輯器</h2>
+                <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_video_trimmer">預覽影片並精確設定開始與結束時間</p>
+            </div>
+            <div class="bg-white dark:bg-dark-card rounded-xl shadow p-4 sm:p-6 transition-colors video-tool-shell">
+                <input type="file" id="file-video-trimmer" class="hidden" accept="video/mp4,video/webm,video/quicktime,.mp4,.m4v,.mov,.webm">
+                <button type="button" id="drop-video-trimmer" class="video-upload" onclick="document.getElementById('file-video-trimmer').click()">
+                    <span>
+                        <span class="video-upload-icon" aria-hidden="true">
+                            <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 3v18M18 3v18M6 8h12M6 16h12M3 8h3m12 0h3M3 16h3m12 0h3"/></svg>
+                        </span>
+                        <strong class="block text-lg" data-i18n="video_trimmer_upload">選擇影片開始剪輯</strong>
+                        <span class="block mt-2 text-sm text-gray-500 dark:text-gray-400" data-i18n="video_upload_hint">拖放或點擊選擇影片</span>
+                        <span class="block mt-1 text-xs text-gray-400" data-i18n="video_trim_formats">建議使用瀏覽器可預覽的 MP4、WebM 或 MOV</span>
+                    </span>
+                </button>
+                <p class="video-privacy-note"><span aria-hidden="true">🔒</span><span data-i18n="video_privacy">影片只在瀏覽器內處理，不會上傳</span></p>
+
+                <div id="video-trimmer-controls" class="video-controls hidden">
+                    <div class="video-filebar">
+                        <div class="video-file-copy"><p id="video-trimmer-filename" class="video-filename"></p><p id="video-trimmer-filemeta" class="video-filemeta"></p></div>
+                        <button type="button" class="video-secondary" data-video-processing-lock onclick="document.getElementById('file-video-trimmer').click()" data-i18n="video_change_file">更換影片</button>
+                    </div>
+                    <div class="video-workbench">
+                        <div class="video-preview-panel">
+                            <span class="video-panel-title" data-i18n="video_trim_preview">剪輯預覽</span>
+                            <video id="video-trimmer-input-preview" class="video-preview hidden" controls playsinline></video>
+                            <p class="video-current-time"><span data-i18n="video_current_time">目前時間</span>: <output id="video-trimmer-current-value">00:00:00.000</output></p>
+                        </div>
+                        <div class="video-settings-panel">
+                            <span class="video-panel-title" data-i18n="video_trim_range">剪輯範圍</span>
+                            <div class="video-trim-grid">
+                                <div class="video-setting">
+                                    <label for="video-trimmer-start" data-i18n="video_trim_start">開始時間</label>
+                                    <input id="video-trimmer-start" class="video-time-input" data-video-processing-lock type="range" min="0" max="1" step="0.01" value="0" disabled>
+                                    <output id="video-trimmer-start-value" class="video-time-output" for="video-trimmer-start">00:00:00.000</output>
+                                </div>
+                                <div class="video-setting">
+                                    <label for="video-trimmer-end" data-i18n="video_trim_end">結束時間</label>
+                                    <input id="video-trimmer-end" class="video-time-input" data-video-processing-lock type="range" min="0" max="1" step="0.01" value="1" disabled>
+                                    <output id="video-trimmer-end-value" class="video-time-output" for="video-trimmer-end">00:00:00.000</output>
+                                </div>
+                            </div>
+                            <div class="video-trim-actions">
+                                <button type="button" id="video-trimmer-set-start" class="video-secondary" data-video-processing-lock disabled data-i18n="video_set_start">以目前時間設為開始</button>
+                                <button type="button" id="video-trimmer-set-end" class="video-secondary" data-video-processing-lock disabled data-i18n="video_set_end">以目前時間設為結束</button>
+                            </div>
+                            <p class="video-filemeta mt-3" data-i18n="video_trim_shortcuts">快捷鍵：空白鍵播放／暫停，← → 移動 0.1 秒，Ctrl/Cmd + I/O 設定起訖點。</p>
+                            <div class="video-action-row mt-4">
+                                <button type="button" id="video-trimmer-process" class="video-primary" data-i18n="video_trimmer_start">開始剪輯</button>
+                                <button type="button" id="video-trimmer-cancel" class="video-secondary hidden" data-i18n="video_cancel">取消</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="video-statusbar"><div class="video-status-copy">
+                        <p id="video-trimmer-status" class="video-status" data-dynamic-text="true" aria-live="polite">準備就緒</p>
+                        <div id="video-trimmer-progress-track" class="video-progress-track hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="video-trimmer-progress-bar" class="video-progress-bar"></div></div>
+                    </div></div>
+                    <div id="video-trimmer-result" class="video-result hidden">
+                        <div class="video-result-head">
+                            <div><span class="video-panel-title" data-i18n="video_result">處理結果</span><p id="video-trimmer-result-meta" class="video-result-meta"></p></div>
+                            <button type="button" id="video-trimmer-download" class="video-download" data-i18n="video_download">下載檔案</button>
+                        </div>
+                        <video class="video-preview hidden" data-video-output-preview="video" controls playsinline></video>
+                        <audio class="w-full hidden" data-video-output-preview="audio" controls></audio>
+                        <img class="video-preview hidden" data-video-output-preview="image" alt="" data-i18n-aria-label="video_result_preview_aria">
+                        <p class="video-filemeta hidden" data-video-preview-unavailable data-i18n="video_preview_unavailable">檔案已成功產生，但此瀏覽器無法預覽這個格式；仍可直接下載。</p>
+                    </div>
+                </div>
+                <p class="video-engine-note"><span data-i18n="video_engine_note">首次處理會下載約 32 MB 的 FFmpeg WebAssembly 核心，之後由瀏覽器快取。</span> <a href="https://ffmpegwasm.netlify.app/" target="_blank" rel="noopener">ffmpeg.wasm</a></p>
+            </div>
+        </section>
+
     </main>
     </div>
 
@@ -1440,6 +1791,10 @@
                 tab_protect: "PDF 解鎖",
                 tab_rotate: "PDF 旋轉",
                 tab_heic: "HEIC 轉 JPG",
+                tab_removebg: "圖片去背",
+                tab_video_converter: "影片轉換",
+                tab_video_compressor: "影片壓縮",
+                tab_video_trimmer: "影片剪輯",
                 processing: "處理中...",
                 status_done: "完成，下載已開始",
                 drop_pdf: "點擊或拖曳上傳 PDF",
@@ -1498,6 +1853,121 @@
                 drop_heic: "點擊或拖曳上傳 HEIC 檔案",
                 btn_dl_jpg: "下載 JPG",
                 btn_dl_all_jpg: "下載全部 JPG",
+                title_removebg: "自動＋手動圖片去背",
+                desc_removebg: "AI 自動移除背景，再用筆刷精修邊緣",
+                removebg_upload_title: "選擇圖片開始去背",
+                removebg_upload_hint: "拖放、點擊選擇，或直接貼上圖片",
+                removebg_formats: "支援 JPG、PNG、WebP、HEIC",
+                removebg_privacy: "圖片只在瀏覽器內處理，不會上傳",
+                removebg_new: "更換圖片",
+                removebg_auto_title: "AI 自動去背",
+                removebg_auto_again: "重新自動去背",
+                removebg_compare: "按住查看原圖",
+                removebg_manual_title: "手動精修",
+                removebg_erase: "擦除",
+                removebg_restore: "還原",
+                removebg_pan: "抓手",
+                removebg_pan_hint: "選擇抓手拖動畫布；也可按住空白鍵暫時使用抓手，方向鍵可微調。",
+                removebg_reset: "重設結果",
+                removebg_brush_size: "筆刷大小",
+                removebg_undo: "復原",
+                removebg_redo: "重做",
+                removebg_view_title: "檢視與輸出",
+                removebg_fit: "適合畫面",
+                removebg_download: "下載透明 PNG",
+                removebg_model_note: "首次使用需下載約 40 MB AI 模型；同一頁只初始化一次，之後優先使用瀏覽器快取。",
+                removebg_model_ready: "AI 模型已載入；本頁更換圖片不會重新下載。",
+                removebg_editor_aria: "去背編輯器",
+                removebg_controls_aria: "去背控制項",
+                removebg_zoom_out_aria: "縮小",
+                removebg_zoom_in_aria: "放大",
+                removebg_status_ready: "準備就緒",
+                removebg_status_decoding: "正在讀取圖片…",
+                removebg_status_model: "正在下載 AI 模型… {percent}%",
+                removebg_status_processing: "正在本機自動去背… {percent}%",
+                removebg_status_done: "自動去背完成，可使用筆刷精修",
+                removebg_status_manual: "手動修改已套用",
+                removebg_status_failed: "自動去背失敗，仍可使用手動筆刷",
+                removebg_error_type: "請選擇 JPG、PNG、WebP 或 HEIC 圖片",
+                removebg_error_decode: "無法解碼這張圖片",
+                removebg_error_heic: "HEIC 解碼器尚未載入",
+                removebg_error_load: "圖片載入失敗：{message}",
+                removebg_error_auto: "自動去背失敗：{message}",
+                title_video_converter: "影片轉換器",
+                desc_video_converter: "在常用影片與音訊格式之間轉換",
+                title_video_compressor: "影片壓縮器",
+                desc_video_compressor: "調整畫質與解析度，縮小影片檔案",
+                title_video_trimmer: "影片剪輯器",
+                desc_video_trimmer: "預覽影片並精確設定開始與結束時間",
+                video_converter_upload: "選擇影片開始轉換",
+                video_compressor_upload: "選擇影片開始壓縮",
+                video_trimmer_upload: "選擇影片開始剪輯",
+                video_upload_hint: "拖放或點擊選擇影片",
+                video_input_formats: "支援 MP4、MOV、WebM、MKV、AVI 等格式",
+                video_trim_formats: "建議使用瀏覽器可預覽的 MP4、WebM 或 MOV",
+                video_privacy: "影片只在瀏覽器內處理，不會上傳",
+                video_change_file: "更換影片",
+                video_input_preview: "原始影片預覽",
+                video_output_settings: "輸出設定",
+                video_output_format: "輸出格式",
+                video_format_mp4: "MP4 · H.264 / AAC",
+                video_format_webm: "WebM · VP9 / Opus",
+                video_format_mov: "MOV · H.264 / AAC",
+                video_format_mkv: "MKV · H.264 / AAC",
+                video_format_avi: "AVI · MPEG-4 / MP3",
+                video_format_ts: "TS · H.264 / AAC",
+                video_format_gif: "GIF 動圖",
+                video_format_mp3: "MP3 音訊",
+                video_format_m4a: "M4A · AAC 音訊",
+                video_format_aac: "AAC 音訊",
+                video_format_ogg: "OGG · Vorbis 音訊",
+                video_format_flac: "FLAC 無損音訊",
+                video_format_wav: "WAV 無損音訊",
+                video_converter_start: "開始轉換",
+                video_compression_settings: "壓縮設定",
+                video_codec: "影片編碼",
+                video_codec_h264: "H.264 · 相容性最佳",
+                video_codec_h265: "H.265 · 更小但較慢",
+                video_codec_vp9: "VP9 · WebM 開放格式",
+                video_quality: "畫質",
+                video_quality_high: "高畫質 · 較大檔案",
+                video_quality_balanced: "平衡 · 建議",
+                video_quality_small: "最小檔案 · 畫質較低",
+                video_resolution: "最高解析度",
+                video_resolution_original: "維持原始解析度",
+                video_compressor_start: "開始壓縮",
+                video_trim_preview: "剪輯預覽",
+                video_current_time: "目前時間",
+                video_trim_range: "剪輯範圍",
+                video_trim_start: "開始時間",
+                video_trim_end: "結束時間",
+                video_set_start: "以目前時間設為開始",
+                video_set_end: "以目前時間設為結束",
+                video_trim_shortcuts: "快捷鍵：空白鍵播放／暫停，← → 移動 0.1 秒，Ctrl/Cmd + I/O 設定起訖點。",
+                video_trimmer_start: "開始剪輯",
+                video_cancel: "取消",
+                video_result: "處理結果",
+                video_download: "下載檔案",
+                video_engine_note: "首次處理會下載約 32 MB 的 FFmpeg WebAssembly 核心，之後由瀏覽器快取。",
+                video_result_preview_aria: "影片處理結果預覽",
+                video_preview_unavailable: "檔案已成功產生，但此瀏覽器無法預覽這個格式；仍可直接下載。",
+                video_status_ready: "準備就緒",
+                video_status_metadata: "正在讀取影片資訊…",
+                video_status_preview_unsupported: "瀏覽器無法預覽此格式，請改用 MP4、WebM 或 MOV",
+                video_status_engine_download: "正在下載 FFmpeg 引擎… {percent}%",
+                video_status_engine_starting: "正在啟動 FFmpeg 引擎…",
+                video_status_preparing: "正在準備影片…",
+                video_status_processing: "正在瀏覽器內處理… {percent}%",
+                video_status_done: "處理完成，可下載結果",
+                video_status_cancelled: "已取消處理",
+                video_status_failed: "影片處理失敗",
+                video_compressor_result_meta: "原始 {original} → {output}（大小變化 {percent}%）",
+                video_trimmer_result_meta: "長度 {duration} · {size}",
+                video_error_select: "請先選擇影片",
+                video_error_type: "請選擇有效的影片檔案",
+                video_error_busy: "另一個影片工具正在處理中",
+                video_error_process: "影片處理失敗。請改用常見格式、降低解析度或縮短影片後重試。技術資訊：{message}",
+                video_warning_large: "這個檔案較大，處理速度與成功率會受到裝置記憶體限制。",
                 processing_count: "處理中 {current}/{total}",
                 progress_page: "第 {current}/{total} 頁",
                 err_select_at_least_two_pdfs: "請至少選擇 2 個 PDF 檔案",
@@ -1526,7 +1996,7 @@
                 heic_status_error_with_message: "失敗：{message}",
                 // About
                 about_title: "關於本站",
-                about_content: "本網站的所有 PDF 與圖片處理功能均完全在您的「瀏覽器端」運行。<br><br><strong>這意味著：</strong><br>1. 您的檔案<b>絕不會</b>上傳到我們的伺服器。<br>2. 即使沒有網路，頁面載入後依然可以使用。<br>3. 您的隱私是 100% 安全的。",
+                about_content: "本網站的所有文件、圖片與影片處理功能均完全在您的「瀏覽器端」運行。<br><br><strong>這意味著：</strong><br>1. 您的檔案<b>絕不會</b>上傳到我們的伺服器。<br>2. 已載入並快取的功能可在離線狀態下使用。<br>3. 您的隱私受到完整保護。",
                 github_btn: "前往 GitHub 專案",
                 btn_close: "了解，關閉視窗"
             },
@@ -1544,6 +2014,10 @@
                 tab_protect: "Unlock PDF",
                 tab_rotate: "Rotate PDF",
                 tab_heic: "HEIC to JPG",
+                tab_removebg: "Remove Background",
+                tab_video_converter: "Video Converter",
+                tab_video_compressor: "Video Compressor",
+                tab_video_trimmer: "Video Trimmer",
                 processing: "Processing...",
                 status_done: "Done. Your download has started.",
                 drop_pdf: "Click or Drag to Upload PDF",
@@ -1594,6 +2068,121 @@
                 drop_heic: "Click or Drag to Upload HEIC",
                 btn_dl_jpg: "Download JPG",
                 btn_dl_all_jpg: "Download All JPGs",
+                title_removebg: "Automatic + Manual Background Removal",
+                desc_removebg: "Remove the background with local AI, then refine the edges with brushes",
+                removebg_upload_title: "Choose an image to remove its background",
+                removebg_upload_hint: "Drop, browse, or paste an image",
+                removebg_formats: "Supports JPG, PNG, WebP, and HEIC",
+                removebg_privacy: "Your image stays in this browser and is never uploaded",
+                removebg_new: "Change image",
+                removebg_auto_title: "AI Background Removal",
+                removebg_auto_again: "Run AI removal again",
+                removebg_compare: "Hold to view original",
+                removebg_manual_title: "Manual Refinement",
+                removebg_erase: "Erase",
+                removebg_restore: "Restore",
+                removebg_pan: "Hand tool",
+                removebg_pan_hint: "Drag with the Hand tool. You can also hold Space temporarily, then use the arrow keys for fine movement.",
+                removebg_reset: "Reset result",
+                removebg_brush_size: "Brush size",
+                removebg_undo: "Undo",
+                removebg_redo: "Redo",
+                removebg_view_title: "View and Export",
+                removebg_fit: "Fit to view",
+                removebg_download: "Download Transparent PNG",
+                removebg_model_note: "The first use downloads about 40 MB. It initializes once per page and prefers the browser cache afterward.",
+                removebg_model_ready: "The AI model is ready; changing images on this page will not download it again.",
+                removebg_editor_aria: "Background removal editor",
+                removebg_controls_aria: "Background removal controls",
+                removebg_zoom_out_aria: "Zoom out",
+                removebg_zoom_in_aria: "Zoom in",
+                removebg_status_ready: "Ready",
+                removebg_status_decoding: "Reading image…",
+                removebg_status_model: "Downloading AI model… {percent}%",
+                removebg_status_processing: "Removing background locally… {percent}%",
+                removebg_status_done: "Automatic removal complete; refine it with the brushes",
+                removebg_status_manual: "Manual edit applied",
+                removebg_status_failed: "Automatic removal failed; manual brushes are still available",
+                removebg_error_type: "Choose a JPG, PNG, WebP, or HEIC image",
+                removebg_error_decode: "This image could not be decoded",
+                removebg_error_heic: "The HEIC decoder is not available",
+                removebg_error_load: "Image loading failed: {message}",
+                removebg_error_auto: "Automatic background removal failed: {message}",
+                title_video_converter: "Video Converter",
+                desc_video_converter: "Convert between common video and audio formats",
+                title_video_compressor: "Video Compressor",
+                desc_video_compressor: "Reduce video size by adjusting quality and resolution",
+                title_video_trimmer: "Video Trimmer",
+                desc_video_trimmer: "Preview a video and set precise start and end times",
+                video_converter_upload: "Choose a video to convert",
+                video_compressor_upload: "Choose a video to compress",
+                video_trimmer_upload: "Choose a video to trim",
+                video_upload_hint: "Drop a video here or click to browse",
+                video_input_formats: "Supports MP4, MOV, WebM, MKV, AVI, and more",
+                video_trim_formats: "For preview, use a browser-compatible MP4, WebM, or MOV",
+                video_privacy: "Your video stays in this browser and is never uploaded",
+                video_change_file: "Change video",
+                video_input_preview: "Original Video Preview",
+                video_output_settings: "Output Settings",
+                video_output_format: "Output format",
+                video_format_mp4: "MP4 · H.264 / AAC",
+                video_format_webm: "WebM · VP9 / Opus",
+                video_format_mov: "MOV · H.264 / AAC",
+                video_format_mkv: "MKV · H.264 / AAC",
+                video_format_avi: "AVI · MPEG-4 / MP3",
+                video_format_ts: "TS · H.264 / AAC",
+                video_format_gif: "Animated GIF",
+                video_format_mp3: "MP3 audio",
+                video_format_m4a: "M4A · AAC audio",
+                video_format_aac: "AAC audio",
+                video_format_ogg: "OGG · Vorbis audio",
+                video_format_flac: "Lossless FLAC audio",
+                video_format_wav: "Lossless WAV audio",
+                video_converter_start: "Start Conversion",
+                video_compression_settings: "Compression Settings",
+                video_codec: "Video codec",
+                video_codec_h264: "H.264 · Best compatibility",
+                video_codec_h265: "H.265 · Smaller but slower",
+                video_codec_vp9: "VP9 · Open WebM format",
+                video_quality: "Quality",
+                video_quality_high: "High quality · Larger file",
+                video_quality_balanced: "Balanced · Recommended",
+                video_quality_small: "Smallest file · Lower quality",
+                video_resolution: "Maximum resolution",
+                video_resolution_original: "Keep original resolution",
+                video_compressor_start: "Start Compression",
+                video_trim_preview: "Trim Preview",
+                video_current_time: "Current time",
+                video_trim_range: "Trim Range",
+                video_trim_start: "Start time",
+                video_trim_end: "End time",
+                video_set_start: "Set start to current time",
+                video_set_end: "Set end to current time",
+                video_trim_shortcuts: "Shortcuts: Space to play/pause, ← → to seek 0.1s, and Ctrl/Cmd + I/O to set in/out points.",
+                video_trimmer_start: "Start Trimming",
+                video_cancel: "Cancel",
+                video_result: "Result",
+                video_download: "Download File",
+                video_engine_note: "The first job downloads an FFmpeg WebAssembly core of about 32 MB. Your browser caches it afterward.",
+                video_result_preview_aria: "Processed video result preview",
+                video_preview_unavailable: "The file was created successfully, but this browser cannot preview its format. You can still download it.",
+                video_status_ready: "Ready",
+                video_status_metadata: "Reading video information…",
+                video_status_preview_unsupported: "This format cannot be previewed by your browser. Try MP4, WebM, or MOV.",
+                video_status_engine_download: "Downloading the FFmpeg engine… {percent}%",
+                video_status_engine_starting: "Starting the FFmpeg engine…",
+                video_status_preparing: "Preparing video…",
+                video_status_processing: "Processing locally… {percent}%",
+                video_status_done: "Processing complete; your result is ready",
+                video_status_cancelled: "Processing cancelled",
+                video_status_failed: "Video processing failed",
+                video_compressor_result_meta: "{original} → {output} (size change {percent}%)",
+                video_trimmer_result_meta: "Duration {duration} · {size}",
+                video_error_select: "Choose a video first",
+                video_error_type: "Choose a valid video file",
+                video_error_busy: "Another video tool is currently processing",
+                video_error_process: "Video processing failed. Try a common format, lower resolution, or a shorter clip. Technical detail: {message}",
+                video_warning_large: "This is a large file. Processing speed and reliability depend on your device memory.",
                 processing_count: "Processing {current}/{total}",
                 progress_page: "Page {current}/{total}",
                 err_select_at_least_two_pdfs: "Please select at least 2 PDF files",
@@ -1621,7 +2210,7 @@
                 heic_status_done: "Conversion complete",
                 heic_status_error_with_message: "Failed: {message}",
                 about_title: "About",
-                about_content: "All PDF and image processing functions on this website run entirely within your <b>Browser</b>.<br><br><strong>This means:</strong><br>1. Your files are <b>NEVER</b> uploaded to our servers.<br>2. You can use this site even without an internet connection after the page loads.<br>3. Your privacy is 100% secure.",
+                about_content: "All document, image, and video processing functions on this website run entirely within your <b>browser</b>.<br><br><strong>This means:</strong><br>1. Your files are <b>NEVER</b> uploaded to our servers.<br>2. Cached features can work offline after they have loaded once.<br>3. Your privacy stays protected.",
                 github_btn: "Visit GitHub",
                 btn_close: "Got it, Close"
             },
@@ -1639,6 +2228,10 @@
                 tab_protect: "PDF 解除",
                 tab_rotate: "PDF 回転",
                 tab_heic: "HEIC JPG 変換",
+                tab_removebg: "画像背景削除",
+                tab_video_converter: "動画変換",
+                tab_video_compressor: "動画圧縮",
+                tab_video_trimmer: "動画トリミング",
                 processing: "処理中...",
                 status_done: "完了しました。ダウンロードを開始しました。",
                 drop_pdf: "PDF をドラッグ＆ドロップ",
@@ -1689,6 +2282,121 @@
                 drop_heic: "HEIC をドラッグ＆ドロップ",
                 btn_dl_jpg: "JPG をダウンロード",
                 btn_dl_all_jpg: "すべての JPG をダウンロード",
+                title_removebg: "自動＋手動の背景削除",
+                desc_removebg: "ローカル AI で背景を削除し、ブラシで輪郭を細かく調整します",
+                removebg_upload_title: "画像を選択して背景を削除",
+                removebg_upload_hint: "ドラッグ、クリック、または貼り付けで画像を追加",
+                removebg_formats: "JPG、PNG、WebP、HEIC に対応",
+                removebg_privacy: "画像はブラウザ内だけで処理され、アップロードされません",
+                removebg_new: "画像を変更",
+                removebg_auto_title: "AI 自動背景削除",
+                removebg_auto_again: "AI 背景削除を再実行",
+                removebg_compare: "押している間、元画像を表示",
+                removebg_manual_title: "手動調整",
+                removebg_erase: "消去",
+                removebg_restore: "復元",
+                removebg_pan: "ハンド",
+                removebg_pan_hint: "ハンドでキャンバスをドラッグできます。Space キーを押している間も使用でき、矢印キーで微調整できます。",
+                removebg_reset: "結果をリセット",
+                removebg_brush_size: "ブラシサイズ",
+                removebg_undo: "元に戻す",
+                removebg_redo: "やり直す",
+                removebg_view_title: "表示と書き出し",
+                removebg_fit: "画面に合わせる",
+                removebg_download: "透明 PNG をダウンロード",
+                removebg_model_note: "初回は約 40 MB をダウンロードします。同じページでは一度だけ初期化し、以後はブラウザキャッシュを優先します。",
+                removebg_model_ready: "AI モデルの準備が完了しました。このページで画像を変更しても再ダウンロードしません。",
+                removebg_editor_aria: "背景削除エディター",
+                removebg_controls_aria: "背景削除コントロール",
+                removebg_zoom_out_aria: "縮小",
+                removebg_zoom_in_aria: "拡大",
+                removebg_status_ready: "準備完了",
+                removebg_status_decoding: "画像を読み込んでいます…",
+                removebg_status_model: "AI モデルをダウンロード中… {percent}%",
+                removebg_status_processing: "ブラウザ内で背景を削除中… {percent}%",
+                removebg_status_done: "自動背景削除が完了しました。ブラシで調整できます",
+                removebg_status_manual: "手動変更を適用しました",
+                removebg_status_failed: "自動背景削除に失敗しました。手動ブラシは使用できます",
+                removebg_error_type: "JPG、PNG、WebP、または HEIC 画像を選択してください",
+                removebg_error_decode: "画像を読み込めませんでした",
+                removebg_error_heic: "HEIC デコーダーを利用できません",
+                removebg_error_load: "画像の読み込みに失敗しました：{message}",
+                removebg_error_auto: "自動背景削除に失敗しました：{message}",
+                title_video_converter: "動画変換",
+                desc_video_converter: "一般的な動画・音声形式に変換します",
+                title_video_compressor: "動画圧縮",
+                desc_video_compressor: "画質と解像度を調整してファイルサイズを削減します",
+                title_video_trimmer: "動画トリミング",
+                desc_video_trimmer: "動画をプレビューし、開始・終了時間を正確に設定します",
+                video_converter_upload: "変換する動画を選択",
+                video_compressor_upload: "圧縮する動画を選択",
+                video_trimmer_upload: "トリミングする動画を選択",
+                video_upload_hint: "動画をドロップするか、クリックして選択",
+                video_input_formats: "MP4、MOV、WebM、MKV、AVI などに対応",
+                video_trim_formats: "プレビューには MP4、WebM、MOV を推奨します",
+                video_privacy: "動画はブラウザ内だけで処理され、アップロードされません",
+                video_change_file: "動画を変更",
+                video_input_preview: "元動画のプレビュー",
+                video_output_settings: "出力設定",
+                video_output_format: "出力形式",
+                video_format_mp4: "MP4 · H.264 / AAC",
+                video_format_webm: "WebM · VP9 / Opus",
+                video_format_mov: "MOV · H.264 / AAC",
+                video_format_mkv: "MKV · H.264 / AAC",
+                video_format_avi: "AVI · MPEG-4 / MP3",
+                video_format_ts: "TS · H.264 / AAC",
+                video_format_gif: "アニメーション GIF",
+                video_format_mp3: "MP3 音声",
+                video_format_m4a: "M4A · AAC 音声",
+                video_format_aac: "AAC 音声",
+                video_format_ogg: "OGG · Vorbis 音声",
+                video_format_flac: "FLAC ロスレス音声",
+                video_format_wav: "WAV ロスレス音声",
+                video_converter_start: "変換開始",
+                video_compression_settings: "圧縮設定",
+                video_codec: "動画コーデック",
+                video_codec_h264: "H.264 · 最高の互換性",
+                video_codec_h265: "H.265 · 小容量だが低速",
+                video_codec_vp9: "VP9 · オープンな WebM 形式",
+                video_quality: "画質",
+                video_quality_high: "高画質 · 大きめのファイル",
+                video_quality_balanced: "バランス · 推奨",
+                video_quality_small: "最小ファイル · 低画質",
+                video_resolution: "最大解像度",
+                video_resolution_original: "元の解像度を維持",
+                video_compressor_start: "圧縮開始",
+                video_trim_preview: "トリミングプレビュー",
+                video_current_time: "現在時刻",
+                video_trim_range: "トリミング範囲",
+                video_trim_start: "開始時間",
+                video_trim_end: "終了時間",
+                video_set_start: "現在時刻を開始点に設定",
+                video_set_end: "現在時刻を終了点に設定",
+                video_trim_shortcuts: "ショートカット：Space で再生／一時停止、← → で 0.1 秒移動、Ctrl/Cmd + I/O で開始・終了点を設定。",
+                video_trimmer_start: "トリミング開始",
+                video_cancel: "キャンセル",
+                video_result: "処理結果",
+                video_download: "ファイルをダウンロード",
+                video_engine_note: "初回処理時に約 32 MB の FFmpeg WebAssembly コアをダウンロードします。以後はブラウザにキャッシュされます。",
+                video_result_preview_aria: "動画処理結果のプレビュー",
+                video_preview_unavailable: "ファイルは正常に作成されましたが、このブラウザではプレビューできません。ダウンロードは可能です。",
+                video_status_ready: "準備完了",
+                video_status_metadata: "動画情報を読み込んでいます…",
+                video_status_preview_unsupported: "ブラウザでこの形式をプレビューできません。MP4、WebM、MOV をお試しください。",
+                video_status_engine_download: "FFmpeg エンジンをダウンロード中… {percent}%",
+                video_status_engine_starting: "FFmpeg エンジンを起動中…",
+                video_status_preparing: "動画を準備中…",
+                video_status_processing: "ブラウザ内で処理中… {percent}%",
+                video_status_done: "処理が完了しました。結果をダウンロードできます",
+                video_status_cancelled: "処理をキャンセルしました",
+                video_status_failed: "動画処理に失敗しました",
+                video_compressor_result_meta: "{original} → {output}（サイズ変化 {percent}%）",
+                video_trimmer_result_meta: "長さ {duration} · {size}",
+                video_error_select: "先に動画を選択してください",
+                video_error_type: "有効な動画ファイルを選択してください",
+                video_error_busy: "別の動画ツールが処理中です",
+                video_error_process: "動画処理に失敗しました。一般的な形式、低い解像度、短い動画で再試行してください。技術情報：{message}",
+                video_warning_large: "大きなファイルです。処理速度と安定性は端末のメモリに依存します。",
                 processing_count: "処理中 {current}/{total}",
                 progress_page: "{current}/{total} ページ",
                 err_select_at_least_two_pdfs: "少なくとも 2 つの PDF ファイルを選択してください",
@@ -1716,7 +2424,7 @@
                 heic_status_done: "変換完了",
                 heic_status_error_with_message: "失敗：{message}",
                 about_title: "このサイトについて",
-                about_content: "このWebサイトのすべてのPDFおよび画像処理機能は、完全に<b>ブラウザ上</b>で実行されます。<br><br><strong>つまり：</strong><br>1. ファイルがサーバーにアップロードされることは<b>決してありません</b>。<br>2. ページ読み込み後は、インターネット接続がなくても使用可能です。<br>3. プライバシーは100%守られます。",
+                about_content: "このWebサイトの文書、画像、動画処理機能は、すべて<b>ブラウザ上</b>で実行されます。<br><br><strong>つまり：</strong><br>1. ファイルがサーバーにアップロードされることは<b>決してありません</b>。<br>2. 一度読み込んでキャッシュされた機能はオフラインでも利用できます。<br>3. プライバシーは保護されます。",
                 github_btn: "GitHub へ",
                 btn_close: "閉じる"
             }
@@ -1800,17 +2508,21 @@
         }
         function changeLanguage(lang) {
             currentLang = lang;
+            document.documentElement.lang = lang;
             document.getElementById('lang-selector').value = lang;
             const dict = translations[lang] || translations['zh-TW'];
-            document.querySelectorAll('[data-i18n]').forEach(el => {
+            document.querySelectorAll('[data-i18n], [data-i18n-aria-label]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if (dict[key]) {
+                const ariaKey = el.getAttribute('data-i18n-aria-label');
+                if (ariaKey && dict[ariaKey]) el.setAttribute('aria-label', dict[ariaKey]);
+                if (key && dict[key]) {
                     if (el.dataset.dynamicText === 'true') return;
                     if (el.hasAttribute('placeholder')) el.placeholder = dict[key];
                     else el.innerHTML = dict[key];
                 }
             });
             updatePasswordToggleLabels();
+            window.dispatchEvent(new CustomEvent('yyy:languagechange', { detail: { lang } }));
         }
         window.addEventListener('load', () => {
             const l = navigator.language || navigator.userLanguage;
@@ -1832,7 +2544,7 @@
             if (e.target.id === 'about-modal') closeAboutModal();
         });
 
-        const tabs = ['img', 'img2pdf', 'merge', 'split', 'compress', 'protect', 'rotate', 'heic'];
+        const tabs = ['img', 'img2pdf', 'merge', 'split', 'compress', 'protect', 'rotate', 'heic', 'removebg', 'video-converter', 'video-compressor', 'video-trimmer'];
         function switchTab(t) {
             tabs.forEach(x => {
                 const section = document.getElementById(`sec-${x}`);
@@ -1908,6 +2620,10 @@
             setupDragDrop('drop-unlock', 'file-unlock');
             setupDragDrop('drop-rotate', 'file-rotate');
             setupDragDrop('drop-heic', 'file-heic');
+            setupDragDrop('drop-removebg', 'file-removebg');
+            setupDragDrop('drop-video-converter', 'file-video-converter');
+            setupDragDrop('drop-video-compressor', 'file-video-compressor');
+            setupDragDrop('drop-video-trimmer', 'file-video-trimmer');
         });
 
         // ================= 功能邏輯 =================
@@ -2536,6 +3252,9 @@
             })().catch(e=>document.getElementById('status-heic').textContent = t('heic_status_error_with_message', { message: e.message }));
         });
 
+        window.YYYTools = { t, notify, safeBaseName };
     </script>
+    <script type="module" src="background-removal.js?v=20260807-3"></script>
+    <script type="module" src="video-tools.js"></script>
 </body>
 </html>
