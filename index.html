@@ -743,19 +743,26 @@
             grid-template-columns: 15rem minmax(0, 1fr);
             gap: 0;
             padding: 1.25rem 0 2.5rem;
-            align-items: start;
+            align-items: stretch;
         }
 
         .layout-v3 .tool-nav-shell {
-            top: 5.25rem;
-        }
-
-        .layout-v3 .tool-nav-inner {
-            min-height: 29rem;
+            position: relative;
+            top: auto;
+            align-self: stretch;
             border: 1px solid var(--line);
             border-right: 0;
             border-radius: 10px 0 0 10px;
             background: var(--surface-2);
+        }
+
+        .layout-v3 .tool-nav-inner {
+            position: sticky;
+            top: 5.25rem;
+            min-height: 29rem;
+            border: 0;
+            border-radius: inherit;
+            background: transparent;
             box-shadow: none;
             padding: 0.5rem;
         }
@@ -1036,12 +1043,17 @@
             .layout-v3 .tool-nav-shell {
                 position: sticky;
                 top: 3.75rem;
+                align-self: auto;
+                border: 0;
                 border-bottom: 1px solid var(--line);
+                border-radius: 0;
                 background: var(--surface);
                 backdrop-filter: none;
             }
 
             .layout-v3 .tool-nav-inner {
+                position: static;
+                top: auto;
                 min-height: 0;
                 border: 0;
                 border-radius: 0;
@@ -1437,7 +1449,7 @@
                     <div class="removebg-workbench">
                         <div class="removebg-canvas-frame">
                             <div id="removebg-stage" class="removebg-stage" data-tool="erase">
-                                <canvas id="removebg-canvas" aria-label="去背編輯器" data-i18n-aria-label="removebg_editor_aria"></canvas>
+                                <canvas id="removebg-canvas" tabindex="0" aria-label="去背編輯器" aria-describedby="removebg-pan-hint" data-i18n-aria-label="removebg_editor_aria"></canvas>
                             </div>
                         </div>
 
@@ -1453,9 +1465,10 @@
                                 <div class="removebg-button-grid">
                                     <button type="button" class="removebg-tool is-active" data-removebg-tool="erase" aria-pressed="true" data-i18n="removebg_erase">擦除</button>
                                     <button type="button" class="removebg-tool" data-removebg-tool="restore" aria-pressed="false" data-i18n="removebg_restore">還原</button>
-                                    <button type="button" class="removebg-tool" data-removebg-tool="pan" aria-pressed="false" data-i18n="removebg_pan">移動畫布</button>
+                                    <button type="button" class="removebg-tool" data-removebg-tool="pan" aria-pressed="false" data-i18n="removebg_pan">抓手</button>
                                     <button type="button" id="removebg-reset" class="removebg-action" data-i18n="removebg_reset">重設結果</button>
                                 </div>
+                                <p id="removebg-pan-hint" class="removebg-pan-hint" data-i18n="removebg_pan_hint">選擇抓手拖動畫布；也可按住空白鍵暫時使用抓手，方向鍵可微調。</p>
 
                                 <label class="removebg-panel-title mt-4" for="removebg-brush-size" data-i18n="removebg_brush_size">筆刷大小</label>
                                 <div class="removebg-range-row">
@@ -1476,9 +1489,10 @@
                                     <output id="removebg-zoom-value" class="removebg-zoom-value">100%</output>
                                     <button type="button" id="removebg-zoom-in" class="removebg-zoom-button" aria-label="放大" data-i18n-aria-label="removebg_zoom_in_aria">＋</button>
                                 </div>
+                                <button type="button" id="removebg-fit" class="removebg-action w-full mb-2" data-i18n="removebg_fit">適合畫面</button>
                                 <button type="button" id="removebg-download" class="removebg-download" data-i18n="removebg_download">下載透明 PNG</button>
                                 <p class="removebg-license mt-3">
-                                    <span data-i18n="removebg_model_note">首次使用需下載約 40 MB AI 模型，之後由瀏覽器快取。</span>
+                                    <span id="removebg-model-note" data-i18n="removebg_model_note">首次使用需下載約 40 MB AI 模型；同一頁只初始化一次，之後優先使用瀏覽器快取。</span>
                                     <a href="https://github.com/imgly/background-removal-js" target="_blank" rel="noopener">IMG.LY · AGPL</a>
                                 </p>
                             </div>
@@ -1852,14 +1866,17 @@
                 removebg_manual_title: "手動精修",
                 removebg_erase: "擦除",
                 removebg_restore: "還原",
-                removebg_pan: "移動畫布",
+                removebg_pan: "抓手",
+                removebg_pan_hint: "選擇抓手拖動畫布；也可按住空白鍵暫時使用抓手，方向鍵可微調。",
                 removebg_reset: "重設結果",
                 removebg_brush_size: "筆刷大小",
                 removebg_undo: "復原",
                 removebg_redo: "重做",
                 removebg_view_title: "檢視與輸出",
+                removebg_fit: "適合畫面",
                 removebg_download: "下載透明 PNG",
-                removebg_model_note: "首次使用需下載約 40 MB AI 模型，之後由瀏覽器快取。",
+                removebg_model_note: "首次使用需下載約 40 MB AI 模型；同一頁只初始化一次，之後優先使用瀏覽器快取。",
+                removebg_model_ready: "AI 模型已載入；本頁更換圖片不會重新下載。",
                 removebg_editor_aria: "去背編輯器",
                 removebg_controls_aria: "去背控制項",
                 removebg_zoom_out_aria: "縮小",
@@ -2064,14 +2081,17 @@
                 removebg_manual_title: "Manual Refinement",
                 removebg_erase: "Erase",
                 removebg_restore: "Restore",
-                removebg_pan: "Pan canvas",
+                removebg_pan: "Hand tool",
+                removebg_pan_hint: "Drag with the Hand tool. You can also hold Space temporarily, then use the arrow keys for fine movement.",
                 removebg_reset: "Reset result",
                 removebg_brush_size: "Brush size",
                 removebg_undo: "Undo",
                 removebg_redo: "Redo",
                 removebg_view_title: "View and Export",
+                removebg_fit: "Fit to view",
                 removebg_download: "Download Transparent PNG",
-                removebg_model_note: "The first use downloads an AI model of about 40 MB. Your browser caches it afterward.",
+                removebg_model_note: "The first use downloads about 40 MB. It initializes once per page and prefers the browser cache afterward.",
+                removebg_model_ready: "The AI model is ready; changing images on this page will not download it again.",
                 removebg_editor_aria: "Background removal editor",
                 removebg_controls_aria: "Background removal controls",
                 removebg_zoom_out_aria: "Zoom out",
@@ -2275,14 +2295,17 @@
                 removebg_manual_title: "手動調整",
                 removebg_erase: "消去",
                 removebg_restore: "復元",
-                removebg_pan: "キャンバス移動",
+                removebg_pan: "ハンド",
+                removebg_pan_hint: "ハンドでキャンバスをドラッグできます。Space キーを押している間も使用でき、矢印キーで微調整できます。",
                 removebg_reset: "結果をリセット",
                 removebg_brush_size: "ブラシサイズ",
                 removebg_undo: "元に戻す",
                 removebg_redo: "やり直す",
                 removebg_view_title: "表示と書き出し",
+                removebg_fit: "画面に合わせる",
                 removebg_download: "透明 PNG をダウンロード",
-                removebg_model_note: "初回は約 40 MB の AI モデルをダウンロードします。以後はブラウザにキャッシュされます。",
+                removebg_model_note: "初回は約 40 MB をダウンロードします。同じページでは一度だけ初期化し、以後はブラウザキャッシュを優先します。",
+                removebg_model_ready: "AI モデルの準備が完了しました。このページで画像を変更しても再ダウンロードしません。",
                 removebg_editor_aria: "背景削除エディター",
                 removebg_controls_aria: "背景削除コントロール",
                 removebg_zoom_out_aria: "縮小",
@@ -3231,7 +3254,7 @@
 
         window.YYYTools = { t, notify, safeBaseName };
     </script>
-    <script type="module" src="background-removal.js"></script>
+    <script type="module" src="background-removal.js?v=20260807-3"></script>
     <script type="module" src="video-tools.js"></script>
 </body>
 </html>

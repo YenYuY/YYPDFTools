@@ -1,15 +1,26 @@
 import {
     backgroundRemovalDownloadName,
+    calculateFittedCanvasSize,
     canvasPointFromClient,
     clamp,
+    constrainCanvasPan,
+    createModelSessionLoader,
     isSupportedImageFile,
     progressPercent,
     strokeBounds,
     unionBounds
-} from './background-removal-core.js';
+} from './background-removal-core.js?v=20260807-3';
 
 const MODEL_MODULE_URL = 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.7.0/+esm';
 const MAX_HISTORY = 30;
+const CANVAS_PADDING = 12;
+const MINIMUM_VISIBLE_CANVAS = 48;
+const MODEL_CONFIG = Object.freeze({
+    model: 'small',
+    device: 'cpu',
+    fetchArgs: Object.freeze({ cache: 'force-cache' }),
+    output: Object.freeze({ format: 'image/png', quality: 1 })
+});
 
 const section = document.getElementById('sec-removebg');
 const fileInput = document.getElementById('file-removebg');
@@ -32,6 +43,8 @@ const brushValue = document.getElementById('removebg-brush-value');
 const zoomValue = document.getElementById('removebg-zoom-value');
 const zoomOutButton = document.getElementById('removebg-zoom-out');
 const zoomInButton = document.getElementById('removebg-zoom-in');
+const fitButton = document.getElementById('removebg-fit');
+const modelNote = document.getElementById('removebg-model-note');
 const toolButtons = Array.from(document.querySelectorAll('[data-removebg-tool]'));
 
 const context = canvas.getContext('2d', { willReadFrequently: true });
@@ -53,11 +66,14 @@ let zoom = 1;
 let panX = 0;
 let panY = 0;
 let panStart = null;
-let modelModulePromise = null;
+let canvasDisplayWidth = 0;
+let canvasDisplayHeight = 0;
+let toolBeforeSpace = null;
 let processingGeneration = 0;
 let isProcessing = false;
 let statusState = { key: 'removebg_status_ready', params: {} };
 let comparePixels = null;
+const modelLoader = createModelSessionLoader(() => import(MODEL_MODULE_URL), MODEL_CONFIG);
 
 function translate(key, params = {}) {
     return window.YYYTools?.t?.(key, params) || key;
@@ -66,6 +82,10 @@ function translate(key, params = {}) {
 function setStatus(key, params = {}) {
     statusState = { key, params };
     statusEl.textContent = translate(key, params);
+}
+
+function updateModelNote() {
+    modelNote.textContent = translate(modelLoader.isReady() ? 'removebg_model_ready' : 'removebg_model_note');
 }
 
 function setProgress(value, visible = true) {
@@ -101,7 +121,36 @@ function updateBrushLabel() {
     brushValue.textContent = `${brushSize.value} px`;
 }
 
+function fitCanvasToStage() {
+    const fitted = calculateFittedCanvasSize(
+        canvas.width,
+        canvas.height,
+        stage.clientWidth,
+        stage.clientHeight,
+        CANVAS_PADDING
+    );
+    if (!fitted.width || !fitted.height) return false;
+
+    canvasDisplayWidth = fitted.width;
+    canvasDisplayHeight = fitted.height;
+    canvas.style.width = `${fitted.width}px`;
+    canvas.style.height = `${fitted.height}px`;
+    return true;
+}
+
 function updateTransform() {
+    const constrained = constrainCanvasPan(
+        panX,
+        panY,
+        canvasDisplayWidth,
+        canvasDisplayHeight,
+        zoom,
+        stage.clientWidth,
+        stage.clientHeight,
+        MINIMUM_VISIBLE_CANVAS
+    );
+    panX = constrained.x;
+    panY = constrained.y;
     canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
     zoomValue.textContent = `${Math.round(zoom * 100)}%`;
 }
@@ -110,6 +159,7 @@ function resetView() {
     zoom = 1;
     panX = 0;
     panY = 0;
+    fitCanvasToStage();
     updateTransform();
 }
 
@@ -209,36 +259,29 @@ async function loadFile(file) {
     }
 }
 
-async function getModelModule() {
-    if (!modelModulePromise) modelModulePromise = import(MODEL_MODULE_URL);
-    try {
-        return await modelModulePromise;
-    } catch (error) {
-        modelModulePromise = null;
-        throw error;
-    }
-}
-
 async function runAutomaticRemoval() {
     if (!inputBlob) return;
     const generation = ++processingGeneration;
     setProcessing(true);
     clearHistory();
     setProgress(0, true);
-    setStatus('removebg_status_model', { percent: 0 });
+    setStatus(modelLoader.isReady() ? 'removebg_status_processing' : 'removebg_status_model', { percent: 0 });
 
     try {
-        const { removeBackground } = await getModelModule();
-        const result = await removeBackground(inputBlob, {
-            model: 'small',
-            device: 'cpu',
-            output: { format: 'image/png', quality: 1 },
-            progress: (key, current, total) => {
-                if (generation !== processingGeneration) return;
-                const percent = progressPercent(current, total);
-                setProgress(percent, true);
-                setStatus(key.startsWith('compute:') ? 'removebg_status_processing' : 'removebg_status_model', { percent });
-            }
+        const handleProgress = (key, current, total) => {
+            if (generation !== processingGeneration) return;
+            const percent = progressPercent(current, total);
+            setProgress(percent, true);
+            setStatus(key.startsWith('compute:') ? 'removebg_status_processing' : 'removebg_status_model', { percent });
+        };
+        const modelModule = await modelLoader.ensureReady(handleProgress);
+        if (generation !== processingGeneration) return;
+
+        updateModelNote();
+        setStatus('removebg_status_processing', { percent: 0 });
+        const result = await modelModule.removeBackground(inputBlob, {
+            ...MODEL_CONFIG,
+            progress: handleProgress
         });
 
         if (generation !== processingGeneration) return;
@@ -425,6 +468,10 @@ function resetEditor() {
     automaticSucceeded = false;
     canvas.width = 0;
     canvas.height = 0;
+    canvas.style.width = '';
+    canvas.style.height = '';
+    canvasDisplayWidth = 0;
+    canvasDisplayHeight = 0;
     fileInput.value = '';
     clearHistory();
     resetView();
@@ -460,14 +507,16 @@ async function downloadResult() {
     }
 }
 
-canvas.addEventListener('pointerdown', event => {
+stage.addEventListener('pointerdown', event => {
     if (!canvas.width || activePointerId !== null || isProcessing) return;
+    if (activeTool !== 'pan' && event.target !== canvas) return;
     event.preventDefault();
     activePointerId = event.pointerId;
-    canvas.setPointerCapture(event.pointerId);
+    stage.setPointerCapture(event.pointerId);
     stage.classList.add('is-dragging');
 
     if (activeTool === 'pan') {
+        canvas.focus({ preventScroll: true });
         panStart = { clientX: event.clientX, clientY: event.clientY, panX, panY };
         return;
     }
@@ -477,7 +526,7 @@ canvas.addEventListener('pointerdown', event => {
     drawBrushSegment(lastPoint, lastPoint);
 });
 
-canvas.addEventListener('pointermove', event => {
+stage.addEventListener('pointermove', event => {
     if (event.pointerId !== activePointerId) return;
     event.preventDefault();
 
@@ -495,16 +544,18 @@ canvas.addEventListener('pointermove', event => {
 
 function endPointer(event) {
     if (event.pointerId !== activePointerId) return;
-    if (activeTool !== 'pan') finishStroke();
+    const endedWithPan = activeTool === 'pan';
+    if (!endedWithPan) finishStroke();
     activePointerId = null;
     lastPoint = null;
     panStart = null;
     stage.classList.remove('is-dragging');
-    canvas.releasePointerCapture?.(event.pointerId);
+    stage.releasePointerCapture?.(event.pointerId);
+    if (endedWithPan && toolBeforeSpace !== null) stopTemporaryPan();
 }
 
-canvas.addEventListener('pointerup', endPointer);
-canvas.addEventListener('pointercancel', endPointer);
+stage.addEventListener('pointerup', endPointer);
+stage.addEventListener('pointercancel', endPointer);
 
 fileInput.addEventListener('change', event => {
     const [file] = event.target.files || [];
@@ -512,7 +563,10 @@ fileInput.addEventListener('change', event => {
 });
 
 toolButtons.forEach(button => {
-    button.addEventListener('click', () => setTool(button.dataset.removebgTool));
+    button.addEventListener('click', () => {
+        toolBeforeSpace = null;
+        setTool(button.dataset.removebgTool);
+    });
 });
 
 brushSize.addEventListener('input', updateBrushLabel);
@@ -524,6 +578,7 @@ resetButton.addEventListener('click', resetToAutomatic);
 newButton.addEventListener('click', resetEditor);
 zoomOutButton.addEventListener('click', () => changeZoom(-0.25));
 zoomInButton.addEventListener('click', () => changeZoom(0.25));
+fitButton.addEventListener('click', resetView);
 
 compareButton.addEventListener('pointerdown', event => {
     event.preventDefault();
@@ -538,8 +593,30 @@ compareButton.addEventListener('keydown', event => {
 compareButton.addEventListener('keyup', stopCompare);
 compareButton.addEventListener('blur', stopCompare);
 
+function isFormControl(target) {
+    return target instanceof HTMLElement && (
+        target.isContentEditable ||
+        ['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName)
+    );
+}
+
+function stopTemporaryPan() {
+    if (toolBeforeSpace === null) return;
+    if (activePointerId !== null) return;
+    const previousTool = toolBeforeSpace;
+    toolBeforeSpace = null;
+    setTool(previousTool);
+}
+
 document.addEventListener('keydown', event => {
     if (section.classList.contains('hidden') || !canvas.width) return;
+    if (event.code === 'Space' && !event.repeat && activePointerId === null && !isFormControl(event.target)) {
+        event.preventDefault();
+        toolBeforeSpace = activeTool;
+        setTool('pan');
+        return;
+    }
+
     const modifier = event.ctrlKey || event.metaKey;
     if (modifier && event.key.toLowerCase() === 'z') {
         event.preventDefault();
@@ -552,7 +629,23 @@ document.addEventListener('keydown', event => {
         brushSize.value = String(clamp(Number(brushSize.value) + direction, Number(brushSize.min), Number(brushSize.max)));
         updateBrushLabel();
     }
+
+    if (document.activeElement === canvas && activeTool === 'pan' && event.key.startsWith('Arrow')) {
+        event.preventDefault();
+        const step = event.shiftKey ? 64 : 24;
+        if (event.key === 'ArrowLeft') panX -= step;
+        if (event.key === 'ArrowRight') panX += step;
+        if (event.key === 'ArrowUp') panY -= step;
+        if (event.key === 'ArrowDown') panY += step;
+        updateTransform();
+    }
 });
+
+document.addEventListener('keyup', event => {
+    if (event.code === 'Space') stopTemporaryPan();
+});
+
+window.addEventListener('blur', stopTemporaryPan);
 
 document.addEventListener('paste', event => {
     if (section.classList.contains('hidden') || isProcessing) return;
@@ -564,7 +657,17 @@ document.addEventListener('paste', event => {
     }
 });
 
-window.addEventListener('yyy:languagechange', () => setStatus(statusState.key, statusState.params));
+window.addEventListener('yyy:languagechange', () => {
+    setStatus(statusState.key, statusState.params);
+    updateModelNote();
+});
+
+const stageResizeObserver = new ResizeObserver(() => {
+    if (!canvas.width || editor.classList.contains('hidden')) return;
+    fitCanvasToStage();
+    updateTransform();
+});
+stageResizeObserver.observe(stage);
 
 updateBrushLabel();
 updateHistoryButtons();

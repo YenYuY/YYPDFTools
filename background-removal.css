@@ -139,13 +139,16 @@
 
 #removebg-canvas {
     display: block;
-    max-width: calc(100% - 1.5rem);
-    max-height: calc(100% - 1.5rem);
-    width: auto;
-    height: auto;
+    max-width: none;
+    max-height: none;
     transform-origin: center center;
     user-select: none;
     -webkit-user-select: none;
+}
+
+#removebg-canvas:focus-visible {
+    outline: 3px solid color-mix(in oklab, var(--accent) 72%, white);
+    outline-offset: 3px;
 }
 
 .removebg-stage[data-tool="erase"] #removebg-canvas,
@@ -153,10 +156,12 @@
     cursor: crosshair;
 }
 
+.removebg-stage[data-tool="pan"],
 .removebg-stage[data-tool="pan"] #removebg-canvas {
     cursor: grab;
 }
 
+.removebg-stage.is-dragging[data-tool="pan"],
 .removebg-stage.is-dragging[data-tool="pan"] #removebg-canvas {
     cursor: grabbing;
 }
@@ -265,6 +270,13 @@
     color: var(--muted);
     font-size: 0.78rem;
     text-align: right;
+}
+
+.removebg-pan-hint {
+    margin-top: 0.65rem;
+    color: var(--muted);
+    font-size: 0.75rem;
+    line-height: 1.5;
 }
 
 .removebg-zoom-row {
