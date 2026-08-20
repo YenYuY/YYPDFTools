@@ -203,13 +203,6 @@ function updateSimpleMode() {
     const mode = currentSimpleMode();
     splitTwoOptions.classList.toggle('hidden', mode !== 'two');
     splitPageOptions.classList.toggle('hidden', mode !== 'pages');
-    document.querySelectorAll('input[name="split-mode"]').forEach(input => {
-        const label = input.closest('label');
-        const activeClasses = ['border-blue-200', 'dark:border-blue-900', 'bg-blue-50', 'dark:bg-blue-900/20'];
-        const idleClasses = ['border-gray-200', 'dark:border-gray-600', 'bg-gray-50', 'dark:bg-gray-700'];
-        activeClasses.forEach(className => label.classList.toggle(className, input.checked));
-        idleClasses.forEach(className => label.classList.toggle(className, !input.checked));
-    });
 }
 
 async function renderPreview() {
