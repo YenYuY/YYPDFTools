@@ -29,7 +29,7 @@ It works well for quick everyday document tasks and can be deployed as a static 
 | PDF to Image | Converts every PDF page to JPG or PNG | Images or ZIP |
 | Images to PDF | Combines multiple JPG/PNG images into one document | PDF |
 | Merge PDF | Combines PDFs with drag-to-reorder support | PDF |
-| Split PDF | Splits after a selected page, or extracts a range into individual pages | PDF or ZIP |
+| Split PDF | Simple two-part or page-by-page splitting, plus page previews and custom multi-range outputs | PDF or ZIP |
 | Compress PDF | Rasterizes pages and rebuilds the PDF at a selected image quality | PDF |
 | Unlock PDF | Uses a known password to rebuild an unprotected PDF | PDF |
 | Rotate PDF | Rotates every page clockwise by 90°, 180°, or 270° | PDF |

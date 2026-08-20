@@ -474,6 +474,206 @@
             background: color-mix(in oklch, var(--accent-soft), var(--surface) 8%) !important;
         }
 
+        .split-file-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-3);
+            margin-bottom: var(--space-4);
+        }
+        .split-file-heading p { min-width: 0; overflow-wrap: anywhere; }
+        .split-page-count,
+        .split-preview-progress {
+            flex: 0 0 auto;
+            color: var(--muted);
+            font-size: 0.8125rem;
+            font-weight: 700;
+        }
+        .split-workflow-switch {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: var(--space-2);
+            margin: 0 0 var(--space-5);
+            padding: 0;
+            border: 0;
+        }
+        .split-workflow-option {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-3);
+            min-width: 0;
+            min-height: 4.25rem;
+            padding: var(--space-3);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-sm);
+            background: var(--surface-2);
+            cursor: pointer;
+            transition: border-color 160ms ease, background-color 160ms ease;
+        }
+        .split-workflow-option:has(input:checked) {
+            border-color: color-mix(in oklch, var(--accent), var(--line) 25%);
+            background: var(--accent-soft);
+        }
+        .split-workflow-option input { margin-top: 0.2rem; accent-color: var(--accent-strong); }
+        .split-workflow-option span { min-width: 0; }
+        .split-workflow-option strong,
+        .split-workflow-option small { display: block; }
+        .split-workflow-option strong { color: var(--ink); font-size: 0.9rem; }
+        .split-workflow-option small {
+            margin-top: 0.2rem;
+            color: var(--muted);
+            font-size: 0.78rem;
+            line-height: 1.35;
+        }
+        .split-advanced-toolbar,
+        .split-preview-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: var(--space-4);
+        }
+        .split-advanced-toolbar { margin-bottom: var(--space-3); }
+        .split-preview-heading {
+            margin-top: var(--space-5);
+            padding-top: var(--space-5);
+            border-top: 1px solid var(--line);
+        }
+        .split-advanced-toolbar h3,
+        .split-preview-heading h3 {
+            margin: 0;
+            color: var(--ink);
+            font-size: 0.95rem;
+            font-weight: 800;
+        }
+        .split-advanced-toolbar p,
+        .split-preview-heading p {
+            margin: 0.25rem 0 0;
+            color: var(--muted);
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+        .split-toolbar-actions { display: flex; flex: 0 0 auto; gap: var(--space-2); }
+        .split-secondary-button {
+            min-height: 2.5rem;
+            padding: 0 var(--space-3);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            color: var(--accent-strong);
+            font-size: 0.8rem;
+            font-weight: 800;
+        }
+        .split-secondary-button:hover { border-color: var(--accent); background: var(--accent-soft); }
+        .split-range-list { display: grid; gap: var(--space-2); }
+        .split-range-row {
+            display: grid;
+            grid-template-columns: minmax(7rem, 1fr) minmax(5rem, 0.7fr) auto minmax(5rem, 0.7fr) auto;
+            align-items: end;
+            gap: var(--space-2);
+            padding: var(--space-3);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-sm);
+            background: var(--surface-2);
+        }
+        .split-range-name {
+            align-self: center;
+            min-width: 0;
+            color: var(--ink);
+            font-size: 0.875rem;
+            font-weight: 800;
+        }
+        .split-range-field label {
+            display: block;
+            margin-bottom: 0.25rem;
+            color: var(--muted) !important;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+        .split-range-field input {
+            width: 100%;
+            min-height: 2.5rem;
+            padding: 0 var(--space-2);
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            background: var(--surface);
+            color: var(--ink);
+        }
+        .split-range-separator { align-self: center; color: var(--muted); font-weight: 800; }
+        .split-remove-range {
+            align-self: end;
+            width: 2.5rem;
+            min-height: 2.5rem;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            background: var(--surface);
+            color: var(--danger);
+            font-size: 1rem;
+            font-weight: 800;
+        }
+        .split-remove-range:hover { border-color: var(--danger); background: var(--danger-soft); }
+        .split-range-summary {
+            min-height: 1.25rem;
+            margin: var(--space-3) 0 0;
+            color: var(--muted);
+            font-size: 0.8rem;
+            line-height: 1.45;
+        }
+        .split-range-summary[data-state="error"] { color: var(--danger); }
+        .split-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+            gap: var(--space-3);
+            max-height: 32rem;
+            margin-top: var(--space-3);
+            padding: var(--space-1);
+            overflow-y: auto;
+        }
+        .split-preview-card {
+            position: relative;
+            min-width: 0;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-sm);
+            background: var(--surface-2);
+        }
+        .split-preview-canvas-wrap {
+            display: grid;
+            place-items: center;
+            aspect-ratio: 0.74;
+            padding: var(--space-2);
+            background: color-mix(in oklch, var(--surface-3), var(--surface) 45%);
+        }
+        .split-preview-card canvas {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            border: 1px solid color-mix(in oklch, var(--line), transparent 35%);
+            background: white;
+            box-shadow: 0 1px 3px oklch(0.2 0.02 240 / 0.12);
+        }
+        .split-preview-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-1);
+            min-height: 2.25rem;
+            padding: 0 var(--space-2);
+            color: var(--ink);
+            font-size: 0.75rem;
+            font-weight: 750;
+        }
+        .split-preview-output {
+            max-width: 65%;
+            overflow: hidden;
+            border-radius: 999px;
+            padding: 0.15rem 0.45rem;
+            background: var(--accent-soft);
+            color: var(--accent-strong);
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .split-preview-output:empty { display: none; }
+
         .toast {
             position: fixed;
             right: 1rem;
@@ -657,6 +857,17 @@
                 bottom: 0.75rem;
                 width: calc(100vw - 1.5rem);
             }
+            .split-workflow-switch { grid-template-columns: 1fr; }
+            .split-advanced-toolbar,
+            .split-preview-heading { display: block; }
+            .split-toolbar-actions { margin-top: var(--space-3); }
+            .split-secondary-button { flex: 1; padding: 0 var(--space-2); }
+            .split-range-row {
+                grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+            }
+            .split-range-name { grid-column: 1 / -1; }
+            .split-preview-progress { display: inline-block; margin-top: var(--space-2); }
+            .split-preview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
 
         .layout-v3,
@@ -1270,35 +1481,85 @@
                     <p class="text-lg text-gray-600 dark:text-gray-300 font-medium" data-i18n="drop_pdf">點擊或拖曳上傳 PDF</p>
                 </div>
                 <div id="ctrl-split" class="hidden mt-4 pt-4 border-t dark:border-gray-700">
-                    <p id="name-split" class="mb-4 font-bold text-gray-700 dark:text-gray-200"></p>
-                    <div class="grid sm:grid-cols-2 gap-2 mb-4">
-                        <label class="flex items-center gap-2 rounded border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-900/20 px-3 py-2 text-sm font-medium text-gray-800 dark:text-gray-100 cursor-pointer">
-                            <input type="radio" name="split-mode" value="two" class="text-blue-600" checked>
-                            <span data-i18n="split_mode_two">分成兩份</span>
+                    <div class="split-file-heading">
+                        <p id="name-split" class="font-bold text-gray-700 dark:text-gray-200"></p>
+                        <span id="split-page-count" class="split-page-count"></span>
+                    </div>
+
+                    <fieldset class="split-workflow-switch">
+                        <legend class="sr-only" data-i18n="split_workflow_label">分割方式</legend>
+                        <label class="split-workflow-option">
+                            <input type="radio" name="split-workflow" value="simple" checked>
+                            <span>
+                                <strong data-i18n="split_simple">簡單</strong>
+                                <small data-i18n="split_simple_desc">使用分割點或逐頁分割</small>
+                            </span>
                         </label>
-                        <label class="flex items-center gap-2 rounded border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-800 dark:text-gray-100 cursor-pointer">
-                            <input type="radio" name="split-mode" value="pages" class="text-blue-600">
-                            <span data-i18n="split_mode_pages">逐頁分割</span>
+                        <label class="split-workflow-option">
+                            <input type="radio" name="split-workflow" value="advanced">
+                            <span>
+                                <strong data-i18n="split_advanced">進階</strong>
+                                <small data-i18n="split_advanced_desc">預覽頁面並自訂多個輸出範圍</small>
+                            </span>
                         </label>
-                    </div>
-                    <div id="split-two-options" class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="lbl_split_after_page">在第幾頁後分割</label>
-                        <input type="number" id="split-after" min="1" value="1" class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md border p-2">
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2" data-i18n="split_two_hint">例如輸入 3：第 1-3 頁會成為第一份，第 4 頁之後成為第二份。</p>
-                    </div>
-                    <div id="split-page-options" class="hidden">
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="lbl_start_page">起始頁</label>
-                            <input type="number" id="split-start" min="1" value="1" class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md border p-2">
+                    </fieldset>
+
+                    <div id="split-simple-panel">
+                        <div class="grid sm:grid-cols-2 gap-2 mb-4">
+                            <label class="flex items-center gap-2 rounded border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-900/20 px-3 py-2 text-sm font-medium text-gray-800 dark:text-gray-100 cursor-pointer">
+                                <input type="radio" name="split-mode" value="two" class="text-blue-600" checked>
+                                <span data-i18n="split_mode_two">分成兩份</span>
+                            </label>
+                            <label class="flex items-center gap-2 rounded border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-800 dark:text-gray-100 cursor-pointer">
+                                <input type="radio" name="split-mode" value="pages" class="text-blue-600">
+                                <span data-i18n="split_mode_pages">逐頁分割</span>
+                            </label>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="lbl_end_page">結束頁</label>
-                            <input type="number" id="split-end" min="1" value="1" class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md border p-2">
+                        <div id="split-two-options" class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="lbl_split_after_page">在第幾頁後分割</label>
+                            <input type="number" id="split-after" min="1" value="1" class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md border p-2">
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2" data-i18n="split_two_hint">例如輸入 3：第 1-3 頁會成為第一份，第 4 頁之後成為第二份。</p>
+                        </div>
+                        <div id="split-page-options" class="hidden">
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="lbl_start_page">起始頁</label>
+                                    <input type="number" id="split-start" min="1" value="1" class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md border p-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="lbl_end_page">結束頁</label>
+                                    <input type="number" id="split-end" min="1" value="1" class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md border p-2">
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4" data-i18n="split_hint">範圍內每一頁都會被分成獨立 PDF；多頁時會下載 ZIP。</p>
                         </div>
                     </div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4" data-i18n="split_hint">範圍內每一頁都會被分成獨立 PDF；多頁時會下載 ZIP。</p>
+
+                    <div id="split-advanced-panel" class="hidden">
+                        <div class="split-advanced-toolbar">
+                            <div>
+                                <h3 data-i18n="split_custom_ranges">自訂輸出範圍</h3>
+                                <p data-i18n="split_custom_hint">每一列會產生一個 PDF；沒有加入範圍的頁面不會輸出。</p>
+                            </div>
+                            <div class="split-toolbar-actions">
+                                <button type="button" id="split-pair-ranges" class="split-secondary-button" data-i18n="split_pair_ranges">每 2 頁一份</button>
+                                <button type="button" id="split-add-range" class="split-secondary-button" data-i18n="split_add_range">新增檔案範圍</button>
+                            </div>
+                        </div>
+
+                        <div id="split-range-list" class="split-range-list" role="list"></div>
+                        <p id="split-range-summary" class="split-range-summary" aria-live="polite"></p>
+
+                        <div class="split-preview-heading">
+                            <div>
+                                <h3 data-i18n="split_preview_title">頁面預覽</h3>
+                                <p data-i18n="split_preview_hint">縮圖上的標籤會顯示該頁將輸出到哪個檔案。</p>
+                            </div>
+                            <span id="split-preview-progress" class="split-preview-progress" aria-live="polite"></span>
+                        </div>
+                        <div id="split-preview-grid" class="split-preview-grid"></div>
                     </div>
+
                     <button id="do-split" class="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-bold" data-i18n="btn_split_dl">分割並下載</button>
                 </div>
             </div>
@@ -1817,7 +2078,12 @@
                 btn_merge_dl: "合併並下載",
                 // Split
                 title_split: "PDF 分割",
-                desc_split: "將 PDF 依分割點切成兩份，或把指定範圍拆成單頁 PDF",
+                desc_split: "簡單分割，或預覽頁面並自訂多個輸出範圍",
+                split_workflow_label: "分割方式",
+                split_simple: "簡單",
+                split_simple_desc: "使用分割點或逐頁分割",
+                split_advanced: "進階",
+                split_advanced_desc: "預覽頁面並自訂多個輸出範圍",
                 split_mode_two: "分成兩份",
                 split_mode_pages: "逐頁分割",
                 lbl_split_after_page: "在第幾頁後分割",
@@ -1825,6 +2091,20 @@
                 lbl_end_page: "結束頁",
                 split_two_hint: "例如輸入 3：第 1-3 頁會成為第一份，第 4 頁之後成為第二份。",
                 split_hint: "範圍內每一頁都會被分成獨立 PDF；多頁時會下載 ZIP。",
+                split_page_count: "共 {count} 頁",
+                split_custom_ranges: "自訂輸出範圍",
+                split_custom_hint: "每一列會產生一個 PDF；沒有加入範圍的頁面不會輸出。",
+                split_pair_ranges: "每 2 頁一份",
+                split_add_range: "新增檔案範圍",
+                split_output_file: "檔案 {number}",
+                split_remove_range: "移除檔案 {number}",
+                split_preview_title: "頁面預覽",
+                split_preview_hint: "縮圖上的標籤會顯示該頁將輸出到哪個檔案。",
+                split_preview_loading: "正在建立預覽 {current}/{total}",
+                split_page_label: "第 {page} 頁",
+                split_output_badge: "檔案 {number}",
+                split_summary: "將產生 {count} 個 PDF",
+                split_summary_omitted: "；不輸出第 {pages} 頁",
                 btn_split_dl: "分割並下載",
                 // Compress
                 title_compress: "PDF 壓縮 (重製)",
@@ -1976,6 +2256,12 @@
                 err_start_greater_than_end: "起始頁不能大於結束頁",
                 err_split_requires_two_pages: "PDF 至少需要 2 頁才能分成兩份",
                 err_split_after_range: "分割頁必須介於 1 到 {lastSplitPage} 之間",
+                err_split_ranges_missing: "請至少新增一個輸出範圍",
+                err_split_range_invalid: "檔案 {number} 的頁碼無效",
+                err_split_range_bounds: "檔案 {number} 的頁碼必須介於 1 到 {totalPages} 之間",
+                err_split_range_reversed: "檔案 {number} 的起始頁不能大於結束頁",
+                err_split_range_overlap: "第 {page} 頁同時出現在多個檔案中，請調整範圍",
+                err_split_no_unassigned_page: "所有頁面都已加入範圍；請先調整或移除現有範圍",
                 err_select_file: "請選擇檔案",
                 err_enter_password: "請輸入密碼",
                 err_password_incorrect: "密碼錯誤或未輸入",
@@ -2036,7 +2322,12 @@
                 drag_hint: "Tip: You can drag the items below to change the merge order",
                 btn_merge_dl: "Merge and Download",
                 title_split: "Split PDF",
-                desc_split: "Split a PDF into two parts, or split a selected range into single-page PDFs",
+                desc_split: "Use a simple split or preview pages and create custom output ranges",
+                split_workflow_label: "Split method",
+                split_simple: "Simple",
+                split_simple_desc: "Use a split point or split into single pages",
+                split_advanced: "Advanced",
+                split_advanced_desc: "Preview pages and define multiple output ranges",
                 split_mode_two: "Split into Two",
                 split_mode_pages: "Split by Page",
                 lbl_split_after_page: "Split after page",
@@ -2044,6 +2335,20 @@
                 lbl_end_page: "End Page",
                 split_two_hint: "For example, enter 3 to make pages 1-3 the first PDF and page 4 onward the second PDF.",
                 split_hint: "Each page in the selected range becomes its own PDF. Multiple pages are downloaded as a ZIP.",
+                split_page_count: "{count} pages",
+                split_custom_ranges: "Custom output ranges",
+                split_custom_hint: "Each row creates one PDF. Pages outside all ranges are not exported.",
+                split_pair_ranges: "Group every 2 pages",
+                split_add_range: "Add output range",
+                split_output_file: "File {number}",
+                split_remove_range: "Remove file {number}",
+                split_preview_title: "Page preview",
+                split_preview_hint: "A label on each thumbnail shows which output file will contain it.",
+                split_preview_loading: "Building preview {current}/{total}",
+                split_page_label: "Page {page}",
+                split_output_badge: "File {number}",
+                split_summary: "Creates {count} PDF files",
+                split_summary_omitted: "; omits pages {pages}",
                 btn_split_dl: "Split and Download",
                 title_compress: "Compress PDF (Rasterize)",
                 desc_compress: "Reduce file size by converting the PDF into images and rebuilding it",
@@ -2191,6 +2496,12 @@
                 err_start_greater_than_end: "The start page cannot be greater than the end page",
                 err_split_requires_two_pages: "The PDF needs at least 2 pages to split into two files",
                 err_split_after_range: "The split page must be between 1 and {lastSplitPage}",
+                err_split_ranges_missing: "Add at least one output range",
+                err_split_range_invalid: "File {number} has an invalid page number",
+                err_split_range_bounds: "File {number} page numbers must be between 1 and {totalPages}",
+                err_split_range_reversed: "File {number} cannot start after its end page",
+                err_split_range_overlap: "Page {page} appears in more than one file. Adjust the ranges.",
+                err_split_no_unassigned_page: "Every page is already in a range. Adjust or remove an existing range first.",
                 err_select_file: "Please select a file",
                 err_enter_password: "Please enter a password",
                 err_password_incorrect: "The password is incorrect or missing",
@@ -2250,7 +2561,12 @@
                 drag_hint: "ヒント：下の項目をドラッグして結合順を変更できます",
                 btn_merge_dl: "結合してダウンロード",
                 title_split: "PDF 分割",
-                desc_split: "PDF を分割点で 2 つに分けるか、指定範囲をページごとに分割します",
+                desc_split: "シンプル分割、またはページを確認して複数の出力範囲を設定します",
+                split_workflow_label: "分割方法",
+                split_simple: "シンプル",
+                split_simple_desc: "分割位置またはページごとの分割を使用",
+                split_advanced: "詳細",
+                split_advanced_desc: "ページをプレビューして複数の出力範囲を設定",
                 split_mode_two: "2 つに分割",
                 split_mode_pages: "ページごとに分割",
                 lbl_split_after_page: "何ページ目の後で分割",
@@ -2258,6 +2574,20 @@
                 lbl_end_page: "終了ページ",
                 split_two_hint: "例：3 を入力すると、1-3 ページが 1 つ目、4 ページ以降が 2 つ目の PDF になります。",
                 split_hint: "選択範囲内の各ページを個別 PDF にします。複数ページの場合は ZIP でダウンロードします。",
+                split_page_count: "全 {count} ページ",
+                split_custom_ranges: "出力範囲を設定",
+                split_custom_hint: "各行から 1 つの PDF を作成します。範囲外のページは出力されません。",
+                split_pair_ranges: "2 ページずつ",
+                split_add_range: "出力範囲を追加",
+                split_output_file: "ファイル {number}",
+                split_remove_range: "ファイル {number} を削除",
+                split_preview_title: "ページプレビュー",
+                split_preview_hint: "各サムネイルのラベルに出力先ファイルが表示されます。",
+                split_preview_loading: "プレビュー作成中 {current}/{total}",
+                split_page_label: "{page} ページ",
+                split_output_badge: "ファイル {number}",
+                split_summary: "{count} 個の PDF を作成",
+                split_summary_omitted: "；{pages} ページは出力しません",
                 btn_split_dl: "分割ダウンロード",
                 title_compress: "PDF 圧縮 (ラスタライズ)",
                 desc_compress: "PDF を画像に変換して再構築し、ファイルサイズを削減します",
@@ -2405,6 +2735,12 @@
                 err_start_greater_than_end: "開始ページは終了ページより大きくできません",
                 err_split_requires_two_pages: "PDF を 2 つに分割するには少なくとも 2 ページ必要です",
                 err_split_after_range: "分割ページは 1 から {lastSplitPage} の範囲で入力してください",
+                err_split_ranges_missing: "出力範囲を 1 つ以上追加してください",
+                err_split_range_invalid: "ファイル {number} のページ番号が無効です",
+                err_split_range_bounds: "ファイル {number} のページ番号は 1 から {totalPages} の範囲で入力してください",
+                err_split_range_reversed: "ファイル {number} の開始ページを終了ページより後にできません",
+                err_split_range_overlap: "{page} ページが複数のファイルに含まれています。範囲を調整してください。",
+                err_split_no_unassigned_page: "すべてのページが範囲に含まれています。既存の範囲を調整または削除してください。",
                 err_select_file: "ファイルを選択してください",
                 err_enter_password: "パスワードを入力してください",
                 err_password_incorrect: "パスワードが正しくないか、入力されていません",
@@ -2870,163 +3206,7 @@
             finally { setBusy(btn, false, 'btn_merge_dl'); }
         });
 
-        // 4. Split
-        let splitFile, splitPdfDoc;
-        const splitName = document.getElementById('name-split');
-        const splitCtrl = document.getElementById('ctrl-split');
-        const splitStartInput = document.getElementById('split-start');
-        const splitEndInput = document.getElementById('split-end');
-        const splitAfterInput = document.getElementById('split-after');
-        const splitTwoOptions = document.getElementById('split-two-options');
-        const splitPageOptions = document.getElementById('split-page-options');
-
-        function updateSplitMode() {
-            const mode = document.querySelector('input[name="split-mode"]:checked')?.value || 'two';
-            splitTwoOptions.classList.toggle('hidden', mode !== 'two');
-            splitPageOptions.classList.toggle('hidden', mode !== 'pages');
-            document.querySelectorAll('input[name="split-mode"]').forEach(input => {
-                const label = input.closest('label');
-                const activeClasses = ['border-blue-200', 'dark:border-blue-900', 'bg-blue-50', 'dark:bg-blue-900/20'];
-                const idleClasses = ['border-gray-200', 'dark:border-gray-600', 'bg-gray-50', 'dark:bg-gray-700'];
-                activeClasses.forEach(className => label.classList.toggle(className, input.checked));
-                idleClasses.forEach(className => label.classList.toggle(className, !input.checked));
-            });
-        }
-
-        document.querySelectorAll('input[name="split-mode"]').forEach(input => {
-            input.addEventListener('change', updateSplitMode);
-        });
-        updateSplitMode();
-
-        function resetSplitState() {
-            splitFile = null;
-            splitPdfDoc = null;
-            splitName.textContent = '';
-            splitCtrl.classList.add('hidden');
-            splitAfterInput.value = 1;
-            splitAfterInput.max = 1;
-            splitStartInput.value = 1;
-            splitEndInput.value = 1;
-            splitStartInput.max = 1;
-            splitEndInput.max = 1;
-        }
-
-        document.getElementById('file-split').addEventListener('change', async e => {
-            if(e.target.files[0]) {
-                const nextFile = e.target.files[0];
-                try {
-                    const arr = await nextFile.arrayBuffer();
-                    const nextPdfDoc = await PDFLib.PDFDocument.load(arr);
-                    const count = nextPdfDoc.getPageCount();
-
-                    splitFile = nextFile;
-                    splitPdfDoc = nextPdfDoc;
-                    splitName.textContent = nextFile.name;
-                    splitAfterInput.value = Math.max(1, Math.floor(count / 2));
-                    splitAfterInput.max = Math.max(1, count - 1);
-                    splitStartInput.value = 1;
-                    splitEndInput.value = count;
-                    splitStartInput.max = count;
-                    splitEndInput.max = count;
-                    splitCtrl.classList.remove('hidden');
-                } catch (err) {
-                    resetSplitState();
-                    e.target.value = '';
-                    showError('err_split_failed', { message: getErrorMessage(err) });
-                }
-            }
-        });
-        document.getElementById('do-split').addEventListener('click', async () => {
-            if(!splitFile || !splitPdfDoc) return;
-
-            const btn = document.getElementById('do-split');
-            const totalPages = splitPdfDoc.getPageCount();
-            const mode = document.querySelector('input[name="split-mode"]:checked')?.value || 'two';
-
-            const baseName = splitFile.name.replace(/\.pdf$/i, '') || 'split';
-
-            setBusy(btn, true);
-
-            try {
-                const { PDFDocument } = PDFLib;
-                const buildPdfFromIndices = async (pageIndices) => {
-                    const pdf = await PDFDocument.create();
-                    const pages = await pdf.copyPages(splitPdfDoc, pageIndices);
-                    pages.forEach(page => pdf.addPage(page));
-                    return pdf.save();
-                };
-
-                if (mode === 'two') {
-                    if (totalPages < 2) {
-                        return showError('err_split_requires_two_pages');
-                    }
-
-                    const splitAfter = parseInt(splitAfterInput.value, 10);
-                    const lastSplitPage = totalPages - 1;
-                    if (Number.isNaN(splitAfter)) {
-                        return showError('err_invalid_page_number');
-                    }
-                    if (splitAfter < 1 || splitAfter > lastSplitPage) {
-                        return showError('err_split_after_range', { lastSplitPage });
-                    }
-
-                    const zip = new JSZip();
-                    const firstPartIndices = Array.from({ length: splitAfter }, (_, index) => index);
-                    const secondPartIndices = Array.from({ length: totalPages - splitAfter }, (_, index) => index + splitAfter);
-
-                    zip.file(
-                        `${baseName}_part_1_pages_1-${splitAfter}.pdf`,
-                        await buildPdfFromIndices(firstPartIndices)
-                    );
-                    zip.file(
-                        `${baseName}_part_2_pages_${splitAfter + 1}-${totalPages}.pdf`,
-                        await buildPdfFromIndices(secondPartIndices)
-                    );
-                    saveAs(await zip.generateAsync({ type: 'blob' }), `${baseName}_split_two_parts.zip`);
-                    notify(t('status_done'), 'success');
-                    return;
-                }
-
-                const start = parseInt(splitStartInput.value, 10);
-                const end = parseInt(splitEndInput.value, 10);
-
-                if (Number.isNaN(start) || Number.isNaN(end)) {
-                    return showError('err_invalid_page_number');
-                }
-                if (start < 1 || end < 1 || start > totalPages || end > totalPages) {
-                    return showError('err_page_range', { totalPages });
-                }
-                if (start > end) {
-                    return showError('err_start_greater_than_end');
-                }
-
-                const pageNumbers = [];
-                for (let pageNum = start; pageNum <= end; pageNum++) pageNumbers.push(pageNum);
-
-                if (pageNumbers.length === 1) {
-                    saveAs(
-                        new Blob([await buildPdfFromIndices([pageNumbers[0] - 1])], { type: 'application/pdf' }),
-                        `${baseName}_page_${pageNumbers[0]}.pdf`
-                    );
-                    notify(t('status_done'), 'success');
-                    return;
-                }
-
-                const zip = new JSZip();
-                for (const pageNum of pageNumbers) {
-                    zip.file(`${baseName}_page_${pageNum}.pdf`, await buildPdfFromIndices([pageNum - 1]));
-                }
-
-                saveAs(
-                    await zip.generateAsync({ type: 'blob' }),
-                    `${baseName}_pages_${start}-${end}.zip`
-                );
-                notify(t('status_done'), 'success');
-            } catch(e){ showError('err_split_failed', { message: getErrorMessage(e) }); }
-            finally {
-                setBusy(btn, false, 'btn_split_dl');
-            }
-        });
+        // PDF splitting is implemented in pdf-split.js so its range logic can be tested independently.
 
         // 5. Compress
         let compressFile = null;
@@ -3254,6 +3434,7 @@
 
         window.YYYTools = { t, notify, safeBaseName };
     </script>
+    <script type="module" src="pdf-split.js?v=20260820-1"></script>
     <script type="module" src="background-removal.js?v=20260807-3"></script>
     <script type="module" src="video-tools.js"></script>
 </body>
