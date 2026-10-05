@@ -33,11 +33,16 @@ It works well for quick everyday document tasks and can be deployed as a static 
 | Compress PDF | Rasterizes pages and rebuilds the PDF at a selected image quality | PDF |
 | Unlock PDF | Uses a known password to rebuild an unprotected PDF | PDF |
 | Rotate PDF | Rotates every page clockwise by 90°, 180°, or 270° | PDF |
+| Watermark PDF | Customizes text, font, size, color, opacity, and angle, with single-position or repeated layouts, live page previews, and black rectangles or brushes for manual redaction | PDF |
 | HEIC to JPG | Converts one or more HEIC/HEIF photos to JPG | JPG |
 | Remove Background | Runs local AI removal, then provides erase and restore brushes for refinement | Transparent PNG |
 | Video Converter | Converts video to MP4, WebM, MOV, MKV, AVI, TS, GIF, or common audio formats | Video, GIF, or audio |
 | Video Compressor | Compresses with quality, resolution, and H.264/H.265/VP9 controls | MP4 or WebM |
 | Video Trimmer | Previews a video and extracts a precise time range | MP4 |
+
+PDF watermarks support sans-serif, serif, and monospace fonts, using fonts on your device to render Chinese, Japanese, and other text. Repeated layouts have adjustable spacing, and watermarks can apply to all or selected pages. Without redaction marks, the watermark is added as an image overlay, preserving the original selectable and searchable text. All processing is performed locally.
+
+The page preview starts in View mode. Switch to a black rectangle or brush to manually redact sensitive content with a mouse or touch, and adjust the brush size. Marks remain on their pages when navigating or switching modes and apply until cleared, with undo and clear available for each page. If any page has redaction marks, downloading renders the watermark first and opaque black masks last, rasterizes every page, and creates a new PDF. Source text layers, annotation and form objects, attachments, and metadata are not copied; text in the output can no longer be selected or searched.
 
 Interface highlights:
 
@@ -95,6 +100,10 @@ Your PDFs, images, and videos still remain on your device and are processed loca
 ```text
 YYPDFTools/
 ├── index.html                 # Main application and default entry point
+├── pdf-watermark.js           # PDF watermark controller and live preview
+├── pdf-watermark-core.js      # Watermark settings, layout, and PDF geometry helpers
+├── pdf-redaction-core.js      # Manual redaction coordinates, brushes, and raster painting helpers
+├── pdf-watermark.css          # Watermark workspace styles
 ├── background-removal.js     # Automatic removal and manual editor
 ├── background-removal-core.js # Testable editor utility functions
 ├── background-removal.css    # Background-removal workspace styles
