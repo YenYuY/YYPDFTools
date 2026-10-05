@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="background-removal.css">
     <link rel="stylesheet" href="video-tools.css">
+    <link rel="stylesheet" href="pdf-watermark.css">
     <!-- 標題 -->
     <title data-i18n="site_title">3Y工具箱</title>
     
@@ -1422,6 +1423,7 @@
                 <button type="button" onclick="switchTab('compress')" class="tab-btn" id="btn-tab-compress" role="tab" aria-controls="sec-compress" aria-selected="false" tabindex="-1" data-short="CMP" data-i18n="tab_compress">PDF 壓縮</button>
                 <button type="button" onclick="switchTab('protect')" class="tab-btn" id="btn-tab-protect" role="tab" aria-controls="sec-protect" aria-selected="false" tabindex="-1" data-short="UNL" data-i18n="tab_protect">PDF 解鎖</button>
                 <button type="button" onclick="switchTab('rotate')" class="tab-btn" id="btn-tab-rotate" role="tab" aria-controls="sec-rotate" aria-selected="false" tabindex="-1" data-short="ROT" data-i18n="tab_rotate">PDF 旋轉</button>
+                <button type="button" onclick="switchTab('watermark')" class="tab-btn" id="btn-tab-watermark" role="tab" aria-controls="sec-watermark" aria-selected="false" tabindex="-1" data-short="WMK" data-i18n="tab_watermark">PDF 浮水印</button>
                 <button type="button" onclick="switchTab('heic')" class="tab-btn" id="btn-tab-heic" role="tab" aria-controls="sec-heic" aria-selected="false" tabindex="-1" data-short="JPG" data-i18n="tab_heic">HEIC 轉 JPG</button>
                 <button type="button" onclick="switchTab('removebg')" class="tab-btn" id="btn-tab-removebg" role="tab" aria-controls="sec-removebg" aria-selected="false" tabindex="-1" data-short="BGR" data-i18n="tab_removebg">圖片去背</button>
                 <button type="button" onclick="switchTab('video-converter')" class="tab-btn" id="btn-tab-video-converter" role="tab" aria-controls="sec-video-converter" aria-selected="false" tabindex="-1" data-short="VCT" data-i18n="tab_video_converter">影片轉換</button>
@@ -1674,6 +1676,161 @@
                         <button onclick="setRotate(270)" class="rotate-opt bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 py-2 rounded border border-gray-200 dark:border-gray-600 dark:text-white" data-deg="270">270°</button>
                     </div>
                     <button id="do-rotate" class="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-bold" data-i18n="btn_rotate_dl">旋轉並下載</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- PDF 浮水印 -->
+        <section id="sec-watermark" class="hidden" role="tabpanel" aria-labelledby="btn-tab-watermark">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold" data-i18n="title_watermark">PDF 浮水印</h2>
+                <p data-i18n="desc_watermark">自訂文字、透明度、角度與位置，預覽後套用至全部或指定頁面</p>
+            </div>
+            <div class="bg-white watermark-shell">
+                <input type="file" id="file-watermark" class="hidden" accept="application/pdf,.pdf">
+                <button type="button" id="drop-watermark" onclick="document.getElementById('file-watermark').click()">
+                    <span data-i18n="drop_pdf">點擊或拖曳上傳 PDF</span>
+                </button>
+                <p class="watermark-note" data-i18n="watermark_privacy">檔案只在瀏覽器內處理。未加入遮蔽時，原有文字仍可選取。</p>
+                <div id="ctrl-watermark" class="hidden">
+                    <div class="watermark-file-info">
+                        <p id="name-watermark" class="watermark-filename"></p>
+                        <p id="watermark-page-count" class="watermark-note" aria-live="polite"></p>
+                    </div>
+                    <div class="watermark-workbench">
+                        <div class="watermark-controls">
+                            <fieldset id="watermark-settings">
+                                <legend data-i18n="watermark_settings_title">浮水印效果</legend>
+                                <div class="watermark-field">
+                                    <label for="watermark-text" data-i18n="watermark_text_label">浮水印文字</label>
+                                    <input type="text" id="watermark-text" value="CONFIDENTIAL" maxlength="120" autocomplete="off" aria-describedby="watermark-text-hint watermark-validation">
+                                    <p id="watermark-text-hint" class="watermark-note" data-i18n="watermark_text_hint">支援中文，最多 120 個字元。</p>
+                                </div>
+                                <div class="watermark-field-pair">
+                                    <div class="watermark-field">
+                                        <label for="watermark-font" data-i18n="watermark_font_label">字體</label>
+                                        <select id="watermark-font">
+                                            <option value="sans" data-i18n="watermark_font_sans">無襯線</option>
+                                            <option value="serif" data-i18n="watermark_font_serif">襯線</option>
+                                            <option value="mono" data-i18n="watermark_font_mono">等寬</option>
+                                        </select>
+                                    </div>
+                                    <div class="watermark-field">
+                                        <label for="watermark-color" data-i18n="watermark_color_label">顏色</label>
+                                        <input type="color" id="watermark-color" value="#64748b">
+                                    </div>
+                                </div>
+                                <div class="watermark-field">
+                                    <div class="watermark-range-heading">
+                                        <label for="watermark-size" data-i18n="watermark_size_label">字體大小</label>
+                                        <output id="watermark-size-value" for="watermark-size">48 pt</output>
+                                    </div>
+                                    <input type="range" id="watermark-size" min="10" max="144" step="1" value="48">
+                                    <p class="watermark-note" data-i18n="watermark_size_hint">單一浮水印的文字過長時，會自動縮小以完整顯示於頁面內。</p>
+                                </div>
+                                <div class="watermark-field">
+                                    <div class="watermark-range-heading">
+                                        <label for="watermark-opacity" data-i18n="watermark_opacity_label">不透明度</label>
+                                        <output id="watermark-opacity-value" for="watermark-opacity">20%</output>
+                                    </div>
+                                    <input type="range" id="watermark-opacity" min="5" max="100" step="1" value="20">
+                                </div>
+                                <div class="watermark-field">
+                                    <div class="watermark-range-heading">
+                                        <label for="watermark-angle" data-i18n="watermark_angle_label">角度（順時針）</label>
+                                        <output id="watermark-angle-value" for="watermark-angle">−35°</output>
+                                    </div>
+                                    <input type="range" id="watermark-angle" min="-180" max="180" step="1" value="-35">
+                                </div>
+                                <div class="watermark-field">
+                                    <label for="watermark-layout" data-i18n="watermark_layout_label">排列方式</label>
+                                    <select id="watermark-layout">
+                                        <option value="single" data-i18n="watermark_layout_single">單一浮水印</option>
+                                        <option value="repeat" data-i18n="watermark_layout_repeat">重複鋪滿</option>
+                                    </select>
+                                </div>
+                                <div id="watermark-position-field" class="watermark-field">
+                                    <label for="watermark-position" data-i18n="watermark_position_label">位置</label>
+                                    <select id="watermark-position">
+                                        <option value="center" data-i18n="watermark_position_center">中央</option>
+                                        <option value="top-left" data-i18n="watermark_position_top_left">左上</option>
+                                        <option value="top-right" data-i18n="watermark_position_top_right">右上</option>
+                                        <option value="bottom-left" data-i18n="watermark_position_bottom_left">左下</option>
+                                        <option value="bottom-right" data-i18n="watermark_position_bottom_right">右下</option>
+                                    </select>
+                                </div>
+                                <div id="watermark-spacing-field" class="watermark-field hidden">
+                                    <div class="watermark-range-heading">
+                                        <label for="watermark-spacing" data-i18n="watermark_spacing_label">重複間距</label>
+                                        <output id="watermark-spacing-value" for="watermark-spacing">80 pt</output>
+                                    </div>
+                                    <input type="range" id="watermark-spacing" min="20" max="240" step="1" value="80">
+                                </div>
+                                <div class="watermark-field">
+                                    <label for="watermark-page-mode" data-i18n="watermark_pages_label">套用頁面</label>
+                                    <select id="watermark-page-mode">
+                                        <option value="all" data-i18n="watermark_pages_all">全部頁面</option>
+                                        <option value="custom" data-i18n="watermark_pages_custom">指定頁面</option>
+                                    </select>
+                                </div>
+                                <div id="watermark-page-range-field" class="watermark-field hidden">
+                                    <label for="watermark-page-range" data-i18n="watermark_page_range_label">頁碼範圍</label>
+                                    <input type="text" id="watermark-page-range" placeholder="1, 3-5" autocomplete="off" aria-describedby="watermark-page-range-hint watermark-validation">
+                                    <p id="watermark-page-range-hint" class="watermark-note" data-i18n="watermark_page_range_hint">用逗號分隔頁碼，以連字號指定範圍，例如 1, 3-5。</p>
+                                </div>
+                            </fieldset>
+                            <p id="watermark-validation" class="watermark-validation" role="status" aria-live="polite"></p>
+                            <button type="button" id="do-watermark" class="watermark-download" data-i18n="btn_watermark_dl">套用浮水印並下載</button>
+                            <p id="watermark-redact-note" class="watermark-note" data-i18n="watermark_redact_note">加入遮蔽後，下載的所有頁面會轉成影像，原始文字無法選取或搜尋。請完整覆蓋敏感內容並檢查每一頁。</p>
+                            <p id="prog-watermark" class="watermark-note hidden" role="status" aria-live="polite"></p>
+                            <div id="watermark-download-result" class="hidden">
+                                <a id="watermark-result-link" download data-i18n="watermark_download_again">再次下載 PDF</a>
+                            </div>
+                        </div>
+                        <div class="watermark-preview-panel" aria-labelledby="watermark-preview-title">
+                            <h3 id="watermark-preview-title" data-i18n="watermark_preview_title">效果預覽</h3>
+                            <p class="watermark-note" data-i18n="watermark_preview_hint">調整設定即時預覽浮水印與遮蔽。未指定的頁面不會加入浮水印。</p>
+                            <fieldset id="watermark-redaction-tools" aria-describedby="watermark-redact-hint">
+                                <legend data-i18n="watermark_redact_title">敏感內容遮蔽</legend>
+                                <div class="watermark-redact-modes">
+                                    <label class="watermark-redact-mode">
+                                        <input type="radio" id="watermark-redact-view" name="watermark-redact-tool" value="view" checked>
+                                        <span data-i18n="watermark_redact_view">瀏覽</span>
+                                    </label>
+                                    <label class="watermark-redact-mode">
+                                        <input type="radio" id="watermark-redact-rect" name="watermark-redact-tool" value="rect">
+                                        <span data-i18n="watermark_redact_rect">黑框</span>
+                                    </label>
+                                    <label class="watermark-redact-mode">
+                                        <input type="radio" id="watermark-redact-brush" name="watermark-redact-tool" value="brush">
+                                        <span data-i18n="watermark_redact_brush">塗寫</span>
+                                    </label>
+                                </div>
+                                <div id="watermark-redact-size-field" class="watermark-field hidden">
+                                    <div class="watermark-range-heading">
+                                        <label for="watermark-redact-size" data-i18n="watermark_redact_size_label">筆刷粗細</label>
+                                        <output id="watermark-redact-size-value" for="watermark-redact-size">24 pt</output>
+                                    </div>
+                                    <input type="range" id="watermark-redact-size" min="8" max="80" step="1" value="24">
+                                </div>
+                                <div class="watermark-redact-actions">
+                                    <button type="button" id="watermark-redact-undo" disabled data-i18n="watermark_redact_undo">復原此頁上一筆</button>
+                                    <button type="button" id="watermark-redact-clear" disabled data-i18n="watermark_redact_clear">清除此頁</button>
+                                </div>
+                                <p id="watermark-redact-summary" class="watermark-note" aria-live="polite" data-i18n="watermark_redact_summary" data-dynamic-text="true">此頁 0 筆遮蔽，全部共 0 筆。</p>
+                                <p id="watermark-redact-hint" class="watermark-note" data-i18n="watermark_redact_hint">用滑鼠或手指拖曳黑框，或塗寫覆蓋敏感內容。換頁會保留遮蔽，切回「瀏覽」可正常捲動。按 Esc 取消正在畫的這一筆。</p>
+                            </fieldset>
+                            <div id="watermark-preview-stage" class="watermark-preview-stage" aria-busy="false">
+                                <canvas id="watermark-preview" role="img" tabindex="0" data-redact-tool="view" aria-label="PDF 浮水印與遮蔽效果預覽" aria-describedby="watermark-redact-hint watermark-redact-note" data-i18n-aria-label="watermark_preview_canvas_label"></canvas>
+                            </div>
+                            <div class="watermark-preview-navigation">
+                                <button type="button" id="watermark-prev" data-i18n="watermark_prev">上一頁</button>
+                                <span id="watermark-preview-page" aria-live="polite"></span>
+                                <button type="button" id="watermark-next" data-i18n="watermark_next">下一頁</button>
+                            </div>
+                            <p id="watermark-preview-status" class="watermark-note" role="status" aria-live="polite"></p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -2160,6 +2317,81 @@
                 desc_rotate: "將 PDF 所有頁面進行旋轉",
                 lbl_rotate_deg: "選擇旋轉角度 (順時針)",
                 btn_rotate_dl: "旋轉並下載",
+                tab_watermark: "PDF 浮水印",
+                title_watermark: "PDF 浮水印",
+                desc_watermark: "自訂文字、透明度、角度與位置，預覽後套用至全部或指定頁面",
+                watermark_privacy: "檔案只在瀏覽器內處理。未加入遮蔽時，原有文字仍可選取。",
+                watermark_settings_title: "浮水印效果",
+                watermark_text_label: "浮水印文字",
+                watermark_text_hint: "支援中文，最多 120 個字元。",
+                watermark_font_label: "字體",
+                watermark_font_sans: "無襯線",
+                watermark_font_serif: "襯線",
+                watermark_font_mono: "等寬",
+                watermark_color_label: "顏色",
+                watermark_size_label: "字體大小",
+                watermark_size_hint: "單一浮水印的文字過長時，會自動縮小以完整顯示於頁面內。",
+                watermark_opacity_label: "不透明度",
+                watermark_angle_label: "角度（順時針）",
+                watermark_layout_label: "排列方式",
+                watermark_layout_single: "單一浮水印",
+                watermark_layout_repeat: "重複鋪滿",
+                watermark_position_label: "位置",
+                watermark_position_center: "中央",
+                watermark_position_top_left: "左上",
+                watermark_position_top_right: "右上",
+                watermark_position_bottom_left: "左下",
+                watermark_position_bottom_right: "右下",
+                watermark_spacing_label: "重複間距",
+                watermark_pages_label: "套用頁面",
+                watermark_pages_all: "全部頁面",
+                watermark_pages_custom: "指定頁面",
+                watermark_page_range_label: "頁碼範圍",
+                watermark_page_range_hint: "用逗號分隔頁碼，以連字號指定範圍，例如 1, 3-5。",
+                watermark_preview_title: "效果預覽",
+                watermark_preview_hint: "調整設定即時預覽浮水印與遮蔽。未指定的頁面不會加入浮水印。",
+                watermark_preview_canvas_label: "PDF 浮水印與遮蔽效果預覽",
+                watermark_redact_title: "敏感內容遮蔽",
+                watermark_redact_view: "瀏覽",
+                watermark_redact_rect: "黑框",
+                watermark_redact_brush: "塗寫",
+                watermark_redact_size_label: "筆刷粗細",
+                watermark_redact_size_value: "{size} pt",
+                watermark_redact_undo: "復原此頁上一筆",
+                watermark_redact_clear: "清除此頁",
+                watermark_redact_summary: "此頁 {current} 筆遮蔽，全部共 {total} 筆。",
+                watermark_redact_hint: "用滑鼠或手指拖曳黑框，或塗寫覆蓋敏感內容。換頁會保留遮蔽，切回「瀏覽」可正常捲動。按 Esc 取消正在畫的這一筆。",
+                watermark_redact_note: "加入遮蔽後，下載的所有頁面會轉成影像，原始文字無法選取或搜尋。請完整覆蓋敏感內容並檢查每一頁。",
+                watermark_redact_preview_required: "請等待此頁預覽完成後再加入遮蔽。",
+                watermark_redact_canvas_label: "PDF 遮蔽編輯區，使用{tool}，可用滑鼠或手指拖曳，按 Esc 取消正在畫的這一筆",
+                watermark_redact_processing: "正在套用浮水印與遮蔽：{current} / {total} 頁",
+                watermark_prev: "上一頁",
+                watermark_next: "下一頁",
+                watermark_page_count: "共 {count} 頁",
+                watermark_preview_page: "第 {current} / {total} 頁",
+                watermark_preview_loading: "正在更新預覽…",
+                watermark_preview_unmarked: "此頁未套用浮水印，您加入的遮蔽仍會保留。",
+                watermark_download_again: "再次下載 PDF",
+                watermark_preview_failed: "無法顯示預覽，請重新選擇 PDF 或調整設定。",
+                watermark_processing: "正在套用浮水印：{current} / {total} 頁",
+                watermark_size_value: "{size} pt",
+                watermark_spacing_value: "{spacing} pt",
+                btn_watermark_dl: "套用浮水印並下載",
+                btn_watermark_redacted_dl: "套用浮水印與遮蔽並下載",
+                err_watermark_redact_render: "無法完成遮蔽頁面輸出，請重新選擇 PDF 後再試一次。",
+                err_watermark_load: "無法讀取 PDF，請選擇有效的 PDF 檔案。",
+                err_watermark_encrypted: "此 PDF 有密碼保護，請先使用 PDF 解鎖功能後再新增浮水印。",
+                err_watermark_failed: "新增浮水印失敗：{message}",
+                err_watermark_text: "請輸入 1 至 120 個字元的浮水印文字。",
+                err_watermark_font: "請選擇有效的字體。",
+                err_watermark_fontSize: "字體大小必須介於 10 至 144 pt。",
+                err_watermark_color: "請選擇有效的浮水印顏色。",
+                err_watermark_opacity: "不透明度必須介於 5% 至 100%。",
+                err_watermark_angle: "角度必須介於 −180° 至 180°。",
+                err_watermark_layout: "請選擇有效的排列方式。",
+                err_watermark_position: "請選擇有效的位置。",
+                err_watermark_spacing: "重複間距必須介於 20 至 240 pt。",
+                err_watermark_pages: "請輸入 1 至 {total} 頁內的有效頁碼或範圍，例如 1, 3-5。",
                 // HEIC
                 title_heic: "HEIC 轉 JPG",
                 desc_heic: "iPhone 照片格式轉換為通用 JPG",
@@ -2401,6 +2633,81 @@
                 desc_rotate: "Rotate all pages in the PDF",
                 lbl_rotate_deg: "Choose Rotation Angle (Clockwise)",
                 btn_rotate_dl: "Rotate and Download",
+                tab_watermark: "PDF Watermark",
+                title_watermark: "PDF Watermark",
+                desc_watermark: "Customize text, opacity, angle, and position, then preview and apply to all or selected pages",
+                watermark_privacy: "Files stay in your browser. Original text remains selectable when no redactions are added.",
+                watermark_settings_title: "Watermark effects",
+                watermark_text_label: "Watermark text",
+                watermark_text_hint: "Supports Chinese text. Up to 120 characters.",
+                watermark_font_label: "Font",
+                watermark_font_sans: "Sans serif",
+                watermark_font_serif: "Serif",
+                watermark_font_mono: "Monospace",
+                watermark_color_label: "Color",
+                watermark_size_label: "Font size",
+                watermark_size_hint: "Long text in a single watermark is automatically reduced to fit inside the page.",
+                watermark_opacity_label: "Opacity",
+                watermark_angle_label: "Angle (clockwise)",
+                watermark_layout_label: "Layout",
+                watermark_layout_single: "Single watermark",
+                watermark_layout_repeat: "Repeat across page",
+                watermark_position_label: "Position",
+                watermark_position_center: "Center",
+                watermark_position_top_left: "Top left",
+                watermark_position_top_right: "Top right",
+                watermark_position_bottom_left: "Bottom left",
+                watermark_position_bottom_right: "Bottom right",
+                watermark_spacing_label: "Repeat spacing",
+                watermark_pages_label: "Apply to pages",
+                watermark_pages_all: "All pages",
+                watermark_pages_custom: "Selected pages",
+                watermark_page_range_label: "Page range",
+                watermark_page_range_hint: "Separate pages with commas and ranges with a hyphen, for example 1, 3-5.",
+                watermark_preview_title: "Preview",
+                watermark_preview_hint: "Watermarks and redactions update as you adjust the settings. Unselected pages receive no watermark.",
+                watermark_preview_canvas_label: "PDF watermark and redaction preview",
+                watermark_redact_title: "Redact sensitive content",
+                watermark_redact_view: "Browse",
+                watermark_redact_rect: "Black box",
+                watermark_redact_brush: "Paint",
+                watermark_redact_size_label: "Brush width",
+                watermark_redact_size_value: "{size} pt",
+                watermark_redact_undo: "Undo last mark on this page",
+                watermark_redact_clear: "Clear this page",
+                watermark_redact_summary: "{current} marks on this page, {total} marks in total.",
+                watermark_redact_hint: "Drag a black box or paint with your mouse or finger to cover sensitive content. Marks stay when you change pages. Choose Browse to scroll normally. Press Esc to cancel the current mark.",
+                watermark_redact_note: "Adding redactions converts every downloaded page to an image. Original text will no longer be selectable or searchable. Cover sensitive content completely and check every page.",
+                watermark_redact_preview_required: "Wait for this page's preview to finish before adding a redaction.",
+                watermark_redact_canvas_label: "PDF redaction editor using {tool}. Drag with your mouse or finger. Press Esc to cancel the current mark.",
+                watermark_redact_processing: "Applying watermark and redactions: page {current} of {total}",
+                watermark_prev: "Previous",
+                watermark_next: "Next",
+                watermark_page_count: "{count} pages",
+                watermark_preview_page: "Page {current} of {total}",
+                watermark_preview_loading: "Updating preview…",
+                watermark_preview_unmarked: "No watermark is applied to this page. Your redaction marks are still retained.",
+                watermark_download_again: "Download PDF Again",
+                watermark_preview_failed: "Unable to show the preview. Select the PDF again or adjust the settings.",
+                watermark_processing: "Applying watermark: page {current} of {total}",
+                watermark_size_value: "{size} pt",
+                watermark_spacing_value: "{spacing} pt",
+                btn_watermark_dl: "Apply Watermark and Download",
+                btn_watermark_redacted_dl: "Apply Watermark and Redactions and Download",
+                err_watermark_redact_render: "Unable to export the redacted pages. Select the PDF again and retry.",
+                err_watermark_load: "Unable to read the PDF. Please choose a valid PDF file.",
+                err_watermark_encrypted: "This PDF is password protected. Use Unlock PDF before adding a watermark.",
+                err_watermark_failed: "Adding the watermark failed: {message}",
+                err_watermark_text: "Enter watermark text between 1 and 120 characters.",
+                err_watermark_font: "Please select a valid font.",
+                err_watermark_fontSize: "Font size must be between 10 and 144 pt.",
+                err_watermark_color: "Please select a valid watermark color.",
+                err_watermark_opacity: "Opacity must be between 5% and 100%.",
+                err_watermark_angle: "Angle must be between −180° and 180°.",
+                err_watermark_layout: "Please select a valid layout.",
+                err_watermark_position: "Please select a valid position.",
+                err_watermark_spacing: "Repeat spacing must be between 20 and 240 pt.",
+                err_watermark_pages: "Enter valid pages or ranges between 1 and {total}, for example 1, 3-5.",
                 title_heic: "HEIC to JPG",
                 desc_heic: "Convert iPhone photo format into standard JPG",
                 drop_heic: "Click or Drag to Upload HEIC",
@@ -2640,6 +2947,81 @@
                 desc_rotate: "PDF の全ページを回転します",
                 lbl_rotate_deg: "回転角度を選択 (時計回り)",
                 btn_rotate_dl: "回転してダウンロード",
+                tab_watermark: "PDF 透かし",
+                title_watermark: "PDF 透かし",
+                desc_watermark: "文字、透明度、角度、位置を調整し、プレビューして全ページまたは指定ページに適用します",
+                watermark_privacy: "ファイルはブラウザ内で処理されます。黒塗りを追加しなければ、元の文字を選択できます。",
+                watermark_settings_title: "透かしの設定",
+                watermark_text_label: "透かしの文字",
+                watermark_text_hint: "日本語・中国語に対応。最大 120 文字。",
+                watermark_font_label: "フォント",
+                watermark_font_sans: "サンセリフ",
+                watermark_font_serif: "セリフ",
+                watermark_font_mono: "等幅",
+                watermark_color_label: "色",
+                watermark_size_label: "文字サイズ",
+                watermark_size_hint: "単一の透かしの文字が長い場合、ページ内に収まるよう自動で縮小します。",
+                watermark_opacity_label: "不透明度",
+                watermark_angle_label: "角度（時計回り）",
+                watermark_layout_label: "配置方法",
+                watermark_layout_single: "単一の透かし",
+                watermark_layout_repeat: "ページ全体に繰り返し",
+                watermark_position_label: "位置",
+                watermark_position_center: "中央",
+                watermark_position_top_left: "左上",
+                watermark_position_top_right: "右上",
+                watermark_position_bottom_left: "左下",
+                watermark_position_bottom_right: "右下",
+                watermark_spacing_label: "繰り返し間隔",
+                watermark_pages_label: "適用するページ",
+                watermark_pages_all: "全ページ",
+                watermark_pages_custom: "指定ページ",
+                watermark_page_range_label: "ページ範囲",
+                watermark_page_range_hint: "ページはカンマ、範囲はハイフンで区切ります。例：1, 3-5。",
+                watermark_preview_title: "プレビュー",
+                watermark_preview_hint: "設定を変更すると透かしと黒塗りのプレビューが更新されます。指定外のページには透かしを追加しません。",
+                watermark_preview_canvas_label: "PDF 透かしと黒塗りのプレビュー",
+                watermark_redact_title: "機密情報を黒塗り",
+                watermark_redact_view: "閲覧",
+                watermark_redact_rect: "黒い四角",
+                watermark_redact_brush: "塗りつぶし",
+                watermark_redact_size_label: "ブラシの太さ",
+                watermark_redact_size_value: "{size} pt",
+                watermark_redact_undo: "このページの直前の操作を戻す",
+                watermark_redact_clear: "このページをクリア",
+                watermark_redact_summary: "このページは {current} 件、全体は {total} 件の黒塗り。",
+                watermark_redact_hint: "マウスや指で四角をドラッグするか、塗りつぶして機密情報を覆います。ページを切り替えても黒塗りは保持されます。「閲覧」に戻すと通常どおりスクロールできます。Esc で描画中の操作を取り消します。",
+                watermark_redact_note: "黒塗りを追加すると、ダウンロードするすべてのページが画像に変換され、元の文字は選択・検索できなくなります。機密情報を完全に覆い、各ページを確認してください。",
+                watermark_redact_preview_required: "ページのプレビューが完了してから黒塗りを追加してください。",
+                watermark_redact_canvas_label: "PDF 黒塗り編集エリア。{tool}でマウスや指をドラッグできます。Esc で描画中の操作を取り消します。",
+                watermark_redact_processing: "透かしと黒塗りを適用中：{current} / {total} ページ",
+                watermark_prev: "前のページ",
+                watermark_next: "次のページ",
+                watermark_page_count: "全 {count} ページ",
+                watermark_preview_page: "{current} / {total} ページ",
+                watermark_preview_loading: "プレビューを更新中…",
+                watermark_preview_unmarked: "このページには透かしを適用しません。追加した黒塗りは保持されます。",
+                watermark_download_again: "PDF を再ダウンロード",
+                watermark_preview_failed: "プレビューを表示できません。PDF を再選択するか設定を調整してください。",
+                watermark_processing: "透かしを適用中：{current} / {total} ページ",
+                watermark_size_value: "{size} pt",
+                watermark_spacing_value: "{spacing} pt",
+                btn_watermark_dl: "透かしを適用してダウンロード",
+                btn_watermark_redacted_dl: "透かしと黒塗りを適用してダウンロード",
+                err_watermark_redact_render: "黒塗りしたページを出力できません。PDF を再選択してお試しください。",
+                err_watermark_load: "PDF を読み込めません。有効な PDF ファイルを選択してください。",
+                err_watermark_encrypted: "この PDF はパスワードで保護されています。PDF 解除機能を使用してから透かしを追加してください。",
+                err_watermark_failed: "透かしの追加に失敗しました：{message}",
+                err_watermark_text: "透かしの文字を 1〜120 文字で入力してください。",
+                err_watermark_font: "有効なフォントを選択してください。",
+                err_watermark_fontSize: "文字サイズは 10〜144 pt で指定してください。",
+                err_watermark_color: "有効な透かしの色を選択してください。",
+                err_watermark_opacity: "不透明度は 5%〜100% で指定してください。",
+                err_watermark_angle: "角度は −180°〜180° で指定してください。",
+                err_watermark_layout: "有効な配置方法を選択してください。",
+                err_watermark_position: "有効な位置を選択してください。",
+                err_watermark_spacing: "繰り返し間隔は 20〜240 pt で指定してください。",
+                err_watermark_pages: "1〜{total} ページの有効なページ番号または範囲を入力してください。例：1, 3-5。",
                 title_heic: "HEIC JPG 変換",
                 desc_heic: "iPhone の写真形式を一般的な JPG に変換します",
                 drop_heic: "HEIC をドラッグ＆ドロップ",
@@ -2913,7 +3295,7 @@
             if (e.target.id === 'about-modal') closeAboutModal();
         });
 
-        const tabs = ['img', 'img2pdf', 'merge', 'split', 'compress', 'protect', 'rotate', 'heic', 'removebg', 'video-converter', 'video-compressor', 'video-trimmer'];
+        const tabs = ['img', 'img2pdf', 'merge', 'split', 'compress', 'protect', 'rotate', 'watermark', 'heic', 'removebg', 'video-converter', 'video-compressor', 'video-trimmer'];
         function switchTab(t) {
             tabs.forEach(x => {
                 const section = document.getElementById(`sec-${x}`);
@@ -2988,6 +3370,7 @@
             setupDragDrop('drop-compress', 'file-compress');
             setupDragDrop('drop-unlock', 'file-unlock');
             setupDragDrop('drop-rotate', 'file-rotate');
+            setupDragDrop('drop-watermark', 'file-watermark');
             setupDragDrop('drop-heic', 'file-heic');
             setupDragDrop('drop-removebg', 'file-removebg');
             setupDragDrop('drop-video-converter', 'file-video-converter');
@@ -3468,6 +3851,7 @@
         window.YYYTools = { t, notify, safeBaseName };
     </script>
     <script type="module" src="pdf-split.js?v=20260820-1"></script>
+    <script type="module" src="pdf-watermark.js"></script>
     <script type="module" src="background-removal.js?v=20260807-3"></script>
     <script type="module" src="video-tools.js"></script>
 </body>

@@ -1,0 +1,385 @@
+#sec-watermark #drop-watermark {
+    width: 100% !important;
+}
+
+#sec-watermark .watermark-note {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.8125rem;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+#sec-watermark .watermark-shell > .watermark-note {
+    margin-top: 0.75rem;
+}
+
+#sec-watermark .watermark-file-info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.35rem 1rem;
+    margin-bottom: 1.25rem;
+}
+
+#sec-watermark .watermark-filename {
+    min-width: 0;
+    margin: 0;
+    color: var(--ink);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+#sec-watermark .watermark-workbench {
+    display: grid;
+    grid-template-columns: minmax(16rem, 0.8fr) minmax(0, 1.2fr);
+    align-items: start;
+    gap: 1.5rem;
+}
+
+#sec-watermark .watermark-controls,
+#sec-watermark .watermark-preview-panel {
+    min-width: 0;
+}
+
+#watermark-settings {
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+#watermark-settings legend {
+    margin-bottom: 1rem;
+    padding: 0;
+    color: var(--ink);
+    font-size: 0.98rem;
+    font-weight: 720;
+}
+
+#sec-watermark .watermark-field {
+    display: grid;
+    min-width: 0;
+    gap: 0.375rem;
+}
+
+#sec-watermark .watermark-field label {
+    font-size: 0.8125rem;
+    font-weight: 650;
+    line-height: 1.5;
+}
+
+#sec-watermark .watermark-field input,
+#sec-watermark .watermark-field select {
+    width: 100%;
+    min-width: 0;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.625rem;
+}
+
+#sec-watermark .watermark-field input[type="range"] {
+    height: 2.75rem;
+    margin: 0;
+    padding: 0;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    accent-color: var(--accent-strong);
+    cursor: pointer;
+}
+
+#sec-watermark .watermark-field input[type="color"] {
+    padding: 0.25rem;
+    cursor: pointer;
+}
+
+#sec-watermark .watermark-field input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+#sec-watermark .watermark-field input[type="color"]::-webkit-color-swatch {
+    border: 0;
+    border-radius: 3px;
+}
+
+#sec-watermark .watermark-field-pair {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(5rem, 0.6fr);
+    gap: 0.75rem;
+}
+
+#sec-watermark .watermark-range-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+#sec-watermark .watermark-range-heading output {
+    color: var(--muted);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+#watermark-validation {
+    margin: 0.875rem 0 0;
+    color: var(--danger);
+    font-size: 0.8125rem;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+#watermark-validation:empty {
+    display: none;
+}
+
+#do-watermark {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.65rem 0.75rem;
+}
+
+#sec-watermark #prog-watermark {
+    margin-top: 0.75rem;
+}
+
+#watermark-download-result {
+    margin-top: 0.75rem;
+}
+
+#watermark-result-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--accent-strong);
+    font-size: 0.875rem;
+    font-weight: 650;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#watermark-result-link:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+
+#sec-watermark #watermark-redact-note {
+    margin-top: 0.75rem;
+    padding-left: 0.75rem;
+    border-left: 2px solid var(--line);
+}
+
+#sec-watermark .watermark-preview-panel {
+    display: grid;
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+}
+
+#watermark-preview-title {
+    margin: 0;
+}
+
+#watermark-redaction-tools {
+    display: grid;
+    gap: 0.625rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0.875rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+}
+
+#watermark-redaction-tools legend {
+    padding: 0 0.375rem;
+    color: var(--ink);
+    font-size: 0.8125rem;
+    font-weight: 700;
+}
+
+#sec-watermark .watermark-redact-modes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+#sec-watermark .watermark-redact-mode {
+    display: flex;
+    flex: 1 1 5.5rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.625rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    color: var(--ink);
+    font-size: 0.8125rem;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+#sec-watermark .watermark-redact-mode:has(input:checked) {
+    border-color: var(--accent-strong);
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+}
+
+#sec-watermark .watermark-redact-mode:has(input:checked) span {
+    color: var(--accent-strong);
+}
+
+#sec-watermark .watermark-redact-mode:has(input:focus-visible) {
+    outline: 3px solid color-mix(in oklch, var(--accent), transparent 55%);
+    outline-offset: 3px;
+}
+
+#sec-watermark .watermark-redact-mode:has(input:disabled) {
+    opacity: 0.5;
+    cursor: default;
+}
+
+#sec-watermark .watermark-redact-mode input {
+    flex: 0 0 auto;
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+    padding: 0;
+    accent-color: var(--accent-strong);
+    cursor: inherit;
+}
+
+#sec-watermark .watermark-redact-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+#watermark-redact-undo,
+#watermark-redact-clear {
+    flex: 1 1 8rem;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.625rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 0.8125rem;
+    font-weight: 650;
+    line-height: 1.4;
+}
+
+#watermark-redact-undo:hover:not(:disabled),
+#watermark-redact-clear:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent-strong);
+}
+
+#watermark-preview-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 22rem;
+    padding: 0.75rem;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-3);
+}
+
+#watermark-preview {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 34rem;
+    background: white;
+    box-shadow: var(--shadow);
+}
+
+#watermark-preview[data-redact-tool="rect"],
+#watermark-preview[data-redact-tool="brush"] {
+    cursor: crosshair;
+    touch-action: none;
+}
+
+#sec-watermark .watermark-preview-navigation {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#watermark-prev,
+#watermark-next {
+    min-height: 2.75rem;
+    padding: 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 0.8125rem;
+    font-weight: 650;
+}
+
+#watermark-prev:hover:not(:disabled),
+#watermark-next:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent-strong);
+}
+
+#watermark-preview-page {
+    color: var(--muted);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+#sec-watermark input:focus-visible,
+#sec-watermark select:focus-visible,
+#sec-watermark button:focus-visible,
+#watermark-result-link:focus-visible,
+#watermark-preview:focus-visible {
+    outline: 3px solid color-mix(in oklch, var(--accent), transparent 55%);
+    outline-offset: 3px;
+}
+
+@media (max-width: 900px) {
+    #sec-watermark .watermark-workbench {
+        grid-template-columns: 1fr;
+    }
+
+    #watermark-preview-stage {
+        min-height: 18rem;
+    }
+}
+
+@media (max-width: 480px) {
+    #sec-watermark .watermark-preview-panel {
+        padding: 0.75rem;
+    }
+
+    #watermark-preview-stage {
+        padding: 0.375rem;
+        min-height: 14rem;
+    }
+
+    #sec-watermark .watermark-preview-navigation {
+        gap: 0.375rem;
+    }
+}
