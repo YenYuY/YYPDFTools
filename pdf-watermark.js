@@ -10,6 +10,11 @@ import {
     drawRedactions,
     chooseRedactionRasterSize
 } from './pdf-redaction-core.js';
+import {
+    calculateFittedCanvasSize,
+    constrainCanvasPan,
+    zoomCanvasView
+} from './canvas-view-core.js';
 
 const byId = id => document.getElementById(id);
 const input = byId('file-watermark');
@@ -19,6 +24,11 @@ const button = byId('do-watermark');
 const canvas = byId('watermark-preview');
 const previous = byId('watermark-prev');
 const next = byId('watermark-next');
+const stage = byId('watermark-preview-stage');
+const zoomOut = byId('watermark-zoom-out');
+const zoomIn = byId('watermark-zoom-in');
+const zoomValue = byId('watermark-zoom-value');
+const fitButton = byId('watermark-fit');
 
 let file = null;
 let sourceBytes = null;
@@ -38,6 +48,9 @@ let previewBase = null;
 let draft = null;
 let paintFrame = null;
 let resultUrl = null;
+let view = { zoom: 1, panX: 0, panY: 0 };
+let fittedView = { width: 0, height: 0, scale: 0 };
+let panGesture = null;
 
 function t(key, params = {}) {
     return window.YYYTools.t(key, params);
@@ -103,9 +116,53 @@ function redactionTool() {
     return document.querySelector('input[name="watermark-redact-tool"]:checked')?.value || 'view';
 }
 
+function stageSize() {
+    const bounds = stage.getBoundingClientRect();
+    return {
+        width: Math.max(1, stage.clientWidth || bounds.width || 800),
+        height: Math.max(1, stage.clientHeight || bounds.height || 600)
+    };
+}
+
+function applyPreviewView() {
+    const ready = !!sourceDocument && !!previewBase;
+    zoomValue.textContent = `${Math.round(view.zoom * 100)}%`;
+    zoomOut.disabled = busy || !ready || view.zoom <= 0.5;
+    zoomIn.disabled = busy || !ready || view.zoom >= 8;
+    fitButton.disabled = busy || !ready;
+    if (!sourceDocument) return;
+    const geometry = watermarkPageGeometry(sourceDocument.getPage(previewPage - 1));
+    const size = stageSize();
+    fittedView = calculateFittedCanvasSize(geometry.displayWidth, geometry.displayHeight,
+        size.width, size.height, 12, true);
+    const pan = constrainCanvasPan(view.panX, view.panY, fittedView.width, fittedView.height,
+        view.zoom, size.width, size.height);
+    view.panX = pan.x;
+    view.panY = pan.y;
+    canvas.style.width = `${fittedView.width * view.zoom}px`;
+    canvas.style.height = `${fittedView.height * view.zoom}px`;
+    canvas.style.transform = `translate(-50%, -50%) translate(${view.panX}px, ${view.panY}px)`;
+}
+
+function resetPreviewView() {
+    cancelPan();
+    view = { zoom: 1, panX: 0, panY: 0 };
+    applyPreviewView();
+}
+
+function changeZoom(nextZoom, anchorX = 0, anchorY = 0) {
+    if (busy || !sourceDocument || draft) return;
+    const zoom = Math.min(8, Math.max(0.5, nextZoom));
+    if (!Number.isFinite(zoom) || zoom === view.zoom) return;
+    view = zoomCanvasView(view, zoom, anchorX, anchorY);
+    applyPreviewView();
+    schedulePreview(80);
+}
+
 function refreshRedactionControls() {
     const tool = redactionTool();
     canvas.dataset.redactTool = tool;
+    stage.dataset.redactTool = tool;
     byId('watermark-redact-size-field').classList.toggle('hidden', tool !== 'brush');
     byId('watermark-redact-size-value').textContent = t('watermark_redact_size_value', {
         size: byId('watermark-redact-size').value
@@ -149,10 +206,12 @@ function refreshControls() {
     }
     if (progress) byId('prog-watermark').textContent = t(progress.key, progress);
     refreshRedactionControls();
+    applyPreviewView();
     return validation;
 }
 
 function setBusy(value) {
+    if (value) cancelPan();
     busy = value;
     input.disabled = value;
     settings.disabled = value;
@@ -162,6 +221,7 @@ function setBusy(value) {
 }
 
 function schedulePreview(delay = 120) {
+    cancelPan();
     cancelDraft();
     // Invalidate a pending render immediately when its settings or page change.
     previewRevision += 1;
@@ -169,22 +229,33 @@ function schedulePreview(delay = 120) {
     previewTimer = window.setTimeout(renderPreview, delay);
 }
 
-async function pageRaster(document, pageNumber) {
-    if (rasterCache?.document === document && rasterCache.pageNumber === pageNumber) {
+async function pageRaster(document, pageNumber, revision) {
+    const page = await document.getPage(pageNumber);
+    // A zoom or navigation change can overtake PDF.js while it retrieves a page.
+    // Discard that request before it touches the latest raster or render task.
+    if (revision !== previewRevision || document !== previewDocument || pageNumber !== previewPage) {
+        throw new Error('Obsolete preview');
+    }
+    const natural = page.getViewport({ scale: 1 });
+    const density = Math.max(1, Number(window.devicePixelRatio) || 1);
+    const requestedScale = Math.max(0.01,
+        fittedView.width * view.zoom * density / natural.width,
+        fittedView.height * view.zoom * density / natural.height);
+    const dimensions = chooseRedactionRasterSize(natural.width, natural.height, requestedScale);
+    if (rasterCache?.document === document && rasterCache.pageNumber === pageNumber &&
+        rasterCache.width >= dimensions.width && rasterCache.height >= dimensions.height) {
         return rasterCache.promise;
     }
     renderTask?.cancel();
-    const entry = { document, pageNumber, promise: null };
+    const entry = { document, pageNumber, width: dimensions.width, height: dimensions.height, promise: null };
+    rasterCache = entry;
     entry.promise = (async () => {
-        const page = await document.getPage(pageNumber);
         if (rasterCache !== entry) throw new Error('Obsolete preview');
-        const natural = page.getViewport({ scale: 1 });
-        const scale = Math.min(2, 1600 / Math.max(natural.width, natural.height));
-        const viewport = page.getViewport({ scale });
         const raster = window.document.createElement('canvas');
-        raster.width = Math.max(1, Math.ceil(viewport.width));
-        raster.height = Math.max(1, Math.ceil(viewport.height));
-        const task = page.render({ canvasContext: raster.getContext('2d'), viewport });
+        raster.width = dimensions.width;
+        raster.height = dimensions.height;
+        const task = page.render({ canvasContext: raster.getContext('2d'), viewport: natural,
+            transform: [raster.width / natural.width, 0, 0, raster.height / natural.height, 0, 0] });
         renderTask = task;
         try {
             await task.promise;
@@ -194,7 +265,6 @@ async function pageRaster(document, pageNumber) {
             page.cleanup();
         }
     })();
-    rasterCache = entry;
     return entry.promise;
 }
 
@@ -207,9 +277,9 @@ async function renderPreview() {
     const status = byId('watermark-preview-status');
     byId('watermark-preview-stage').setAttribute('aria-busy', 'true');
     status.textContent = t('watermark_preview_loading');
-    canvas.classList.add('hidden');
+    if (!previewBase || previewBase.pageNumber !== pageNumber) canvas.classList.add('hidden');
     try {
-        const raster = await pageRaster(document, pageNumber);
+        const raster = await pageRaster(document, pageNumber, revision);
         if (revision !== previewRevision || document !== previewDocument) return;
         const base = window.document.createElement('canvas');
         base.width = raster.width;
@@ -258,6 +328,7 @@ async function clearDocument() {
     previewDocument = null;
     file = sourceBytes = sourceDocument = null;
     previewPage = 1;
+    resetPreviewView();
     progress = null;
     canvas.width = canvas.height = 0;
     canvas.classList.add('hidden');
@@ -284,6 +355,7 @@ input.addEventListener('change', async event => {
         sourceBytes = bytes;
         sourceDocument = pdf;
         previewDocument = preview;
+        resetPreviewView();
         byId('name-watermark').textContent = file.name;
         controls.classList.remove('hidden');
         schedulePreview(0);
@@ -321,6 +393,7 @@ function composePreview() {
     const mark = draftMark();
     drawRedactions(canvas, mark ? [...currentMarks(), mark] : currentMarks(),
         previewBase.geometry.displayWidth, previewBase.geometry.displayHeight);
+    applyPreviewView();
 }
 
 function queuePaint() {
@@ -410,10 +483,12 @@ canvas.addEventListener('keydown', event => {
 });
 
 byId('watermark-redaction-tools').addEventListener('input', () => {
+    cancelPan();
     cancelDraft();
     refreshControls();
 });
 byId('watermark-redaction-tools').addEventListener('change', () => {
+    cancelPan();
     cancelDraft();
     refreshControls();
 });
@@ -450,15 +525,85 @@ settings.addEventListener('change', () => {
 previous.addEventListener('click', () => {
     if (busy || previewPage <= 1) return;
     previewPage -= 1;
+    resetPreviewView();
     refreshControls();
     schedulePreview(0);
 });
 next.addEventListener('click', () => {
     if (busy || previewPage >= pageCount()) return;
     previewPage += 1;
+    resetPreviewView();
     refreshControls();
     schedulePreview(0);
 });
+
+zoomOut.addEventListener('click', () => changeZoom(view.zoom - 0.25));
+zoomIn.addEventListener('click', () => changeZoom(view.zoom + 0.25));
+fitButton.addEventListener('click', () => {
+    if (busy || !sourceDocument) return;
+    cancelDraft();
+    resetPreviewView();
+    schedulePreview(0);
+});
+
+function cancelPan() {
+    const pointerId = panGesture?.pointerId;
+    panGesture = null;
+    stage.dataset.panning = 'false';
+    if (pointerId !== undefined && stage.hasPointerCapture(pointerId)) stage.releasePointerCapture(pointerId);
+}
+
+function extendPan(event) {
+    if (!panGesture || panGesture.pointerId !== event.pointerId) return;
+    view.panX = panGesture.panX + event.clientX - panGesture.startX;
+    view.panY = panGesture.panY + event.clientY - panGesture.startY;
+    applyPreviewView();
+}
+
+stage.addEventListener('pointerdown', event => {
+    if (busy || panGesture || draft || redactionTool() !== 'view' || event.button !== 0 || !event.isPrimary) return;
+    if (!previewBase || canvas.classList.contains('hidden')) return;
+    if (!Number.isFinite(event.clientX) || !Number.isFinite(event.clientY)) return;
+    event.preventDefault();
+    panGesture = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY,
+        panX: view.panX, panY: view.panY };
+    stage.dataset.panning = 'true';
+    stage.setPointerCapture(event.pointerId);
+});
+stage.addEventListener('pointermove', event => {
+    if (!panGesture || panGesture.pointerId !== event.pointerId) return;
+    event.preventDefault();
+    extendPan(event);
+});
+stage.addEventListener('pointerup', event => {
+    if (!panGesture || panGesture.pointerId !== event.pointerId) return;
+    event.preventDefault();
+    extendPan(event);
+    cancelPan();
+});
+stage.addEventListener('pointercancel', cancelPan);
+stage.addEventListener('lostpointercapture', cancelPan);
+stage.addEventListener('wheel', event => {
+    if ((!event.ctrlKey && !event.metaKey) || busy || draft || !previewBase) return;
+    if (!Number.isFinite(event.deltaY) || !Number.isFinite(event.clientX) || !Number.isFinite(event.clientY)) return;
+    event.preventDefault();
+    const bounds = stage.getBoundingClientRect();
+    changeZoom(view.zoom * Math.exp(-Math.max(-200, Math.min(200, event.deltaY)) * 0.002),
+        event.clientX - bounds.left - bounds.width / 2,
+        event.clientY - bounds.top - bounds.height / 2);
+}, { passive: false });
+
+function refreshViewportSize() {
+    if (!sourceDocument) return;
+    applyPreviewView();
+    schedulePreview(80);
+}
+
+if (typeof ResizeObserver === 'function') {
+    const observer = new ResizeObserver(refreshViewportSize);
+    observer.observe(stage);
+}
+window.addEventListener('resize', refreshViewportSize);
 
 function pngBytes(overlay) {
     return new Promise((resolve, reject) => {

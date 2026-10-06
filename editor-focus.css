@@ -1,0 +1,121 @@
+.editor-preview-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    min-width: 0;
+}
+
+.editor-preview-title {
+    color: var(--ink);
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+.editor-view-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.editor-view-button {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 0.8125rem;
+    font-weight: 650;
+    line-height: 1.4;
+}
+
+.editor-view-button:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+}
+
+.editor-view-button:focus-visible {
+    outline: 3px solid color-mix(in oklch, var(--accent), transparent 55%);
+    outline-offset: 2px;
+}
+
+.editor-zoom-value {
+    min-width: 4.5rem;
+    color: var(--ink);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.editor-view-hint {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.removebg-canvas-frame > .editor-preview-heading {
+    margin-bottom: 0.5rem;
+}
+
+.removebg-canvas-frame > .editor-view-hint {
+    margin-bottom: 0.75rem;
+}
+
+/* The editor sits above the app bar (40) and below notifications/dialogs. */
+.editor-expanded {
+    position: fixed;
+    inset: clamp(0.5rem, 1vw, 1.5rem);
+    z-index: 45;
+    margin: 0;
+    padding: 1rem;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+}
+
+.removebg-workbench.editor-expanded {
+    align-items: stretch;
+}
+
+.removebg-workbench.editor-expanded .removebg-canvas-frame {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.removebg-workbench.editor-expanded .removebg-stage {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+}
+
+.removebg-workbench.editor-expanded .removebg-sidebar {
+    align-content: start;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+@media (max-width: 900px) {
+    .editor-expanded {
+        padding: 0.75rem;
+        overflow-y: auto;
+    }
+
+    .removebg-workbench.editor-expanded {
+        grid-template-columns: 1fr;
+    }
+
+    .removebg-workbench.editor-expanded .removebg-stage {
+        flex: none;
+        height: 65dvh;
+        min-height: 18rem;
+    }
+}
