@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="background-removal.css?v=20261005-2">
     <link rel="stylesheet" href="video-tools.css">
-    <link rel="stylesheet" href="pdf-watermark.css?v=20261005-3">
+    <link rel="stylesheet" href="pdf-watermark.css?v=20261006-1">
     <!-- 標題 -->
     <title data-i18n="site_title">3Y工具箱</title>
     
@@ -1767,7 +1767,8 @@
                                         <label for="watermark-spacing" data-i18n="watermark_spacing_label">重複間距</label>
                                         <output id="watermark-spacing-value" for="watermark-spacing">80 pt</output>
                                     </div>
-                                    <input type="range" id="watermark-spacing" min="20" max="240" step="1" value="80">
+                                    <input type="range" id="watermark-spacing" min="0" max="240" step="1" value="80" aria-describedby="watermark-spacing-hint">
+                                    <p id="watermark-spacing-hint" class="watermark-note" data-i18n="watermark_spacing_hint">間距越小，排列越密集。浮水印延伸至頁面邊緣，部分文字可能裁切。</p>
                                 </div>
                                 <div class="watermark-field">
                                     <label for="watermark-page-mode" data-i18n="watermark_pages_label">套用頁面</label>
@@ -1782,6 +1783,20 @@
                                     <p id="watermark-page-range-hint" class="watermark-note" data-i18n="watermark_page_range_hint">用逗號分隔頁碼，以連字號指定範圍，例如 1, 3-5。</p>
                                 </div>
                             </fieldset>
+                            <div id="watermark-redact-size-field" class="watermark-field hidden">
+                                <div class="watermark-range-heading">
+                                    <label for="watermark-redact-size" data-i18n="watermark_redact_size_label">筆刷粗細</label>
+                                    <output id="watermark-redact-size-value" for="watermark-redact-size">24 pt</output>
+                                </div>
+                                <input type="range" id="watermark-redact-size" min="8" max="80" step="1" value="24">
+                            </div>
+                            <details class="watermark-help">
+                                <summary data-i18n="watermark_editor_help">操作說明與遮蔽紀錄</summary>
+                                <p id="watermark-redact-summary" class="watermark-note" aria-live="polite" data-i18n="watermark_redact_summary" data-dynamic-text="true">此頁 0 筆遮蔽，全部共 0 筆。</p>
+                                <p id="watermark-redact-hint" class="watermark-note" data-i18n="watermark_redact_hint">用滑鼠或手指拖曳黑框，或塗寫覆蓋敏感內容。換頁會保留遮蔽；「瀏覽」可拖移放大後的頁面。按 Esc 取消正在畫的這一筆。</p>
+                                <p class="watermark-note" data-i18n="watermark_preview_hint">調整設定即時預覽浮水印與遮蔽。未指定的頁面不會加入浮水印。</p>
+                                <p class="watermark-note editor-view-hint" data-i18n="editor_view_hint">100% 為適合畫面。使用＋／−或 Ctrl／⌘＋滾輪縮放，切到瀏覽／抓手可拖移。</p>
+                            </details>
                             <p id="watermark-validation" class="watermark-validation" role="status" aria-live="polite"></p>
                             <button type="button" id="do-watermark" class="watermark-download" data-i18n="btn_watermark_dl">套用浮水印並下載</button>
                             <p id="watermark-redact-note" class="watermark-note" data-i18n="watermark_redact_note">加入遮蔽後，下載的所有頁面會轉成影像，原始文字無法選取或搜尋。請完整覆蓋敏感內容並檢查每一頁。</p>
@@ -1795,46 +1810,51 @@
                                 <h3 id="watermark-preview-title" data-i18n="watermark_preview_title">效果預覽</h3>
                                 <button type="button" id="watermark-expand" class="editor-view-button" data-i18n="editor_expand" data-dynamic-text="true" aria-expanded="false">展開編輯器</button>
                             </div>
-                            <p class="watermark-note" data-i18n="watermark_preview_hint">調整設定即時預覽浮水印與遮蔽。未指定的頁面不會加入浮水印。</p>
-                            <fieldset id="watermark-redaction-tools" aria-describedby="watermark-redact-hint">
-                                <legend data-i18n="watermark_redact_title">敏感內容遮蔽</legend>
-                                <div class="watermark-redact-modes">
-                                    <label class="watermark-redact-mode">
-                                        <input type="radio" id="watermark-redact-view" name="watermark-redact-tool" value="view" checked>
-                                        <span data-i18n="watermark_redact_view">瀏覽</span>
-                                    </label>
-                                    <label class="watermark-redact-mode">
-                                        <input type="radio" id="watermark-redact-rect" name="watermark-redact-tool" value="rect">
-                                        <span data-i18n="watermark_redact_rect">黑框</span>
-                                    </label>
-                                    <label class="watermark-redact-mode">
-                                        <input type="radio" id="watermark-redact-brush" name="watermark-redact-tool" value="brush">
-                                        <span data-i18n="watermark_redact_brush">塗寫</span>
-                                    </label>
-                                </div>
-                                <div id="watermark-redact-size-field" class="watermark-field hidden">
-                                    <div class="watermark-range-heading">
-                                        <label for="watermark-redact-size" data-i18n="watermark_redact_size_label">筆刷粗細</label>
-                                        <output id="watermark-redact-size-value" for="watermark-redact-size">24 pt</output>
+                            <div class="watermark-preview-workspace">
+                                <aside class="watermark-tool-palette" data-i18n-aria-label="watermark_redact_title" aria-label="敏感內容遮蔽">
+                                    <fieldset id="watermark-redaction-tools" aria-describedby="watermark-redact-hint">
+                                        <legend class="watermark-sr-only" data-i18n="watermark_redact_title">敏感內容遮蔽</legend>
+                                        <div class="watermark-redact-modes">
+                                            <label class="watermark-redact-mode" title="瀏覽" data-i18n-title="watermark_redact_view">
+                                                <input type="radio" id="watermark-redact-view" class="watermark-sr-only" name="watermark-redact-tool" value="view" checked>
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 13V5a1.5 1.5 0 0 1 3 0v6-7a1.5 1.5 0 0 1 3 0v7-5a1.5 1.5 0 0 1 3 0v6-3a1.5 1.5 0 0 1 3 0v7c0 4-3 6-6 6h-1c-2 0-3-1-4-3l-4-5a1.5 1.5 0 0 1 2-2Z"/></svg>
+                                                <span class="watermark-sr-only" data-i18n="watermark_redact_view">瀏覽</span>
+                                            </label>
+                                            <label class="watermark-redact-mode" title="黑框" data-i18n-title="watermark_redact_rect">
+                                                <input type="radio" id="watermark-redact-rect" class="watermark-sr-only" name="watermark-redact-tool" value="rect">
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><rect x="4" y="6" width="16" height="12" rx="1"/></svg>
+                                                <span class="watermark-sr-only" data-i18n="watermark_redact_rect">黑框</span>
+                                            </label>
+                                            <label class="watermark-redact-mode" title="塗寫" data-i18n-title="watermark_redact_brush">
+                                                <input type="radio" id="watermark-redact-brush" class="watermark-sr-only" name="watermark-redact-tool" value="brush">
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m10 14 8-10a2.1 2.1 0 0 1 3 3l-10 8Z"/><path d="M10 14c-4-2-3 5-7 6 4 1 9 0 8-5"/></svg>
+                                                <span class="watermark-sr-only" data-i18n="watermark_redact_brush">塗寫</span>
+                                            </label>
+                                        </div>
+                                        <div class="watermark-redact-actions">
+                                            <button type="button" id="watermark-redact-undo" disabled title="復原此頁上一筆" data-i18n-title="watermark_redact_undo">
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m8 4-5 5 5 5M3 9h10a7 7 0 0 1 0 14" transform="translate(0 -2)"/></svg>
+                                                <span class="watermark-sr-only" data-i18n="watermark_redact_undo">復原此頁上一筆</span>
+                                            </button>
+                                            <button type="button" id="watermark-redact-clear" disabled title="清除此頁" data-i18n-title="watermark_redact_clear">
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg>
+                                                <span class="watermark-sr-only" data-i18n="watermark_redact_clear">清除此頁</span>
+                                            </button>
+                                        </div>
+                                    </fieldset>
+                                    <div class="editor-view-toolbar" role="group" data-i18n-aria-label="editor_view_controls" aria-label="預覽縮放">
+                                        <button type="button" id="watermark-zoom-out" class="editor-view-button" aria-label="縮小" data-i18n-aria-label="editor_zoom_out" title="縮小" data-i18n-title="editor_zoom_out">−</button>
+                                        <output id="watermark-zoom-value" class="editor-zoom-value" aria-live="polite">100%</output>
+                                        <button type="button" id="watermark-zoom-in" class="editor-view-button" aria-label="放大" data-i18n-aria-label="editor_zoom_in" title="放大" data-i18n-title="editor_zoom_in">＋</button>
+                                        <button type="button" id="watermark-fit" class="editor-view-button" title="適合畫面" data-i18n-title="editor_fit">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"/><rect x="8" y="7" width="8" height="10" rx="1"/></svg>
+                                            <span class="watermark-sr-only" data-i18n="editor_fit">適合畫面</span>
+                                        </button>
                                     </div>
-                                    <input type="range" id="watermark-redact-size" min="8" max="80" step="1" value="24">
+                                </aside>
+                                <div id="watermark-preview-stage" class="watermark-preview-stage" aria-busy="false">
+                                    <canvas id="watermark-preview" role="img" tabindex="0" data-redact-tool="view" aria-label="PDF 浮水印與遮蔽效果預覽" aria-describedby="watermark-redact-hint watermark-redact-note" data-i18n-aria-label="watermark_preview_canvas_label"></canvas>
                                 </div>
-                                <div class="watermark-redact-actions">
-                                    <button type="button" id="watermark-redact-undo" disabled data-i18n="watermark_redact_undo">復原此頁上一筆</button>
-                                    <button type="button" id="watermark-redact-clear" disabled data-i18n="watermark_redact_clear">清除此頁</button>
-                                </div>
-                                <p id="watermark-redact-summary" class="watermark-note" aria-live="polite" data-i18n="watermark_redact_summary" data-dynamic-text="true">此頁 0 筆遮蔽，全部共 0 筆。</p>
-                                <p id="watermark-redact-hint" class="watermark-note" data-i18n="watermark_redact_hint">用滑鼠或手指拖曳黑框，或塗寫覆蓋敏感內容。換頁會保留遮蔽；「瀏覽」可拖移放大後的頁面。按 Esc 取消正在畫的這一筆。</p>
-                            </fieldset>
-                            <div class="editor-view-toolbar" role="group" data-i18n-aria-label="editor_view_controls" aria-label="預覽縮放">
-                                <button type="button" id="watermark-zoom-out" class="editor-view-button" aria-label="縮小" data-i18n-aria-label="editor_zoom_out">−</button>
-                                <output id="watermark-zoom-value" class="editor-zoom-value" aria-live="polite">100%</output>
-                                <button type="button" id="watermark-zoom-in" class="editor-view-button" aria-label="放大" data-i18n-aria-label="editor_zoom_in">＋</button>
-                                <button type="button" id="watermark-fit" class="editor-view-button" data-i18n="editor_fit">適合畫面</button>
-                            </div>
-                            <p class="watermark-note editor-view-hint" data-i18n="editor_view_hint">100% 為適合畫面。使用＋／−或 Ctrl／⌘＋滾輪縮放，切到瀏覽／抓手可拖移。</p>
-                            <div id="watermark-preview-stage" class="watermark-preview-stage" aria-busy="false">
-                                <canvas id="watermark-preview" role="img" tabindex="0" data-redact-tool="view" aria-label="PDF 浮水印與遮蔽效果預覽" aria-describedby="watermark-redact-hint watermark-redact-note" data-i18n-aria-label="watermark_preview_canvas_label"></canvas>
                             </div>
                             <div class="watermark-preview-navigation">
                                 <button type="button" id="watermark-prev" data-i18n="watermark_prev">上一頁</button>
@@ -2368,12 +2388,14 @@
                 watermark_position_bottom_left: "左下",
                 watermark_position_bottom_right: "右下",
                 watermark_spacing_label: "重複間距",
+                watermark_spacing_hint: "間距越小，排列越密集。浮水印延伸至頁面邊緣，部分文字可能裁切。",
                 watermark_pages_label: "套用頁面",
                 watermark_pages_all: "全部頁面",
                 watermark_pages_custom: "指定頁面",
                 watermark_page_range_label: "頁碼範圍",
                 watermark_page_range_hint: "用逗號分隔頁碼，以連字號指定範圍，例如 1, 3-5。",
                 watermark_preview_title: "效果預覽",
+                watermark_editor_help: "操作說明與遮蔽紀錄",
                 watermark_preview_hint: "調整設定即時預覽浮水印與遮蔽。未指定的頁面不會加入浮水印。",
                 watermark_preview_canvas_label: "PDF 浮水印與遮蔽效果預覽",
                 watermark_redact_title: "敏感內容遮蔽",
@@ -2415,7 +2437,7 @@
                 err_watermark_angle: "角度必須介於 −180° 至 180°。",
                 err_watermark_layout: "請選擇有效的排列方式。",
                 err_watermark_position: "請選擇有效的位置。",
-                err_watermark_spacing: "重複間距必須介於 20 至 240 pt。",
+                err_watermark_spacing: "重複間距必須介於 0 至 240 pt。",
                 err_watermark_pages: "請輸入 1 至 {total} 頁內的有效頁碼或範圍，例如 1, 3-5。",
                 // HEIC
                 title_heic: "HEIC 轉 JPG",
@@ -2691,12 +2713,14 @@
                 watermark_position_bottom_left: "Bottom left",
                 watermark_position_bottom_right: "Bottom right",
                 watermark_spacing_label: "Repeat spacing",
+                watermark_spacing_hint: "Smaller spacing creates a denser pattern. Watermarks extend to page edges, where some text may be cropped.",
                 watermark_pages_label: "Apply to pages",
                 watermark_pages_all: "All pages",
                 watermark_pages_custom: "Selected pages",
                 watermark_page_range_label: "Page range",
                 watermark_page_range_hint: "Separate pages with commas and ranges with a hyphen, for example 1, 3-5.",
                 watermark_preview_title: "Preview",
+                watermark_editor_help: "Editing help and redaction marks",
                 watermark_preview_hint: "Watermarks and redactions update as you adjust the settings. Unselected pages receive no watermark.",
                 watermark_preview_canvas_label: "PDF watermark and redaction preview",
                 watermark_redact_title: "Redact sensitive content",
@@ -2738,7 +2762,7 @@
                 err_watermark_angle: "Angle must be between −180° and 180°.",
                 err_watermark_layout: "Please select a valid layout.",
                 err_watermark_position: "Please select a valid position.",
-                err_watermark_spacing: "Repeat spacing must be between 20 and 240 pt.",
+                err_watermark_spacing: "Repeat spacing must be between 0 and 240 pt.",
                 err_watermark_pages: "Enter valid pages or ranges between 1 and {total}, for example 1, 3-5.",
                 title_heic: "HEIC to JPG",
                 desc_heic: "Convert iPhone photo format into standard JPG",
@@ -3012,12 +3036,14 @@
                 watermark_position_bottom_left: "左下",
                 watermark_position_bottom_right: "右下",
                 watermark_spacing_label: "繰り返し間隔",
+                watermark_spacing_hint: "間隔を小さくすると密度が上がります。ページ端まで配置するため、一部の文字が切れる場合があります。",
                 watermark_pages_label: "適用するページ",
                 watermark_pages_all: "全ページ",
                 watermark_pages_custom: "指定ページ",
                 watermark_page_range_label: "ページ範囲",
                 watermark_page_range_hint: "ページはカンマ、範囲はハイフンで区切ります。例：1, 3-5。",
                 watermark_preview_title: "プレビュー",
+                watermark_editor_help: "操作説明と黒塗りの記録",
                 watermark_preview_hint: "設定を変更すると透かしと黒塗りのプレビューが更新されます。指定外のページには透かしを追加しません。",
                 watermark_preview_canvas_label: "PDF 透かしと黒塗りのプレビュー",
                 watermark_redact_title: "機密情報を黒塗り",
@@ -3059,7 +3085,7 @@
                 err_watermark_angle: "角度は −180°〜180° で指定してください。",
                 err_watermark_layout: "有効な配置方法を選択してください。",
                 err_watermark_position: "有効な位置を選択してください。",
-                err_watermark_spacing: "繰り返し間隔は 20〜240 pt で指定してください。",
+                err_watermark_spacing: "繰り返し間隔は 0〜240 pt で指定してください。",
                 err_watermark_pages: "1〜{total} ページの有効なページ番号または範囲を入力してください。例：1, 3-5。",
                 title_heic: "HEIC JPG 変換",
                 desc_heic: "iPhone の写真形式を一般的な JPG に変換します",
@@ -3301,9 +3327,11 @@
             document.documentElement.lang = lang;
             document.getElementById('lang-selector').value = lang;
             const dict = translations[lang] || translations['zh-TW'];
-            document.querySelectorAll('[data-i18n], [data-i18n-aria-label]').forEach(el => {
+            document.querySelectorAll('[data-i18n], [data-i18n-aria-label], [data-i18n-title]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 const ariaKey = el.getAttribute('data-i18n-aria-label');
+                const titleKey = el.getAttribute('data-i18n-title');
+                if (titleKey && dict[titleKey]) el.setAttribute('title', dict[titleKey]);
                 if (ariaKey && dict[ariaKey]) el.setAttribute('aria-label', dict[ariaKey]);
                 if (key && dict[key]) {
                     if (el.dataset.dynamicText === 'true') return;
@@ -3891,9 +3919,9 @@
         window.YYYTools = { t, notify, safeBaseName };
     </script>
     <script type="module" src="pdf-split.js?v=20260820-1"></script>
-    <script type="module" src="pdf-watermark.js?v=20261005-2"></script>
+    <script type="module" src="pdf-watermark.js?v=20261006-3"></script>
     <script type="module" src="background-removal.js?v=20261005-2"></script>
-    <script type="module" src="editor-focus.js?v=20261005-2"></script>
+    <script type="module" src="editor-focus.js?v=20261006-2"></script>
     <script type="module" src="video-tools.js"></script>
 </body>
 </html>

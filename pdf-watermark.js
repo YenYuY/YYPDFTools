@@ -3,7 +3,7 @@ import {
     watermarkPageGeometry,
     watermarkOverlayPlacement,
     drawWatermarkOverlay
-} from './pdf-watermark-core.js';
+} from './pdf-watermark-core.js?v=20261006-3';
 import {
     pointOnPage,
     makeRedactionRect,
@@ -168,6 +168,7 @@ function refreshRedactionControls() {
         size: byId('watermark-redact-size').value
     });
     byId('watermark-redaction-tools').disabled = busy;
+    byId('watermark-redact-size').disabled = busy;
     byId('watermark-redact-undo').disabled = busy || currentMarks().length === 0;
     byId('watermark-redact-clear').disabled = busy || currentMarks().length === 0;
     byId('watermark-redact-summary').textContent = t('watermark_redact_summary', {
@@ -482,16 +483,15 @@ canvas.addEventListener('keydown', event => {
     }
 });
 
-byId('watermark-redaction-tools').addEventListener('input', () => {
+function redactionControlChanged() {
     cancelPan();
     cancelDraft();
     refreshControls();
-});
-byId('watermark-redaction-tools').addEventListener('change', () => {
-    cancelPan();
-    cancelDraft();
-    refreshControls();
-});
+}
+byId('watermark-redaction-tools').addEventListener('input', redactionControlChanged);
+byId('watermark-redaction-tools').addEventListener('change', redactionControlChanged);
+byId('watermark-redact-size').addEventListener('input', redactionControlChanged);
+byId('watermark-redact-size').addEventListener('change', redactionControlChanged);
 byId('watermark-redact-undo').addEventListener('click', () => {
     if (busy) return;
     clearResult();

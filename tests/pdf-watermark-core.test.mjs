@@ -23,7 +23,7 @@ test('rejects blank or overlong text and counts Unicode code points', () => {
 });
 
 test('validates every numeric effect and accepts numeric input strings', () => {
-    const limits = { fontSize: [10, 144], opacity: [0.05, 1], angle: [-180, 180], spacing: [20, 240] };
+    const limits = { fontSize: [10, 144], opacity: [0.05, 1], angle: [-180, 180], spacing: [0, 240] };
     for (const [key, [min, max]] of Object.entries(limits)) {
         for (const value of ['', '  ', null, false, [], {}, NaN, Infinity, 'abc', min - 0.01, max + 0.01]) {
             assert.deepEqual(core.validateWatermarkOptions({ [key]: value }, 3), { valid: false, error: key }, `${key}: ${String(value)}`);
@@ -187,31 +187,135 @@ test('drawing uses fitted size and the chosen corner for a long watermark', () =
     assert.deepEqual(canvas.calls.find(call => call[0] === 'translate'), ['translate', layout.marks[0].x, layout.marks[0].y]);
 });
 
-test('repeats a centered grid, honors spacing, and caps very large-page layouts at 500 marks', () => {
-    const options = { ...core.WATERMARK_DEFAULTS, layout: 'repeat', angle: 0, spacing: 20 };
-    const metrics = { width: 40, height: 12 };
-    const dense = core.watermarkLayout(400, 600, options, metrics);
-    assert.ok(dense.marks.length > 1 && dense.marks.length <= 500);
-    const sparse = core.watermarkLayout(400, 600, { ...options, spacing: 240 }, metrics);
-    assert.ok(sparse.marks.length < dense.marks.length);
-    const huge = core.watermarkLayout(1000000, 1000000, options, metrics);
-    assert.ok(huge.marks.length > 1 && huge.marks.length <= 500);
-    for (const [width, height, layout] of [[400, 600, dense], [1000000, 1000000, huge]]) {
-        const xs = [...new Set(layout.marks.map(mark => mark.x))].sort((a, b) => a - b);
-        const ys = [...new Set(layout.marks.map(mark => mark.y))].sort((a, b) => a - b);
-        assert.ok(Math.abs((xs[0] + xs.at(-1)) / 2 - width / 2) < 1e-8);
-        assert.ok(Math.abs((ys[0] + ys.at(-1)) / 2 - height / 2) < 1e-8);
-        for (let index = 1; index < xs.length; index += 1) assert.ok(xs[index] - xs[index - 1] >= layout.boundsWidth + options.spacing - 1e-8);
-        for (const mark of layout.marks) {
-            assert.ok(mark.x >= layout.boundsWidth / 2 + layout.margin);
-            assert.ok(mark.y >= layout.boundsHeight / 2 + layout.margin);
-            assert.ok(mark.x <= width - layout.margin - layout.boundsWidth / 2);
-            assert.ok(mark.y <= height - layout.margin - layout.boundsHeight / 2);
+function watermarkAxisCoordinates(layout, width, height, angle) {
+    const radians = angle * Math.PI / 180;
+    const cosine = Math.cos(radians);
+    const sine = Math.sin(radians);
+    const points = layout.marks.map(mark => {
+        const x = mark.x - width / 2;
+        const y = mark.y - height / 2;
+        return { x: x * cosine + y * sine, y: -x * sine + y * cosine };
+    });
+    const unique = axis => [...new Set(points.map(point => Number(point[axis].toFixed(7))))].sort((a, b) => a - b);
+    return { points, xs: unique('x'), ys: unique('y') };
+}
+
+test('repeated long Chinese and English watermarks have many diagonal rows with text-axis spacing', () => {
+    for (const angle of [-35, 35]) {
+        for (const [text, metrics] of [['僅供文件審閱使用', { width: 700, height: 58 }], ['CONFIDENTIAL DOCUMENT FOR INTERNAL REVIEW ONLY', { width: 2400, height: 58 }]]) {
+            const options = { ...core.WATERMARK_DEFAULTS, text, layout: 'repeat', angle, spacing: 20 };
+            const layout = core.watermarkLayout(595, 842, options, metrics);
+            const { xs, ys } = watermarkAxisCoordinates(layout, 595, 842, angle);
+            assert.ok(ys.length >= 10, `angle ${angle}, text ${text}: ${ys.length} rows`);
+            assert.equal(xs.length * ys.length, layout.marks.length);
+            for (let index = 1; index < ys.length; index += 1) {
+                assert.ok(Math.abs(ys[index] - ys[index - 1] - metrics.height * layout.fontScale - options.spacing) < 1e-6);
+            }
         }
     }
+});
+
+test('repeated row pitch follows unrotated text height and changes smoothly with spacing', () => {
+    const metrics = { width: 300, height: 48 };
+    for (const angle of [0, 35, -35, 90, 180, -180]) {
+        for (const spacing of [0, 20, 80, 81, 240]) {
+            const options = { ...core.WATERMARK_DEFAULTS, layout: 'repeat', angle, spacing };
+            const layout = core.watermarkLayout(595, 842, options, metrics);
+            assert.equal(layout.fontScale, 1);
+            const { ys } = watermarkAxisCoordinates(layout, 595, 842, angle);
+            assert.ok(ys.length > 1);
+            assert.ok(Math.abs(ys[1] - ys[0] - metrics.height - spacing) < 1e-6, `angle ${angle}, spacing ${spacing}`);
+        }
+    }
+});
+
+test('repeated grids extend beyond every page edge without duplicate or non-finite centers', () => {
+    const metrics = { width: 420, height: 58 };
+    for (const [width, height] of [[595, 842], [842, 595], [220, 120], [100, 20]]) {
+        for (const angle of [0, 35, -35, 90, 180, -180]) {
+            const options = { ...core.WATERMARK_DEFAULTS, layout: 'repeat', angle, spacing: 20 };
+            const layout = core.watermarkLayout(width, height, options, metrics);
+            const radians = angle * Math.PI / 180;
+            const halfWidth = Math.abs(Math.cos(radians)) * width / 2 + Math.abs(Math.sin(radians)) * height / 2;
+            const halfHeight = Math.abs(Math.sin(radians)) * width / 2 + Math.abs(Math.cos(radians)) * height / 2;
+            const { xs, ys } = watermarkAxisCoordinates(layout, width, height, angle);
+            assert.ok(xs[0] <= -halfWidth - metrics.width * layout.fontScale / 2 + 1e-6);
+            assert.ok(xs.at(-1) >= halfWidth + metrics.width * layout.fontScale / 2 - 1e-6);
+            assert.ok(ys[0] <= -halfHeight - metrics.height * layout.fontScale / 2 + 1e-6);
+            assert.ok(ys.at(-1) >= halfHeight + metrics.height * layout.fontScale / 2 - 1e-6);
+            assert.ok(Math.abs(xs[0] + xs.at(-1)) < 1e-6);
+            assert.ok(Math.abs(ys[0] + ys.at(-1)) < 1e-6);
+            assert.equal(new Set(layout.marks.map(mark => `${mark.x.toFixed(7)},${mark.y.toFixed(7)}`)).size, layout.marks.length);
+            assert.ok(layout.marks.every(mark => Number.isFinite(mark.x) && Number.isFinite(mark.y)));
+            assert.ok(layout.marks.some(mark => mark.x < 0));
+            assert.ok(layout.marks.some(mark => mark.x > width));
+            assert.ok(layout.marks.some(mark => mark.y < 0));
+            assert.ok(layout.marks.some(mark => mark.y > height));
+        }
+    }
+});
+
+test('zero-gap copies reach and clip at each page edge for positive and negative rotations', () => {
+    const width = 595;
+    const height = 842;
+    const metrics = { width: 420, height: 58 };
+    const edgePoints = [{ x: 0, y: height / 2 }, { x: width, y: height / 2 }, { x: width / 2, y: 0 }, { x: width / 2, y: height }];
+    for (const angle of [0, 35, -35, 90, -90, 180, -180]) {
+        const options = { ...core.WATERMARK_DEFAULTS, layout: 'repeat', angle, spacing: 0 };
+        const layout = core.watermarkLayout(width, height, options, metrics);
+        const radians = angle * Math.PI / 180;
+        const cosine = Math.cos(radians);
+        const sine = Math.sin(radians);
+        const halfWidth = metrics.width * layout.fontScale / 2;
+        const halfHeight = metrics.height * layout.fontScale / 2;
+        for (const edge of edgePoints) {
+            assert.ok(layout.marks.some(mark => {
+                const x = edge.x - mark.x;
+                const y = edge.y - mark.y;
+                return Math.abs(cosine * x + sine * y) <= halfWidth + 1e-7 && Math.abs(-sine * x + cosine * y) <= halfHeight + 1e-7;
+            }), `angle ${angle}, edge (${edge.x}, ${edge.y})`);
+        }
+        const mirrored = core.watermarkLayout(width, height, { ...options, angle: -angle }, metrics);
+        assert.equal(mirrored.marks.length, layout.marks.length);
+    }
+});
+
+test('zero-gap repetition is denser and increasing spacing never adds rows or columns', () => {
+    const metrics = { width: 400, height: 58 };
+    for (const angle of [0, 35, -35, 90, 180]) {
+        let previousCount = Infinity;
+        let denseCount;
+        for (const spacing of [0, 20, 40, 80, 120, 180, 240]) {
+            const layout = core.watermarkLayout(595, 842, { ...core.WATERMARK_DEFAULTS, layout: 'repeat', angle, spacing }, metrics);
+            if (spacing === 0) denseCount = layout.marks.length;
+            assert.ok(layout.marks.length <= previousCount);
+            previousCount = layout.marks.length;
+        }
+        assert.ok(denseCount > previousCount);
+    }
     const canvas = fakeCanvas();
-    core.drawWatermarkOverlay(canvas, 400, 600, options);
+    core.drawWatermarkOverlay(canvas, 400, 600, { ...core.WATERMARK_DEFAULTS, layout: 'repeat', spacing: 0 });
     assert.ok(canvas.calls.filter(call => call[0] === 'fillText').length > 1);
+});
+
+test('very large and narrow pages spread at most 500 repeated marks across the complete grid', () => {
+    const metrics = { width: 40, height: 12 };
+    for (const [width, height] of [[1000000, 1000000], [1000000, 100], [100, 1000000]]) {
+        for (const angle of [0, 35, -35, 90, 180]) {
+            const layout = core.watermarkLayout(width, height, { ...core.WATERMARK_DEFAULTS, layout: 'repeat', angle, spacing: 0 }, metrics);
+            const { xs, ys } = watermarkAxisCoordinates(layout, width, height, angle);
+            const radians = angle * Math.PI / 180;
+            const halfWidth = Math.abs(Math.cos(radians)) * width / 2 + Math.abs(Math.sin(radians)) * height / 2;
+            const halfHeight = Math.abs(Math.sin(radians)) * width / 2 + Math.abs(Math.cos(radians)) * height / 2;
+            assert.ok(layout.marks.length > 1 && layout.marks.length <= 500);
+            assert.equal(xs.length * ys.length, layout.marks.length);
+            assert.ok(xs[0] <= -halfWidth && xs.at(-1) >= halfWidth);
+            assert.ok(ys[0] <= -halfHeight && ys.at(-1) >= halfHeight);
+            assert.ok(Math.abs(xs[0] + xs.at(-1)) < 1e-6);
+            assert.ok(Math.abs(ys[0] + ys.at(-1)) < 1e-6);
+            assert.ok(layout.marks.every(mark => Number.isFinite(mark.x) && Number.isFinite(mark.y)));
+        }
+    }
 });
 
 test('limits raster dimensions and pixels while scaling both axes consistently', () => {

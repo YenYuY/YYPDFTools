@@ -67,8 +67,12 @@ document.addEventListener('keydown', event => {
         event.preventDefault();
         closeEditor();
     } else if (event.key === 'Tab') {
-        const controls = [...active.element.querySelectorAll('button, input, select, a[href], canvas[tabindex]')]
-            .filter(element => !element.disabled && !element.closest('[inert]') && element.getClientRects().length);
+        const controls = [...active.element.querySelectorAll('button, input, select, summary, a[href], canvas[tabindex]')]
+            .filter(element => {
+                const closedDetails = element.closest('details:not([open])');
+                return !element.matches(':disabled') && !element.closest('[inert]') &&
+                    (!closedDetails || element.tagName === 'SUMMARY') && element.getClientRects().length;
+            });
         const first = controls[0];
         const last = controls.at(-1);
         if (event.shiftKey && document.activeElement === first) {
