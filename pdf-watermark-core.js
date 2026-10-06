@@ -19,7 +19,7 @@ export function validateWatermarkOptions(raw = {}, totalPages) {
         return { valid: false, error: 'text' };
     }
     options.text = options.text.trim();
-    const limits = { fontSize: [10, 144], opacity: [0.05, 1], angle: [-180, 180], spacing: [20, 240] };
+    const limits = { fontSize: [10, 144], opacity: [0.05, 1], angle: [-180, 180], spacing: [0, 240] };
     for (const [key, [min, max]] of Object.entries(limits)) {
         const rawValue = options[key];
         if (!['string', 'number'].includes(typeof rawValue) || (typeof rawValue === 'string' && !rawValue.trim())) {
@@ -139,24 +139,35 @@ export function watermarkLayout(width, height, options, metrics) {
     const boundsWidth = rotatedWidth * fontScale;
     const boundsHeight = rotatedHeight * fontScale;
     if (options.layout === 'repeat') {
-        let stepX = boundsWidth + options.spacing;
-        let stepY = boundsHeight + options.spacing;
-        let columns = Math.max(1, Math.floor((innerWidth + options.spacing) / stepX));
-        let rows = Math.max(1, Math.floor((innerHeight + options.spacing) / stepY));
-        if (columns * rows > 500) {
-            columns = Math.min(columns, 500, Math.max(1, Math.floor(Math.sqrt(500 * columns / rows))));
-            rows = Math.min(rows, Math.floor(500 / columns));
-            if (columns > 1) stepX = Math.max(stepX, (innerWidth - boundsWidth) / (columns - 1));
-            if (rows > 1) stepY = Math.max(stepY, (innerHeight - boundsHeight) / (rows - 1));
+        const textWidth = metrics.width * fontScale;
+        const textHeight = metrics.height * fontScale;
+        const signedCosine = Math.cos(radians);
+        const signedSine = Math.sin(radians);
+        // Project the page corners into the text's rotated axes. Include complete
+        // tiles beyond these limits so clipping, rather than a margin, sets the edge.
+        const halfWidth = cosine * width / 2 + sine * height / 2 + textWidth / 2;
+        const halfHeight = sine * width / 2 + cosine * height / 2 + textHeight / 2;
+        let stepX = Math.max(1, textWidth + options.spacing);
+        let stepY = Math.max(1, textHeight + options.spacing);
+        let columnRadius = Math.ceil(halfWidth / stepX);
+        let rowRadius = Math.ceil(halfHeight / stepY);
+        // Reduce density across both axes before drawing, retaining a complete,
+        // centered grid even for oversized pages instead of truncating at 500.
+        while ((columnRadius * 2 + 1) * (rowRadius * 2 + 1) > 500) {
+            const densityScale = Math.max(1.05, Math.sqrt((columnRadius * 2 + 1) * (rowRadius * 2 + 1) / 500));
+            stepX *= densityScale;
+            stepY *= densityScale;
+            columnRadius = Math.ceil(halfWidth / stepX);
+            rowRadius = Math.ceil(halfHeight / stepY);
         }
-        const startX = (width - (columns - 1) * stepX) / 2;
-        const startY = (height - (rows - 1) * stepY) / 2;
         const marks = [];
-        for (let row = 0; row < rows; row += 1) {
-            for (let column = 0; column < columns; column += 1) {
+        for (let row = -rowRadius; row <= rowRadius; row += 1) {
+            for (let column = -columnRadius; column <= columnRadius; column += 1) {
+                const x = column * stepX;
+                const y = row * stepY;
                 marks.push({
-                    x: Math.min(width - margin - boundsWidth / 2, Math.max(margin + boundsWidth / 2, startX + column * stepX)),
-                    y: Math.min(height - margin - boundsHeight / 2, Math.max(margin + boundsHeight / 2, startY + row * stepY))
+                    x: width / 2 + signedCosine * x - signedSine * y,
+                    y: height / 2 + signedSine * x + signedCosine * y
                 });
             }
         }

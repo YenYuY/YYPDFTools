@@ -75,6 +75,10 @@ The video tools download an FFmpeg WebAssembly core of about 32 MB on the first 
 
 The background removal and PDF watermark editors can expand or collapse; press Esc to leave the expanded view. Fit-to-window is 100%: use +/− or Ctrl/⌘ and the mouse wheel to zoom between 50% and 800%, and drag in Browse/Hand mode to pan. Zooming and panning do not change output dimensions or redaction positions.
 
+The PDF editor uses a compact floating toolbar on the left, with brush width and editing help in the settings panel to keep the preview larger in short windows or scaled desktop displays.
+
+For repeated watermarks, spacing from 0–240 pt controls pattern density. Angled patterns repeat along the text direction and extend to page edges, where some letters may be cropped. Preview and export use the same layout.
+
 Everything happens on the current device. Large or high-resolution documents may take more time and memory depending on device performance, page count, and image dimensions.
 
 ## Use Online

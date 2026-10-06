@@ -11,6 +11,7 @@ async function controller() {
     const elements = new Map();
     const renders = [];
     const paintedMasks = [];
+    const paintedBrushes = [];
     const windowEvents = new Map();
     const stageBounds = { left: 0, top: 0, width: 1200, height: 900 };
     let tool = 'view';
@@ -54,7 +55,9 @@ async function controller() {
             canvas: node, font: '', globalAlpha: 1,
             save() { stack.push({ ...this }); }, restore() { Object.assign(this, stack.pop()); },
             setTransform() {}, clearRect() {}, drawImage() {}, beginPath() {}, rect() {}, clip() {},
-            setLineDash() {}, moveTo() {}, lineTo() {}, arc() {}, fill() {}, stroke() {},
+            setLineDash() {}, moveTo() {}, lineTo() {},
+            arc(...values) { if (id === 'watermark-preview') paintedBrushes.push(values); },
+            fill() {}, stroke() {},
             translate() {}, rotate() {}, fillText() {},
             fillRect(...values) { if (id === 'watermark-preview') paintedMasks.push(values); },
             measureText(text) { return { width: text.length * parseFloat(this.font) * 0.6 }; }
@@ -101,7 +104,10 @@ async function controller() {
             if (!windowEvents.has(name)) windowEvents.set(name, []);
             windowEvents.get(name).push(handler);
         },
-        YYYTools: { t: key => key, notify(message) { throw new Error(message); } }
+        YYYTools: {
+            t: (key, params) => key === 'watermark_redact_size_value' ? `${params.size} pt` : key,
+            notify(message) { throw new Error(message); }
+        }
     };
     for (const [id, value] of Object.entries({
         'watermark-text': 'Preview', 'watermark-font': 'sans', 'watermark-size': '48',
@@ -113,7 +119,7 @@ async function controller() {
     await byId('file-watermark').emit('change', { target: { files: [{ name: 'preview.pdf', arrayBuffer: async () => new Uint8Array([1, 2, 3]).buffer }] } });
     async function settled() { await new Promise(resolve => setTimeout(resolve, 180)); }
     await settled();
-    return { byId, renders, paintedMasks, stageBounds, settled, setTool: value => { tool = value; },
+    return { byId, renders, paintedMasks, paintedBrushes, stageBounds, settled, setTool: value => { tool = value; },
         async resize(width, height) {
             stageBounds.width = width;
             stageBounds.height = height;
@@ -129,6 +135,45 @@ async function controller() {
         }
     };
 }
+
+test('a standalone brush slider updates its label, cancels drafts and supplies the next stroke width', async () => {
+    const env = await controller();
+    const canvas = env.byId('watermark-preview');
+    const slider = env.byId('watermark-redact-size');
+    env.setTool('brush');
+    await env.byId('watermark-redaction-tools').emit('change');
+    const bounds = canvas.getBoundingClientRect();
+    const point = { clientX: bounds.left + bounds.width / 2, clientY: bounds.top + bounds.height / 2 };
+    for (const [event, size] of [['input', '48'], ['change', '72']]) {
+        await canvas.emit('pointerdown', point);
+        assert.equal(canvas.hasPointerCapture(1), true);
+        slider.value = size;
+        // No fieldset event is emitted: the slider lives in the left settings panel.
+        await slider.emit(event);
+        assert.equal(env.byId('watermark-redact-size-value').textContent, `${size} pt`);
+        assert.equal(canvas.hasPointerCapture(1), false);
+        await canvas.emit('pointerup', point);
+        assert.equal(env.byId('watermark-redact-undo').disabled, true);
+    }
+    await canvas.emit('pointerdown', point);
+    await canvas.emit('pointerup', point);
+    assert.equal(env.byId('watermark-redact-undo').disabled, false);
+    assertCoordinates(env.paintedBrushes.at(-1).slice(0, 3), [300, 400, 36]);
+});
+
+test('the standalone brush slider is disabled while a PDF is loading and restored afterward', async () => {
+    const env = await controller();
+    let releaseBytes;
+    const bytes = new Promise(resolve => { releaseBytes = resolve; });
+    const loading = env.byId('file-watermark').emit('change', {
+        target: { files: [{ name: 'replacement.pdf', arrayBuffer: () => bytes }] }
+    });
+    assert.equal(env.byId('watermark-redact-size').disabled, true);
+    releaseBytes(new Uint8Array([4, 5, 6]).buffer);
+    await loading;
+    await env.settled();
+    assert.equal(env.byId('watermark-redact-size').disabled, false);
+});
 
 test('zoom renders more PDF detail and keeps manual masks in displayed page coordinates', async () => {
     const env = await controller();
