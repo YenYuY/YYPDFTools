@@ -96,7 +96,7 @@
 
 .removebg-workbench {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 17rem;
+    grid-template-columns: minmax(0, 1fr) clamp(17rem, 18vw, 20rem);
     gap: 1rem;
     align-items: start;
 }
@@ -112,7 +112,8 @@
 .removebg-stage {
     position: relative;
     display: grid;
-    height: min(62vh, 620px);
+    height: 62vh;
+    height: 62dvh;
     min-height: 360px;
     overflow: hidden;
     place-items: center;
@@ -322,6 +323,7 @@
 @media (max-width: 560px) {
     .removebg-stage {
         height: 52vh;
+        height: 52dvh;
         min-height: 300px;
     }
 

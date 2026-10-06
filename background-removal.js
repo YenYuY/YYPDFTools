@@ -9,12 +9,15 @@ import {
     progressPercent,
     strokeBounds,
     unionBounds
-} from './background-removal-core.js?v=20260807-3';
+} from './background-removal-core.js?v=20261005-1';
+import { zoomCanvasView } from './canvas-view-core.js';
 
 const MODEL_MODULE_URL = 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.7.0/+esm';
 const MAX_HISTORY = 30;
 const CANVAS_PADDING = 12;
 const MINIMUM_VISIBLE_CANVAS = 48;
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 8;
 const MODEL_CONFIG = Object.freeze({
     model: 'small',
     device: 'cpu',
@@ -121,7 +124,7 @@ function updateBrushLabel() {
     brushValue.textContent = `${brushSize.value} px`;
 }
 
-function fitCanvasToStage() {
+function fitCanvasToStage(preserveView = false) {
     const fitted = calculateFittedCanvasSize(
         canvas.width,
         canvas.height,
@@ -131,6 +134,11 @@ function fitCanvasToStage() {
     );
     if (!fitted.width || !fitted.height) return false;
 
+    if (preserveView && canvasDisplayWidth && canvasDisplayHeight) {
+        // Preserve the image point at the viewport center when the fitted size changes.
+        panX *= fitted.width / canvasDisplayWidth;
+        panY *= fitted.height / canvasDisplayHeight;
+    }
     canvasDisplayWidth = fitted.width;
     canvasDisplayHeight = fitted.height;
     canvas.style.width = `${fitted.width}px`;
@@ -153,6 +161,8 @@ function updateTransform() {
     panY = constrained.y;
     canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
     zoomValue.textContent = `${Math.round(zoom * 100)}%`;
+    zoomOutButton.disabled = !canvas.width || zoom <= MIN_ZOOM;
+    zoomInButton.disabled = !canvas.width || zoom >= MAX_ZOOM;
 }
 
 function resetView() {
@@ -454,12 +464,26 @@ function stopCompare() {
     compareButton.classList.remove('is-active');
 }
 
-function changeZoom(delta) {
-    zoom = clamp(zoom + delta, 0.5, 4);
+function setZoom(nextZoom, anchorX = 0, anchorY = 0) {
+    if (activePointerId !== null || !canvas.width) return;
+    const view = zoomCanvasView(
+        { zoom, panX, panY },
+        clamp(nextZoom, MIN_ZOOM, MAX_ZOOM),
+        anchorX,
+        anchorY
+    );
+    zoom = view.zoom;
+    panX = view.panX;
+    panY = view.panY;
     updateTransform();
 }
 
+function changeZoom(delta) {
+    setZoom(zoom + delta);
+}
+
 function resetEditor() {
+    window.dispatchEvent(new CustomEvent('yyy:editorreset'));
     processingGeneration += 1;
     currentFile = null;
     inputBlob = null;
@@ -556,6 +580,19 @@ function endPointer(event) {
 
 stage.addEventListener('pointerup', endPointer);
 stage.addEventListener('pointercancel', endPointer);
+
+stage.addEventListener('wheel', event => {
+    if ((!event.ctrlKey && !event.metaKey) || !canvas.width || activePointerId !== null) return;
+    event.preventDefault();
+    const rect = stage.getBoundingClientRect();
+    const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? stage.clientHeight : 1;
+    const delta = event.deltaY * unit;
+    setZoom(
+        zoom * Math.exp(clamp(-delta * 0.002, -1, 1)),
+        event.clientX - rect.left - rect.width / 2,
+        event.clientY - rect.top - rect.height / 2
+    );
+}, { passive: false });
 
 fileInput.addEventListener('change', event => {
     const [file] = event.target.files || [];
@@ -664,7 +701,7 @@ window.addEventListener('yyy:languagechange', () => {
 
 const stageResizeObserver = new ResizeObserver(() => {
     if (!canvas.width || editor.classList.contains('hidden')) return;
-    fitCanvasToStage();
+    fitCanvasToStage(true);
     updateTransform();
 });
 stageResizeObserver.observe(stage);

@@ -42,7 +42,7 @@ It works well for quick everyday document tasks and can be deployed as a static 
 
 PDF watermarks support sans-serif, serif, and monospace fonts, using fonts on your device to render Chinese, Japanese, and other text. Repeated layouts have adjustable spacing, and watermarks can apply to all or selected pages. Without redaction marks, the watermark is added as an image overlay, preserving the original selectable and searchable text. All processing is performed locally.
 
-The page preview starts in View mode. Switch to a black rectangle or brush to manually redact sensitive content with a mouse or touch, and adjust the brush size. Marks remain on their pages when navigating or switching modes and apply until cleared, with undo and clear available for each page. If any page has redaction marks, downloading renders the watermark first and opaque black masks last, rasterizes every page, and creates a new PDF. Source text layers, annotation and form objects, attachments, and metadata are not copied; text in the output can no longer be selected or searched.
+The page preview starts in Browse mode. Switch to a black rectangle or brush to manually redact sensitive content with a mouse or touch, and adjust the brush size. Marks remain on their pages when navigating or switching modes and apply until cleared, with undo and clear available for each page. If any page has redaction marks, downloading renders the watermark first and opaque black masks last, rasterizes every page, and creates a new PDF. Source text layers, annotation and form objects, attachments, and metadata are not copied; text in the output can no longer be selected or searched.
 
 Interface highlights:
 
@@ -51,7 +51,7 @@ Interface highlights:
 - Automatic light and dark themes
 - Progress indicators, success notifications, and recovery-focused errors
 - Visible keyboard focus, semantic tabs, and live status announcements
-- Responsive desktop and mobile layouts
+- Desktop tool areas expand with wide windows, with responsive mobile layouts
 
 ## Privacy and Processing Model
 
@@ -72,6 +72,8 @@ The video tools download an FFmpeg WebAssembly core of about 32 MB on the first 
 2. Click the upload area or drag files onto it.
 3. Configure the format, page range, image quality, password, or rotation angle when applicable.
 4. Start processing; preview the result when the browser supports its format, then download it.
+
+The background removal and PDF watermark editors can expand or collapse; press Esc to leave the expanded view. Fit-to-window is 100%: use +/− or Ctrl/⌘ and the mouse wheel to zoom between 50% and 800%, and drag in Browse/Hand mode to pan. Zooming and panning do not change output dimensions or redaction positions.
 
 Everything happens on the current device. Large or high-resolution documents may take more time and memory depending on device performance, page count, and image dimensions.
 
@@ -100,6 +102,9 @@ Your PDFs, images, and videos still remain on your device and are processed loca
 ```text
 YYPDFTools/
 ├── index.html                 # Main application and default entry point
+├── canvas-view-core.js        # Shared preview fit, zoom, and pan helpers
+├── editor-focus.js            # Shared editor expand and collapse behavior
+├── editor-focus.css           # Expanded editor styles
 ├── pdf-watermark.js           # PDF watermark controller and live preview
 ├── pdf-watermark-core.js      # Watermark settings, layout, and PDF geometry helpers
 ├── pdf-redaction-core.js      # Manual redaction coordinates, brushes, and raster painting helpers

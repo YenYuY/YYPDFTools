@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="background-removal.css">
+    <link rel="stylesheet" href="background-removal.css?v=20261005-2">
     <link rel="stylesheet" href="video-tools.css">
-    <link rel="stylesheet" href="pdf-watermark.css">
+    <link rel="stylesheet" href="pdf-watermark.css?v=20261005-3">
     <!-- 標題 -->
     <title data-i18n="site_title">3Y工具箱</title>
     
@@ -83,6 +83,8 @@
             --space-8: 2rem;
             --space-10: 2.5rem;
             --space-12: 3rem;
+            --page-gutter: clamp(1rem, 2vw, 4rem);
+            --shell-width: calc(100% - var(--page-gutter) * 2);
         }
 
         .dark {
@@ -149,7 +151,7 @@
             backdrop-filter: blur(14px);
         }
         .topbar-inner {
-            width: min(1220px, calc(100% - 2rem));
+            width: var(--shell-width);
             min-height: 4.5rem;
             margin: 0 auto;
             display: flex;
@@ -235,7 +237,7 @@
         }
 
         .app-shell {
-            width: min(1220px, calc(100% - 2rem));
+            width: var(--shell-width);
             margin: 0 auto;
             padding: var(--space-6) 0 var(--space-12);
             display: grid;
@@ -940,7 +942,7 @@
         }
 
         .layout-v3 .topbar-inner {
-            width: min(1180px, calc(100% - 2rem));
+            width: var(--shell-width);
             min-height: 4rem;
             gap: var(--space-3);
         }
@@ -984,7 +986,7 @@
         }
 
         .layout-v3 .app-shell {
-            width: min(1180px, calc(100% - 2rem));
+            width: var(--shell-width);
             grid-template-columns: 15rem minmax(0, 1fr);
             gap: 0;
             padding: 1.25rem 0 2.5rem;
@@ -1379,6 +1381,7 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="editor-focus.css?v=20261005-2">
 </head>
 <body class="app-body layout-v3 flex flex-col">
 
@@ -1697,7 +1700,7 @@
                         <p id="name-watermark" class="watermark-filename"></p>
                         <p id="watermark-page-count" class="watermark-note" aria-live="polite"></p>
                     </div>
-                    <div class="watermark-workbench">
+                    <div class="watermark-workbench" data-editor-label="title_watermark">
                         <div class="watermark-controls">
                             <fieldset id="watermark-settings">
                                 <legend data-i18n="watermark_settings_title">浮水印效果</legend>
@@ -1788,7 +1791,10 @@
                             </div>
                         </div>
                         <div class="watermark-preview-panel" aria-labelledby="watermark-preview-title">
-                            <h3 id="watermark-preview-title" data-i18n="watermark_preview_title">效果預覽</h3>
+                            <div class="editor-preview-heading">
+                                <h3 id="watermark-preview-title" data-i18n="watermark_preview_title">效果預覽</h3>
+                                <button type="button" id="watermark-expand" class="editor-view-button" data-i18n="editor_expand" data-dynamic-text="true" aria-expanded="false">展開編輯器</button>
+                            </div>
                             <p class="watermark-note" data-i18n="watermark_preview_hint">調整設定即時預覽浮水印與遮蔽。未指定的頁面不會加入浮水印。</p>
                             <fieldset id="watermark-redaction-tools" aria-describedby="watermark-redact-hint">
                                 <legend data-i18n="watermark_redact_title">敏感內容遮蔽</legend>
@@ -1818,8 +1824,15 @@
                                     <button type="button" id="watermark-redact-clear" disabled data-i18n="watermark_redact_clear">清除此頁</button>
                                 </div>
                                 <p id="watermark-redact-summary" class="watermark-note" aria-live="polite" data-i18n="watermark_redact_summary" data-dynamic-text="true">此頁 0 筆遮蔽，全部共 0 筆。</p>
-                                <p id="watermark-redact-hint" class="watermark-note" data-i18n="watermark_redact_hint">用滑鼠或手指拖曳黑框，或塗寫覆蓋敏感內容。換頁會保留遮蔽，切回「瀏覽」可正常捲動。按 Esc 取消正在畫的這一筆。</p>
+                                <p id="watermark-redact-hint" class="watermark-note" data-i18n="watermark_redact_hint">用滑鼠或手指拖曳黑框，或塗寫覆蓋敏感內容。換頁會保留遮蔽；「瀏覽」可拖移放大後的頁面。按 Esc 取消正在畫的這一筆。</p>
                             </fieldset>
+                            <div class="editor-view-toolbar" role="group" data-i18n-aria-label="editor_view_controls" aria-label="預覽縮放">
+                                <button type="button" id="watermark-zoom-out" class="editor-view-button" aria-label="縮小" data-i18n-aria-label="editor_zoom_out">−</button>
+                                <output id="watermark-zoom-value" class="editor-zoom-value" aria-live="polite">100%</output>
+                                <button type="button" id="watermark-zoom-in" class="editor-view-button" aria-label="放大" data-i18n-aria-label="editor_zoom_in">＋</button>
+                                <button type="button" id="watermark-fit" class="editor-view-button" data-i18n="editor_fit">適合畫面</button>
+                            </div>
+                            <p class="watermark-note editor-view-hint" data-i18n="editor_view_hint">100% 為適合畫面。使用＋／−或 Ctrl／⌘＋滾輪縮放，切到瀏覽／抓手可拖移。</p>
                             <div id="watermark-preview-stage" class="watermark-preview-stage" aria-busy="false">
                                 <canvas id="watermark-preview" role="img" tabindex="0" data-redact-tool="view" aria-label="PDF 浮水印與遮蔽效果預覽" aria-describedby="watermark-redact-hint watermark-redact-note" data-i18n-aria-label="watermark_preview_canvas_label"></canvas>
                             </div>
@@ -1897,8 +1910,13 @@
                         <button type="button" id="removebg-new" class="removebg-action px-4" data-i18n="removebg_new">更換圖片</button>
                     </div>
 
-                    <div class="removebg-workbench">
+                    <div class="removebg-workbench" data-editor-label="title_removebg">
                         <div class="removebg-canvas-frame">
+                            <div class="editor-preview-heading">
+                                <span class="editor-preview-title" data-i18n="removebg_manual_title">手動精修</span>
+                                <button type="button" id="removebg-expand" class="editor-view-button" data-i18n="editor_expand" data-dynamic-text="true" aria-expanded="false">展開編輯器</button>
+                            </div>
+                            <p class="editor-view-hint" data-i18n="editor_view_hint">100% 為適合畫面。使用＋／−或 Ctrl／⌘＋滾輪縮放，切到瀏覽／抓手可拖移。</p>
                             <div id="removebg-stage" class="removebg-stage" data-tool="erase">
                                 <canvas id="removebg-canvas" tabindex="0" aria-label="去背編輯器" aria-describedby="removebg-pan-hint" data-i18n-aria-label="removebg_editor_aria"></canvas>
                             </div>
@@ -2319,6 +2337,13 @@
                 btn_rotate_dl: "旋轉並下載",
                 tab_watermark: "PDF 浮水印",
                 title_watermark: "PDF 浮水印",
+                editor_expand: "展開編輯器",
+                editor_collapse: "收合編輯器 · Esc",
+                editor_view_controls: "預覽縮放",
+                editor_zoom_in: "放大預覽",
+                editor_zoom_out: "縮小預覽",
+                editor_fit: "適合畫面",
+                editor_view_hint: "100% 為適合畫面。使用＋／−或 Ctrl／⌘＋滾輪縮放，切到瀏覽／抓手可拖移。",
                 desc_watermark: "自訂文字、透明度、角度與位置，預覽後套用至全部或指定頁面",
                 watermark_privacy: "檔案只在瀏覽器內處理。未加入遮蔽時，原有文字仍可選取。",
                 watermark_settings_title: "浮水印效果",
@@ -2360,7 +2385,7 @@
                 watermark_redact_undo: "復原此頁上一筆",
                 watermark_redact_clear: "清除此頁",
                 watermark_redact_summary: "此頁 {current} 筆遮蔽，全部共 {total} 筆。",
-                watermark_redact_hint: "用滑鼠或手指拖曳黑框，或塗寫覆蓋敏感內容。換頁會保留遮蔽，切回「瀏覽」可正常捲動。按 Esc 取消正在畫的這一筆。",
+                watermark_redact_hint: "用滑鼠或手指拖曳黑框，或塗寫覆蓋敏感內容。換頁會保留遮蔽；「瀏覽」可拖移放大後的頁面。按 Esc 取消正在畫的這一筆。",
                 watermark_redact_note: "加入遮蔽後，下載的所有頁面會轉成影像，原始文字無法選取或搜尋。請完整覆蓋敏感內容並檢查每一頁。",
                 watermark_redact_preview_required: "請等待此頁預覽完成後再加入遮蔽。",
                 watermark_redact_canvas_label: "PDF 遮蔽編輯區，使用{tool}，可用滑鼠或手指拖曳，按 Esc 取消正在畫的這一筆",
@@ -2635,6 +2660,13 @@
                 btn_rotate_dl: "Rotate and Download",
                 tab_watermark: "PDF Watermark",
                 title_watermark: "PDF Watermark",
+                editor_expand: "Expand editor",
+                editor_collapse: "Collapse editor · Esc",
+                editor_view_controls: "Preview zoom",
+                editor_zoom_in: "Zoom preview in",
+                editor_zoom_out: "Zoom preview out",
+                editor_fit: "Fit to view",
+                editor_view_hint: "100% fits the view. Use +/− or Ctrl/⌘ + wheel to zoom. Drag in Browse/Hand mode to pan.",
                 desc_watermark: "Customize text, opacity, angle, and position, then preview and apply to all or selected pages",
                 watermark_privacy: "Files stay in your browser. Original text remains selectable when no redactions are added.",
                 watermark_settings_title: "Watermark effects",
@@ -2676,7 +2708,7 @@
                 watermark_redact_undo: "Undo last mark on this page",
                 watermark_redact_clear: "Clear this page",
                 watermark_redact_summary: "{current} marks on this page, {total} marks in total.",
-                watermark_redact_hint: "Drag a black box or paint with your mouse or finger to cover sensitive content. Marks stay when you change pages. Choose Browse to scroll normally. Press Esc to cancel the current mark.",
+                watermark_redact_hint: "Drag a black box or paint with your mouse or finger to cover sensitive content. Marks stay when you change pages. Choose Browse to pan a zoomed page. Press Esc to cancel the current mark.",
                 watermark_redact_note: "Adding redactions converts every downloaded page to an image. Original text will no longer be selectable or searchable. Cover sensitive content completely and check every page.",
                 watermark_redact_preview_required: "Wait for this page's preview to finish before adding a redaction.",
                 watermark_redact_canvas_label: "PDF redaction editor using {tool}. Drag with your mouse or finger. Press Esc to cancel the current mark.",
@@ -2949,6 +2981,13 @@
                 btn_rotate_dl: "回転してダウンロード",
                 tab_watermark: "PDF 透かし",
                 title_watermark: "PDF 透かし",
+                editor_expand: "編集エリアを拡大",
+                editor_collapse: "編集エリアを戻す · Esc",
+                editor_view_controls: "プレビューのズーム",
+                editor_zoom_in: "プレビューを拡大",
+                editor_zoom_out: "プレビューを縮小",
+                editor_fit: "画面に合わせる",
+                editor_view_hint: "100% は画面に合わせた倍率です。＋／− または Ctrl／⌘＋ホイールでズームし、閲覧／ハンドモードでドラッグして移動できます。",
                 desc_watermark: "文字、透明度、角度、位置を調整し、プレビューして全ページまたは指定ページに適用します",
                 watermark_privacy: "ファイルはブラウザ内で処理されます。黒塗りを追加しなければ、元の文字を選択できます。",
                 watermark_settings_title: "透かしの設定",
@@ -2990,7 +3029,7 @@
                 watermark_redact_undo: "このページの直前の操作を戻す",
                 watermark_redact_clear: "このページをクリア",
                 watermark_redact_summary: "このページは {current} 件、全体は {total} 件の黒塗り。",
-                watermark_redact_hint: "マウスや指で四角をドラッグするか、塗りつぶして機密情報を覆います。ページを切り替えても黒塗りは保持されます。「閲覧」に戻すと通常どおりスクロールできます。Esc で描画中の操作を取り消します。",
+                watermark_redact_hint: "マウスや指で四角をドラッグするか、塗りつぶして機密情報を覆います。ページを切り替えても黒塗りは保持されます。「閲覧」で拡大したページをドラッグして移動できます。Esc で描画中の操作を取り消します。",
                 watermark_redact_note: "黒塗りを追加すると、ダウンロードするすべてのページが画像に変換され、元の文字は選択・検索できなくなります。機密情報を完全に覆い、各ページを確認してください。",
                 watermark_redact_preview_required: "ページのプレビューが完了してから黒塗りを追加してください。",
                 watermark_redact_canvas_label: "PDF 黒塗り編集エリア。{tool}でマウスや指をドラッグできます。Esc で描画中の操作を取り消します。",
@@ -3297,6 +3336,7 @@
 
         const tabs = ['img', 'img2pdf', 'merge', 'split', 'compress', 'protect', 'rotate', 'watermark', 'heic', 'removebg', 'video-converter', 'video-compressor', 'video-trimmer'];
         function switchTab(t) {
+            window.dispatchEvent(new CustomEvent('yyy:tabchange', { detail: { tab: t } }));
             tabs.forEach(x => {
                 const section = document.getElementById(`sec-${x}`);
                 const tab = document.getElementById(`btn-tab-${x}`);
@@ -3851,8 +3891,9 @@
         window.YYYTools = { t, notify, safeBaseName };
     </script>
     <script type="module" src="pdf-split.js?v=20260820-1"></script>
-    <script type="module" src="pdf-watermark.js"></script>
-    <script type="module" src="background-removal.js?v=20260807-3"></script>
+    <script type="module" src="pdf-watermark.js?v=20261005-2"></script>
+    <script type="module" src="background-removal.js?v=20261005-2"></script>
+    <script type="module" src="editor-focus.js?v=20261005-2"></script>
     <script type="module" src="video-tools.js"></script>
 </body>
 </html>

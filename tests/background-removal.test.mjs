@@ -11,6 +11,7 @@ import {
     strokeBounds,
     unionBounds
 } from '../background-removal-core.js';
+import { zoomCanvasView } from '../canvas-view-core.js';
 
 test('accepts supported image MIME types and extensions', () => {
     assert.equal(isSupportedImageFile({ type: 'image/png', name: 'photo.bin' }), true);
@@ -32,6 +33,40 @@ test('maps a transformed canvas rectangle back to intrinsic pixels', () => {
         70
     );
     assert.deepEqual(point, { x: 500, y: 250 });
+});
+
+test('keeps the same intrinsic image pixel under the wheel anchor after panning and zooming', () => {
+    const fitted = calculateFittedCanvasSize(4000, 3000, 1000, 800, 12);
+    const viewport = { left: 100, top: 80, width: 1000, height: 800 };
+    const anchor = { x: 240, y: -180 };
+    const clientPoint = {
+        x: viewport.left + viewport.width / 2 + anchor.x,
+        y: viewport.top + viewport.height / 2 + anchor.y
+    };
+    const pixelAtAnchor = view => canvasPointFromClient({
+        left: viewport.left + viewport.width / 2 + view.panX - fitted.width * view.zoom / 2,
+        top: viewport.top + viewport.height / 2 + view.panY - fitted.height * view.zoom / 2,
+        width: fitted.width * view.zoom,
+        height: fitted.height * view.zoom
+    }, 4000, 3000, clientPoint.x, clientPoint.y);
+    const before = { zoom: 2, panX: -100, panY: 75 };
+    const after = zoomCanvasView(before, 8, anchor.x, anchor.y);
+    const beforePixel = pixelAtAnchor(before);
+    const afterPixel = pixelAtAnchor(after);
+
+    assert.ok(Math.abs(beforePixel.x - afterPixel.x) < 1e-9);
+    assert.ok(Math.abs(beforePixel.y - afterPixel.y) < 1e-9);
+    assert.deepEqual(before, { zoom: 2, panX: -100, panY: 75 });
+});
+
+test('maps precise edit coordinates on a panned image at 800 percent without resizing source pixels', () => {
+    const fitted = calculateFittedCanvasSize(4000, 2000, 1000, 700);
+    assert.deepEqual(fitted, { width: 1000, height: 500, scale: 0.25 });
+    // The source remains 4000 x 2000; only the CSS rectangle grows for detailed editing.
+    const zoomedRect = { left: -3740, top: -1505, width: 8000, height: 4000 };
+    assert.deepEqual(canvasPointFromClient(zoomedRect, 4000, 2000, 1260, 495), { x: 2500, y: 1000 });
+    assert.deepEqual(canvasPointFromClient(zoomedRect, 4000, 2000, 1284, 495), { x: 2512, y: 1000 });
+    assert.deepEqual(canvasPointFromClient(zoomedRect, 4000, 2000, 1260, 519), { x: 2500, y: 1012 });
 });
 
 test('calculates clipped stroke bounds and unions edit regions', () => {
