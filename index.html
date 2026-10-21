@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="background-removal.css?v=20261005-2">
     <link rel="stylesheet" href="video-tools.css">
     <link rel="stylesheet" href="pdf-watermark.css?v=20261006-1">
+    <link rel="stylesheet" href="pdf-rotate.css?v=20261021-1">
     <!-- 標題 -->
     <title data-i18n="site_title">3Y工具箱</title>
     
@@ -1665,18 +1666,33 @@
                 <p class="text-gray-500 dark:text-gray-400" data-i18n="desc_rotate">將 PDF 所有頁面進行旋轉</p>
             </div>
             <div class="bg-white dark:bg-dark-card rounded-xl shadow p-6 transition-colors">
-                <input type="file" id="file-rotate" class="hidden" accept="application/pdf">
+                <input type="file" id="file-rotate" class="hidden" accept="application/pdf,.pdf">
                 <!-- Drop Zone ID: drop-rotate -->
                 <div id="drop-rotate" onclick="document.getElementById('file-rotate').click()" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700 hover:border-blue-400 transition">
                     <p class="text-lg text-gray-600 dark:text-gray-300 font-medium" data-i18n="drop_pdf">點擊或拖曳上傳 PDF</p>
                 </div>
                 <div id="ctrl-rotate" class="hidden mt-4 pt-4 border-t dark:border-gray-700">
                     <p id="name-rotate" class="mb-4 font-bold text-gray-700 dark:text-gray-200"></p>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-i18n="lbl_rotate_deg">選擇旋轉角度 (順時針)</label>
-                    <div class="grid grid-cols-3 gap-2 mb-4">
-                        <button onclick="setRotate(90)" class="rotate-opt bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 py-2 rounded border border-gray-200 dark:border-gray-600 dark:text-white" data-deg="90">90°</button>
-                        <button onclick="setRotate(180)" class="rotate-opt bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 py-2 rounded border border-gray-200 dark:border-gray-600 dark:text-white" data-deg="180">180°</button>
-                        <button onclick="setRotate(270)" class="rotate-opt bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 py-2 rounded border border-gray-200 dark:border-gray-600 dark:text-white" data-deg="270">270°</button>
+                    <div class="rotate-preview-panel" role="group" aria-labelledby="rotate-preview-title">
+                        <div class="rotate-preview-heading">
+                            <h3 id="rotate-preview-title" data-i18n="rotate_preview_title">即時預覽</h3>
+                            <p id="rotate-angle-label" aria-live="polite"></p>
+                        </div>
+                        <div id="rotate-preview-stage" aria-busy="false">
+                            <canvas id="rotate-preview" class="hidden" role="img"></canvas>
+                            <p id="rotate-preview-status" role="status" aria-live="polite"></p>
+                        </div>
+                        <div class="rotate-preview-navigation">
+                            <button type="button" id="rotate-prev" class="editor-view-button" disabled data-i18n="rotate_previous">上一頁</button>
+                            <span id="rotate-page-label" aria-live="polite"></span>
+                            <button type="button" id="rotate-next" class="editor-view-button" disabled data-i18n="rotate_next">下一頁</button>
+                        </div>
+                    </div>
+                    <p id="rotate-degrees-label" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-i18n="lbl_rotate_deg">選擇旋轉角度 (順時針)</p>
+                    <div class="grid grid-cols-3 gap-2 mb-4" role="group" aria-labelledby="rotate-degrees-label">
+                        <button type="button" onclick="setRotate(90)" class="rotate-opt bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 py-2 rounded border border-gray-200 dark:border-gray-600 dark:text-white" data-deg="90">90°</button>
+                        <button type="button" onclick="setRotate(180)" class="rotate-opt bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 py-2 rounded border border-gray-200 dark:border-gray-600 dark:text-white" data-deg="180">180°</button>
+                        <button type="button" onclick="setRotate(270)" class="rotate-opt bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 py-2 rounded border border-gray-200 dark:border-gray-600 dark:text-white" data-deg="270">270°</button>
                     </div>
                     <button id="do-rotate" class="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-bold" data-i18n="btn_rotate_dl">旋轉並下載</button>
                 </div>
@@ -2355,6 +2371,14 @@
                 desc_rotate: "將 PDF 所有頁面進行旋轉",
                 lbl_rotate_deg: "選擇旋轉角度 (順時針)",
                 btn_rotate_dl: "旋轉並下載",
+                rotate_preview_title: "即時預覽",
+                rotate_angle_label: "順時針 {angle}° · 套用至所有頁面",
+                rotate_preview_canvas_label: "第 {page} 頁，順時針旋轉 {angle}° 後的預覽",
+                rotate_page_label: "第 {page} / {total} 頁",
+                rotate_previous: "上一頁",
+                rotate_next: "下一頁",
+                rotate_preview_loading: "正在載入預覽…",
+                rotate_preview_error: "無法顯示預覽。請確認 PDF 未損毀且未加密，或重新選擇檔案。仍可嘗試旋轉並下載。",
                 tab_watermark: "PDF 浮水印",
                 title_watermark: "PDF 浮水印",
                 editor_expand: "展開編輯器",
@@ -2680,6 +2704,14 @@
                 desc_rotate: "Rotate all pages in the PDF",
                 lbl_rotate_deg: "Choose Rotation Angle (Clockwise)",
                 btn_rotate_dl: "Rotate and Download",
+                rotate_preview_title: "Live preview",
+                rotate_angle_label: "{angle}° clockwise · Applies to all pages",
+                rotate_preview_canvas_label: "Page {page} preview after rotating {angle}° clockwise",
+                rotate_page_label: "Page {page} of {total}",
+                rotate_previous: "Previous page",
+                rotate_next: "Next page",
+                rotate_preview_loading: "Loading preview…",
+                rotate_preview_error: "Preview unavailable. Check that the PDF is not damaged or encrypted, or select another file. You can still try rotating and downloading.",
                 tab_watermark: "PDF Watermark",
                 title_watermark: "PDF Watermark",
                 editor_expand: "Expand editor",
@@ -3003,6 +3035,14 @@
                 desc_rotate: "PDF の全ページを回転します",
                 lbl_rotate_deg: "回転角度を選択 (時計回り)",
                 btn_rotate_dl: "回転してダウンロード",
+                rotate_preview_title: "リアルタイムプレビュー",
+                rotate_angle_label: "時計回りに {angle}° · 全ページに適用",
+                rotate_preview_canvas_label: "{page} ページを時計回りに {angle}° 回転したプレビュー",
+                rotate_page_label: "{page} / {total} ページ",
+                rotate_previous: "前のページ",
+                rotate_next: "次のページ",
+                rotate_preview_loading: "プレビューを読み込み中…",
+                rotate_preview_error: "プレビューを表示できません。PDF の破損や暗号化を確認するか、別のファイルを選択してください。回転とダウンロードは引き続き試せます。",
                 tab_watermark: "PDF 透かし",
                 title_watermark: "PDF 透かし",
                 editor_expand: "編集エリアを拡大",
@@ -3815,38 +3855,6 @@
             }
         });
 
-        // 7. Rotate
-        let rotateFile, rotateDeg=90;
-        document.getElementById('file-rotate').addEventListener('change', e => {
-            if(e.target.files[0]){
-                rotateFile=e.target.files[0];
-                document.getElementById('name-rotate').textContent=rotateFile.name;
-                document.getElementById('ctrl-rotate').classList.remove('hidden');
-            }
-        });
-        window.setRotate = d => {
-            rotateDeg=d;
-            document.querySelectorAll('.rotate-opt').forEach(b=>{
-                const on = parseInt(b.dataset.deg)===d;
-                b.classList.toggle('is-selected', on);
-                b.setAttribute('aria-pressed', String(on));
-            });
-        };
-        setRotate(90);
-        document.getElementById('do-rotate').addEventListener('click', async () => {
-            if(!rotateFile) return;
-            const btn = document.getElementById('do-rotate');
-            setBusy(btn, true);
-            try {
-                const { PDFDocument, degrees } = PDFLib;
-                const pdf = await PDFDocument.load(await rotateFile.arrayBuffer());
-                pdf.getPages().forEach(p => p.setRotation(degrees(p.getRotation().angle + rotateDeg)));
-                saveAs(new Blob([await pdf.save()],{type:'application/pdf'}), `rotated.pdf`);
-                notify(t('status_done'), 'success');
-            } catch(e){ showError('err_rotate_failed', { message: getErrorMessage(e) }); }
-            finally { setBusy(btn, false, 'btn_rotate_dl'); }
-        });
-
         // 8. HEIC
         let currentHeicPreviewUrl = null;
         document.getElementById('file-heic').addEventListener('change', e => {
@@ -3919,6 +3927,7 @@
         window.YYYTools = { t, notify, safeBaseName };
     </script>
     <script type="module" src="pdf-split.js?v=20260820-1"></script>
+    <script type="module" src="pdf-rotate.js?v=20261021-1"></script>
     <script type="module" src="pdf-watermark.js?v=20261006-3"></script>
     <script type="module" src="background-removal.js?v=20261005-2"></script>
     <script type="module" src="editor-focus.js?v=20261006-2"></script>
