@@ -1,0 +1,132 @@
+.organize-heading,
+.organize-toolbar,
+.organize-preview-heading,
+.organize-preview-actions,
+.organize-navigation {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.organize-heading { justify-content: space-between; margin-bottom: 1rem; }
+.layout-v3 .workspace #drop-organize.hidden + #ctrl-organize {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: 0 !important;
+}
+.organize-file { min-width: 0; flex: 1 1 14rem; }
+#name-organize { font-weight: 700; overflow-wrap: anywhere; }
+#organize-count,
+.organize-hint,
+.organize-note { color: var(--muted); font-size: 0.8125rem; line-height: 1.6; }
+.organize-hint { margin: 0 0 1rem; }
+.organize-note { margin-top: 0.75rem; }
+.organize-toolbar { margin-bottom: 1rem; }
+.organize-toolbar .organize-download { margin-left: auto; }
+.organize-download {
+    min-height: 2.75rem;
+    padding: 0.625rem 1rem;
+    border: 0;
+    border-radius: var(--radius-sm);
+    color: white;
+    background: var(--accent-strong);
+    font-weight: 700;
+}
+.organize-download:hover:not(:disabled) { background: var(--accent); }
+.organize-workbench { display: grid; grid-template-columns: minmax(0, 1fr) minmax(18rem, 42%); gap: 1.5rem; align-items: start; }
+.organize-pages { min-width: 0; }
+.organize-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    gap: 0.875rem;
+    padding: 0.25rem;
+    margin: -0.25rem;
+    list-style: none;
+}
+.organize-card {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    transition: border-color 160ms ease, opacity 160ms ease;
+}
+.organize-card.is-selected { border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 1px; }
+.organize-card.is-dragging { opacity: 0.45; }
+.organize-card.is-drop-target { outline: 3px dashed var(--accent); outline-offset: 3px; }
+.organize-select { display: block; width: 100%; padding: 0; border: 0; background: transparent; color: var(--ink); text-align: left; cursor: grab; }
+.organize-select:active { cursor: grabbing; }
+.organize-thumb { display: flex; align-items: center; justify-content: center; height: 12rem; padding: 0.75rem; background: var(--surface-2); }
+.organize-thumb canvas { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; background: white; pointer-events: none; }
+.organize-thumb-placeholder { color: var(--muted); font-size: 0.8125rem; text-align: center; }
+.organize-card-label { display: flex; align-items: center; justify-content: space-between; gap: 0.25rem; padding: 0.625rem 0.5rem 0.25rem; }
+.organize-position { font-weight: 750; font-variant-numeric: tabular-nums; }
+.organize-original { color: var(--muted); font-size: 0.75rem; }
+.organize-card-actions { display: flex; gap: 0.25rem; padding: 0.25rem 0.375rem 0.375rem; }
+.organize-card-actions .editor-view-button { flex: 1; min-width: 2.75rem; padding: 0.375rem; font-size: 1rem; }
+.organize-danger { color: var(--danger); }
+.organize-danger:hover:not(:disabled) { color: var(--danger); border-color: var(--danger); background: var(--danger-soft); }
+.organize-preview-panel { position: sticky; top: 6rem; min-width: 0; }
+.organize-preview-heading { justify-content: space-between; margin-bottom: 0.75rem; }
+.organize-stage {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: clamp(20rem, 55vh, 42rem);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+}
+.organize-stage canvas { display: block; flex: none; max-width: 100%; max-height: 100%; background: white; }
+.organize-preview-status { position: absolute; max-width: 32rem; padding: 1rem; color: var(--muted); text-align: center; font-size: 0.875rem; }
+.organize-preview-status:empty { display: none; }
+.organize-preview-status[data-state="error"],
+#organize-message[data-state="error"] { color: var(--danger); }
+#organize-message { color: var(--muted); margin: 0.75rem 0; font-size: 0.875rem; overflow-wrap: anywhere; }
+#organize-message:empty { display: none; }
+.organize-navigation { justify-content: center; margin: 0.75rem 0; }
+.organize-page-label { color: var(--muted); font-size: 0.8125rem; text-align: center; font-variant-numeric: tabular-nums; }
+.organize-preview-actions { justify-content: center; }
+.organize-dialog {
+    width: min(72rem, calc(100% - 2rem));
+    max-width: none;
+    max-height: calc(100dvh - 2rem);
+    padding: 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--ink);
+}
+.organize-dialog::backdrop { background: oklch(0.15 0.02 240 / 0.65); }
+.organize-dialog .organize-stage { height: min(65dvh, 54rem); }
+.organize-dialog header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.75rem; }
+.organize-dialog h3 { font-weight: 700; }
+.organize-dialog .organize-preview-actions { margin-top: 0.75rem; }
+#sec-organize button:focus-visible,
+.organize-dialog button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+@media (max-width: 1050px) {
+    .organize-workbench { grid-template-columns: minmax(0, 1fr); }
+    .organize-preview-panel { position: static; grid-row: 1; }
+    .organize-preview-panel .organize-stage { height: 24rem; }
+}
+
+@media (max-width: 560px) {
+    .organize-toolbar > .editor-view-button { flex: 1; }
+    .organize-toolbar .organize-download { width: 100%; margin: 0; }
+    .organize-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.625rem; }
+    .organize-thumb { height: 9rem; padding: 0.5rem; }
+    .organize-card-label { flex-wrap: wrap; }
+    .organize-card-actions { gap: 0; padding: 0.25rem 0; }
+    .organize-card-actions .editor-view-button { min-width: 0; border-color: transparent; }
+    .organize-preview-panel .organize-stage { height: 20rem; }
+    .organize-dialog { width: calc(100% - 1rem); padding: 0.75rem; max-height: calc(100dvh - 1rem); }
+    .organize-dialog .organize-stage { height: 50dvh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .organize-card { transition: none; }
+}

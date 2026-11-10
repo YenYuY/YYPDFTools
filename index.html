@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="video-tools.css">
     <link rel="stylesheet" href="pdf-watermark.css?v=20261006-1">
     <link rel="stylesheet" href="pdf-rotate.css?v=20261021-1">
+    <link rel="stylesheet" href="pdf-organize.css?v=20261110-1">
     <!-- 標題 -->
     <title data-i18n="site_title">3Y工具箱</title>
     
@@ -1423,6 +1424,7 @@
                 <button type="button" onclick="switchTab('img')" class="tab-btn" id="btn-tab-img" role="tab" aria-controls="sec-img" aria-selected="false" tabindex="-1" data-short="P2I" data-i18n="tab_img">PDF 轉圖片</button>
                 <button type="button" onclick="switchTab('img2pdf')" class="tab-btn" id="btn-tab-img2pdf" role="tab" aria-controls="sec-img2pdf" aria-selected="false" tabindex="-1" data-short="I2P" data-i18n="tab_img2pdf">圖片 轉 PDF</button>
                 <button type="button" onclick="switchTab('merge')" class="tab-btn active" id="btn-tab-merge" role="tab" aria-controls="sec-merge" aria-selected="true" data-short="MRG" data-i18n="tab_merge">PDF 合併</button>
+                <button type="button" onclick="switchTab('organize')" class="tab-btn" id="btn-tab-organize" role="tab" aria-controls="sec-organize" aria-selected="false" tabindex="-1" data-short="PGS" data-i18n="tab_organize">PDF 頁面管理</button>
                 <button type="button" onclick="switchTab('split')" class="tab-btn" id="btn-tab-split" role="tab" aria-controls="sec-split" aria-selected="false" tabindex="-1" data-short="SPL" data-i18n="tab_split">PDF 分割</button>
                 <button type="button" onclick="switchTab('compress')" class="tab-btn" id="btn-tab-compress" role="tab" aria-controls="sec-compress" aria-selected="false" tabindex="-1" data-short="CMP" data-i18n="tab_compress">PDF 壓縮</button>
                 <button type="button" onclick="switchTab('protect')" class="tab-btn" id="btn-tab-protect" role="tab" aria-controls="sec-protect" aria-selected="false" tabindex="-1" data-short="UNL" data-i18n="tab_protect">PDF 解鎖</button>
@@ -1503,6 +1505,59 @@
                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-2 italic text-center" data-i18n="drag_hint">提示：您可以拖曳下方的項目來調整合併順序</p>
                     <ul id="list-merge" class="space-y-2"></ul>
                     <button id="do-merge" class="mt-6 w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-bold" data-i18n="btn_merge_dl">合併並下載</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- PDF 頁面管理 -->
+        <section id="sec-organize" class="hidden" role="tabpanel" aria-labelledby="btn-tab-organize">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold" data-i18n="title_organize">PDF 頁面管理</h2>
+                <p data-i18n="desc_organize">預覽每一頁，拖曳調整順序或刪除不需要的頁面</p>
+            </div>
+            <div class="bg-white dark:bg-dark-card rounded-xl p-6">
+                <input type="file" id="file-organize" class="hidden" accept="application/pdf,.pdf">
+                <div id="drop-organize" onclick="document.getElementById('file-organize').click()" class="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer">
+                    <p data-i18n="drop_pdf">點擊或拖曳上傳 PDF</p>
+                </div>
+                <div id="ctrl-organize" class="hidden">
+                    <div class="organize-heading">
+                        <div class="organize-file"><p id="name-organize"></p><p id="organize-count"></p></div>
+                        <button type="button" id="organize-replace" class="editor-view-button" data-i18n="organize_replace">更換 PDF</button>
+                    </div>
+                    <div class="organize-toolbar">
+                        <button type="button" id="organize-undo" class="editor-view-button" disabled data-i18n="organize_undo">復原上一步</button>
+                        <button type="button" id="organize-reset" class="editor-view-button" disabled data-i18n="organize_reset">還原原始頁面</button>
+                        <button type="button" id="do-organize" class="organize-download" disabled data-dynamic-text="true" data-i18n="organize_download">下載編輯後的 PDF</button>
+                    </div>
+                    <p class="organize-hint" data-i18n="organize_hint">拖曳縮圖重新排序，點選縮圖查看大圖。也可用前移／後移按鈕調整順序。</p>
+                    <p id="organize-message" role="status" aria-live="polite"></p>
+                    <div id="organize-workbench" class="organize-workbench hidden">
+                        <div class="organize-pages">
+                            <ol id="organize-grid" class="organize-grid" aria-label="頁面順序" data-i18n-aria-label="organize_order"></ol>
+                            <p class="organize-note" data-i18n="organize_note">至少保留一頁。刪除與排序只會套用至下載的新檔案，原始 PDF 不會變更。</p>
+                        </div>
+                        <div class="organize-preview-panel" role="group" aria-labelledby="organize-preview-title">
+                            <div class="organize-preview-heading">
+                                <h3 id="organize-preview-title" data-i18n="organize_preview_title">頁面預覽</h3>
+                                <button type="button" id="organize-expand" class="editor-view-button" data-i18n="organize_expand">放大預覽</button>
+                            </div>
+                            <div id="organize-preview-stage" class="organize-stage" aria-busy="false">
+                                <canvas id="organize-preview" class="hidden" role="img"></canvas>
+                                <p id="organize-preview-status" class="organize-preview-status" role="status" aria-live="polite"></p>
+                            </div>
+                            <div class="organize-navigation">
+                                <button type="button" id="organize-prev" class="editor-view-button" data-i18n="rotate_previous">上一頁</button>
+                                <span id="organize-page-label" class="organize-page-label" aria-live="polite"></span>
+                                <button type="button" id="organize-next" class="editor-view-button" data-i18n="rotate_next">下一頁</button>
+                            </div>
+                            <div class="organize-preview-actions">
+                                <button type="button" id="organize-earlier" class="editor-view-button" data-i18n="organize_earlier">前移</button>
+                                <button type="button" id="organize-later" class="editor-view-button" data-i18n="organize_later">後移</button>
+                                <button type="button" id="organize-delete" class="editor-view-button organize-danger" data-i18n="organize_delete">刪除此頁</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -2296,6 +2351,41 @@
                 tab_protect: "PDF 解鎖",
                 tab_rotate: "PDF 旋轉",
                 tab_heic: "HEIC 轉 JPG",
+                tab_organize: "PDF 頁面管理",
+                title_organize: "PDF 頁面管理",
+                desc_organize: "預覽每一頁，拖曳調整順序或刪除不需要的頁面",
+                organize_replace: "更換 PDF",
+                organize_undo: "復原上一步",
+                organize_reset: "還原原始頁面",
+                organize_download: "下載編輯後的 PDF",
+                organize_hint: "拖曳縮圖重新排序，點選縮圖查看大圖。也可用前移／後移按鈕調整順序。",
+                organize_order: "頁面順序",
+                organize_note: "至少保留一頁。刪除與排序只會套用至下載的新檔案，原始 PDF 不會變更。",
+                organize_preview_title: "頁面預覽",
+                organize_expand: "放大預覽",
+                organize_close: "關閉",
+                organize_earlier: "前移",
+                organize_later: "後移",
+                organize_delete: "刪除此頁",
+                organize_count: "保留 {count} / {total} 頁 · 已刪除 {deleted} 頁",
+                organize_page_label: "第 {position} / {total} 頁 · 原第 {page} 頁",
+                organize_thumb_label: "預覽第 {position} 頁（原第 {page} 頁）",
+                organize_page: "第 {position} 頁",
+                organize_original: "原第 {page} 頁",
+                organize_move_earlier: "將原第 {page} 頁前移",
+                organize_move_later: "將原第 {page} 頁後移",
+                organize_delete_page: "刪除原第 {page} 頁",
+                organize_loading: "正在讀取 PDF…",
+                organize_preview_loading: "正在載入預覽…",
+                organize_preview_error: "此頁無法預覽，請重新選擇頁面或更換 PDF。",
+                organize_thumbnail_error: "無法顯示縮圖",
+                organize_load_error: "無法讀取 PDF，請確認檔案未損毀，並重新選擇檔案。",
+                organize_password_error: "此 PDF 已加密，請先使用「PDF 解鎖」，再載入解鎖後的檔案。",
+                organize_export_error: "無法匯出 PDF：{message}",
+                organize_moved: "已將原第 {page} 頁移至第 {position} 頁。",
+                organize_deleted: "已刪除原第 {page} 頁。可按「復原上一步」還原。",
+                organize_undone: "已復原上一步。",
+                organize_reset_done: "已還原全部原始頁面與順序。",
                 tab_removebg: "圖片去背",
                 tab_video_converter: "影片轉換",
                 tab_video_compressor: "影片壓縮",
@@ -2639,6 +2729,41 @@
                 tab_removebg: "Remove Background",
                 tab_video_converter: "Video Converter",
                 tab_video_compressor: "Video Compressor",
+                tab_organize: "Organize PDF",
+                title_organize: "Organize PDF Pages",
+                desc_organize: "Preview pages, drag to reorder, and delete the pages you no longer need",
+                organize_replace: "Replace PDF",
+                organize_undo: "Undo",
+                organize_reset: "Restore original pages",
+                organize_download: "Download edited PDF",
+                organize_hint: "Drag thumbnails to reorder. Select a thumbnail for a larger preview, or use the move buttons to change its position.",
+                organize_order: "Page order",
+                organize_note: "Keep at least one page. Edits apply to the downloaded copy; your original PDF stays unchanged.",
+                organize_preview_title: "Page preview",
+                organize_expand: "Enlarge preview",
+                organize_close: "Close",
+                organize_earlier: "Move earlier",
+                organize_later: "Move later",
+                organize_delete: "Delete page",
+                organize_count: "Keeping {count} / {total} pages · {deleted} deleted",
+                organize_page_label: "Page {position} / {total} · Original {page}",
+                organize_thumb_label: "Preview page {position} (original page {page})",
+                organize_page: "Page {position}",
+                organize_original: "Original {page}",
+                organize_move_earlier: "Move original page {page} earlier",
+                organize_move_later: "Move original page {page} later",
+                organize_delete_page: "Delete original page {page}",
+                organize_loading: "Reading PDF…",
+                organize_preview_loading: "Loading preview…",
+                organize_preview_error: "Unable to preview this page. Select it again or choose another PDF.",
+                organize_thumbnail_error: "Thumbnail unavailable",
+                organize_load_error: "Unable to read this PDF. Check that the file is not damaged and select a file again.",
+                organize_password_error: "This PDF is encrypted. Use Unlock PDF first, then load the unlocked file.",
+                organize_export_error: "Unable to export PDF: {message}",
+                organize_moved: "Moved original page {page} to position {position}.",
+                organize_deleted: "Deleted original page {page}. Choose Undo to restore it.",
+                organize_undone: "Last change undone.",
+                organize_reset_done: "All original pages and their order have been restored.",
                 tab_video_trimmer: "Video Trimmer",
                 processing: "Processing...",
                 status_done: "Done. Your download has started.",
@@ -2973,6 +3098,41 @@
                 tab_video_trimmer: "動画トリミング",
                 processing: "処理中...",
                 status_done: "完了しました。ダウンロードを開始しました。",
+                tab_organize: "PDF ページ管理",
+                title_organize: "PDF ページ管理",
+                desc_organize: "各ページをプレビューし、ドラッグで並べ替えたり不要なページを削除できます",
+                organize_replace: "PDF を変更",
+                organize_undo: "元に戻す",
+                organize_reset: "元のページに戻す",
+                organize_download: "編集した PDF をダウンロード",
+                organize_hint: "サムネイルをドラッグして並べ替え、選択すると大きく表示します。前へ／後ろへボタンでも順序を変更できます。",
+                organize_order: "ページ順序",
+                organize_note: "最低 1 ページは残してください。編集はダウンロードするコピーに適用され、元の PDF は変更されません。",
+                organize_preview_title: "ページプレビュー",
+                organize_expand: "プレビューを拡大",
+                organize_close: "閉じる",
+                organize_earlier: "前へ移動",
+                organize_later: "後ろへ移動",
+                organize_delete: "このページを削除",
+                organize_count: "{total} ページ中 {count} ページを保持 · {deleted} ページ削除",
+                organize_page_label: "{position} / {total} ページ · 元の {page} ページ",
+                organize_thumb_label: "{position} ページを表示（元の {page} ページ）",
+                organize_page: "{position} ページ",
+                organize_original: "元の {page} ページ",
+                organize_move_earlier: "元の {page} ページを前へ移動",
+                organize_move_later: "元の {page} ページを後ろへ移動",
+                organize_delete_page: "元の {page} ページを削除",
+                organize_loading: "PDF を読み込み中…",
+                organize_preview_loading: "プレビューを読み込み中…",
+                organize_preview_error: "このページを表示できません。再選択するか、別の PDF を選んでください。",
+                organize_thumbnail_error: "サムネイルを表示できません",
+                organize_load_error: "PDF を読み込めません。破損していないことを確認し、ファイルを選び直してください。",
+                organize_password_error: "暗号化された PDF です。「PDF 解除」で解除してから読み込んでください。",
+                organize_export_error: "PDF を書き出せません：{message}",
+                organize_moved: "元の {page} ページを {position} 番目に移動しました。",
+                organize_deleted: "元の {page} ページを削除しました。「元に戻す」で復元できます。",
+                organize_undone: "前の操作を元に戻しました。",
+                organize_reset_done: "すべての元のページと順序を復元しました。",
                 drop_pdf: "PDF をドラッグ＆ドロップ",
                 select_file: "ファイルを選択またはドラッグ",
                 title_img: "PDF 画像変換",
@@ -3402,7 +3562,7 @@
             if (e.target.id === 'about-modal') closeAboutModal();
         });
 
-        const tabs = ['img', 'img2pdf', 'merge', 'split', 'compress', 'protect', 'rotate', 'watermark', 'heic', 'removebg', 'video-converter', 'video-compressor', 'video-trimmer'];
+        const tabs = ['img', 'img2pdf', 'merge', 'organize', 'split', 'compress', 'protect', 'rotate', 'watermark', 'heic', 'removebg', 'video-converter', 'video-compressor', 'video-trimmer'];
         function switchTab(t) {
             window.dispatchEvent(new CustomEvent('yyy:tabchange', { detail: { tab: t } }));
             tabs.forEach(x => {
@@ -3484,6 +3644,7 @@
             setupDragDrop('drop-video-converter', 'file-video-converter');
             setupDragDrop('drop-video-compressor', 'file-video-compressor');
             setupDragDrop('drop-video-trimmer', 'file-video-trimmer');
+            setupDragDrop('drop-organize', 'file-organize');
         });
 
         // ================= 功能邏輯 =================
@@ -3934,3 +4095,24 @@
     <script type="module" src="video-tools.js"></script>
 </body>
 </html>
+    <dialog id="organize-dialog" class="organize-dialog" aria-labelledby="organize-dialog-title">
+        <header>
+            <h3 id="organize-dialog-title" data-i18n="organize_preview_title">頁面預覽</h3>
+            <button type="button" id="organize-dialog-close" class="editor-view-button" data-i18n="organize_close">關閉</button>
+        </header>
+        <div id="organize-dialog-stage" class="organize-stage" aria-busy="false">
+            <canvas id="organize-dialog-canvas" class="hidden" role="img"></canvas>
+            <p id="organize-dialog-status" class="organize-preview-status" role="status" aria-live="polite"></p>
+        </div>
+        <div class="organize-navigation">
+            <button type="button" id="organize-dialog-prev" class="editor-view-button" data-i18n="rotate_previous">上一頁</button>
+            <span id="organize-dialog-label" class="organize-page-label" aria-live="polite"></span>
+            <button type="button" id="organize-dialog-next" class="editor-view-button" data-i18n="rotate_next">下一頁</button>
+        </div>
+        <div class="organize-preview-actions">
+            <button type="button" id="organize-dialog-earlier" class="editor-view-button" data-i18n="organize_earlier">前移</button>
+            <button type="button" id="organize-dialog-later" class="editor-view-button" data-i18n="organize_later">後移</button>
+            <button type="button" id="organize-dialog-delete" class="editor-view-button organize-danger" data-i18n="organize_delete">刪除此頁</button>
+        </div>
+    </dialog>
+    <script type="module" src="pdf-organize.js?v=20261110-1"></script>

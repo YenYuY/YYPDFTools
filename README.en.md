@@ -29,6 +29,7 @@ It works well for quick everyday document tasks and can be deployed as a static 
 | PDF to Image | Converts every PDF page to JPG or PNG | Images or ZIP |
 | Images to PDF | Combines multiple JPG/PNG images into one document | PDF |
 | Merge PDF | Combines PDFs with drag-to-reorder support | PDF |
+| Organize PDF | Thumbnail previews, drag-to-reorder, and page deletion; move or delete directly in the enlarged preview, with undo and reset | PDF |
 | Split PDF | Simple two-part or page-by-page splitting, plus page previews and custom multi-range outputs | PDF or ZIP |
 | Compress PDF | Rasterizes pages and rebuilds the PDF at a selected image quality | PDF |
 | Unlock PDF | Uses a known password to rebuild an unprotected PDF | PDF |
@@ -73,6 +74,8 @@ The video tools download an FFmpeg WebAssembly core of about 32 MB on the first 
 3. Configure the format, page range, image quality, password, or rotation angle when applicable.
 4. Start processing; preview the result when the browser supports its format, then download it.
 
+In **Organize PDF**, drag thumbnails to reorder pages, or use the move buttons with touch or a keyboard. Select a thumbnail to show a larger inline page preview, then choose **Enlarge preview** to open the preview dialog. Both previews let you move or delete that page directly. Undo reverses edits, reset restores the original pages, and at least one page must remain. Download copies the pages locally in their current order, preserves the original selectable and searchable text, and saves a new `organized_<original-name>.pdf` file.
+
 The background removal and PDF watermark editors can expand or collapse; press Esc to leave the expanded view. Fit-to-window is 100%: use +/− or Ctrl/⌘ and the mouse wheel to zoom between 50% and 800%, and drag in Browse/Hand mode to pan. Zooming and panning do not change output dimensions or redaction positions.
 
 The PDF editor uses a compact floating toolbar on the left, with brush width and editing help in the settings panel to keep the preview larger in short windows or scaled desktop displays.
@@ -111,6 +114,9 @@ YYPDFTools/
 ├── editor-focus.css           # Expanded editor styles
 ├── pdf-watermark.js           # PDF watermark controller and live preview
 ├── pdf-watermark-core.js      # Watermark settings, layout, and PDF geometry helpers
+├── pdf-organize.js            # PDF page management, thumbnails, and enlarged preview
+├── pdf-organize-core.js       # Page ordering, deletion, and export mapping logic
+├── pdf-organize.css           # Page management workspace styles
 ├── pdf-redaction-core.js      # Manual redaction coordinates, brushes, and raster painting helpers
 ├── pdf-watermark.css          # Watermark workspace styles
 ├── background-removal.js     # Automatic removal and manual editor
