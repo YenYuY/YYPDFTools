@@ -14,6 +14,8 @@
   <img alt="Three languages" src="https://img.shields.io/badge/UI-ZH・EN・JA-7c3aed">
 </p>
 
+**[Open 3Y Toolbox](https://yenyuy.github.io/YYPDFTools/)** · Use it in your browser without installing anything.
+
 ![3Y Toolbox English desktop home screen](docs/images/yyypdftools-desktop-en.jpg)
 
 ## Overview
@@ -29,12 +31,12 @@ It works well for quick everyday document tasks and can be deployed as a static 
 | PDF to Image | Converts every PDF page to JPG or PNG | Images or ZIP |
 | Images to PDF | Combines multiple JPG/PNG images into one document | PDF |
 | Merge PDF | Combines PDFs with drag-to-reorder support | PDF |
-| Organize PDF | Thumbnail previews, drag-to-reorder, and page deletion; move or delete directly in the enlarged preview, with undo and reset | PDF |
+| Organize PDF | Preview, reorder, or delete pages, with options to undo edits or restore the original pages | PDF |
 | Split PDF | Simple two-part or page-by-page splitting, plus page previews and custom multi-range outputs | PDF or ZIP |
 | Compress PDF | Rasterizes pages and rebuilds the PDF at a selected image quality | PDF |
 | Unlock PDF | Uses a known password to rebuild an unprotected PDF | PDF |
-| Rotate PDF | Rotates every page clockwise by 90°, 180°, or 270° | PDF |
-| Watermark PDF | Customizes text, font, size, color, opacity, and angle, with single-position or repeated layouts, live page previews, and black rectangles or brushes for manual redaction | PDF |
+| Rotate PDF | Preview rotation page by page and rotate every page clockwise by 90°, 180°, or 270° | PDF |
+| PDF Watermark | Customize the text style, angle, and layout, preview page by page, apply to all or selected pages, and redact content using black rectangles or a brush | PDF |
 | HEIC to JPG | Converts one or more HEIC/HEIF photos to JPG | JPG |
 | Remove Background | Runs local AI removal, then provides erase and restore brushes for refinement | Transparent PNG |
 | Video Converter | Converts video to MP4, WebM, MOV, MKV, AVI, TS, GIF, or common audio formats | Video, GIF, or audio |
@@ -58,7 +60,7 @@ Interface highlights:
 
 All file content is processed in the current browser tab. The project has no upload API and requires no account.
 
-The page loads its frontend libraries from CDNs on first visit, so an internet connection is still required for the initial load. Once those resources are loaded, document processing itself is local. For a fully offline build, download the CDN dependencies listed below and replace their URLs with local paths.
+The first visit uses an internet connection to load frontend libraries from CDNs. An offline deployment also needs local copies of the assets loaded on demand, including the PDF.js worker, the background removal model, and the FFmpeg WebAssembly core.
 
 The background removal tool downloads an AI model of about 40 MB on first use. The browser caches the model, and the image itself is never sent to the model host or another server.
 
@@ -69,12 +71,24 @@ The video tools download an FFmpeg WebAssembly core of about 32 MB on the first 
 
 ## How to Use
 
-1. Open the toolbox and choose a tool from the navigation bar.
-2. Click the upload area or drag files onto it.
+1. Open the toolbox and pick a tool from the tools menu.
+2. Click the file selection area or drag files onto it.
 3. Configure the format, page range, image quality, password, or rotation angle when applicable.
-4. Start processing; preview the result when the browser supports its format, then download it.
+4. Start processing. When it finishes, download the result. The browser also previews supported formats.
 
-In **Organize PDF**, drag thumbnails to reorder pages, or use the move buttons with touch or a keyboard. Select a thumbnail to show a larger inline page preview, then choose **Enlarge preview** to open the preview dialog. Both previews let you move or delete that page directly. Undo reverses edits, reset restores the original pages, and at least one page must remain. Download copies the pages locally in their current order, preserves the original selectable and searchable text, and saves a new `organized_<original-name>.pdf` file.
+### Organize PDF
+
+1. Drag thumbnails to reorder pages, or use **Move earlier** and **Move later** with touch or a keyboard.
+2. Select a thumbnail to preview the page, or choose **Enlarge preview** to open the dialog. You can move or delete the current page in either preview.
+3. Use **Undo** or **Restore original pages** to revise your edits. Keep at least one page.
+4. Choose **Download edited PDF** to save a new copy in the current page order. For example, `report.pdf` becomes `organized_report.pdf`. Existing selectable text remains selectable and searchable.
+
+### Split and rotate PDFs
+
+- In **Split PDF**, use Advanced mode and its thumbnails to confirm the page range for each output PDF. Ranges must not overlap. Only assigned pages are exported. Multiple PDFs download as a ZIP archive.
+- In **Rotate PDF**, choose 90°, 180°, or 270° clockwise and switch between pages to inspect the result. Downloading applies the selected angle to the entire PDF.
+
+### Background removal and watermark editors
 
 The background removal and PDF watermark editors can expand or collapse; press Esc to leave the expanded view. Fit-to-window is 100%: use +/− or Ctrl/⌘ and the mouse wheel to zoom between 50% and 800%, and drag in Browse/Hand mode to pan. Zooming and panning do not change output dimensions or redaction positions.
 
@@ -82,27 +96,19 @@ The PDF editor uses a compact floating toolbar on the left, with brush width and
 
 For repeated watermarks, spacing from 0–240 pt controls pattern density. Angled patterns repeat along the text direction and extend to page edges, where some letters may be cropped. Preview and export use the same layout.
 
-Everything happens on the current device. Large or high-resolution documents may take more time and memory depending on device performance, page count, and image dimensions.
-
-## Use Online
-
-No download or installation is required. Open the hosted version and start using it immediately:
-
-### [Open 3Y Toolbox →](https://yenyuy.github.io/YYPDFTools/)
-
-Your PDFs, images, and videos still remain on your device and are processed locally by the browser. They are never uploaded to a server.
-
 ## Technology
 
 - HTML, CSS, and vanilla JavaScript
 - [Tailwind CSS](https://tailwindcss.com/) via CDN
 - [PDF.js](https://mozilla.github.io/pdf.js/) for reading and rendering PDF pages
-- [pdf-lib](https://pdf-lib.js.org/) for creating, merging, splitting, and rotating PDFs
+- [pdf-lib](https://pdf-lib.js.org/) for creating PDFs and merging, splitting, rotating, or reordering their pages
 - [JSZip](https://stuk.github.io/jszip/) for multi-file archives
 - [FileSaver.js](https://github.com/eligrey/FileSaver.js/) for saving generated files
 - [heic-to](https://github.com/hoppergee/heic-to) for HEIC/HEIF conversion
 - [IMG.LY background-removal](https://github.com/imgly/background-removal-js) for in-browser ONNX Runtime Web and WebAssembly background removal (AGPL-3.0)
 - [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm) for in-browser video conversion, compression, and trimming
+
+Licenses and upstream source code are listed in the [third-party notices](THIRD_PARTY_NOTICES.md).
 
 ## Project Structure
 
@@ -112,6 +118,10 @@ YYPDFTools/
 ├── canvas-view-core.js        # Shared preview fit, zoom, and pan helpers
 ├── editor-focus.js            # Shared editor expand and collapse behavior
 ├── editor-focus.css           # Expanded editor styles
+├── pdf-split.js               # PDF split interface, thumbnails, and export
+├── pdf-split-core.js          # Page range validation and grouping
+├── pdf-rotate.js              # PDF rotation, live preview, and export
+├── pdf-rotate.css             # PDF rotation workspace styles
 ├── pdf-watermark.js           # PDF watermark controller and live preview
 ├── pdf-watermark-core.js      # Watermark settings, layout, and PDF geometry helpers
 ├── pdf-organize.js            # PDF page management, thumbnails, and enlarged preview
@@ -140,7 +150,7 @@ YYPDFTools/
 ## Browser Requirements and Limitations
 
 - The latest Chrome, Edge, Firefox, or Safari is recommended.
-- Large PDFs can consume significant memory. If the browser tab is terminated, process fewer pages or split the work into batches.
+- Large or high-resolution PDFs can consume significant memory. If the browser closes the tab, process fewer pages or work in smaller batches.
 - Encrypted PDF support depends on PDF.js; some encryption methods cannot be unlocked in the browser.
 - Rasterized compression is most useful for scanned PDFs and may not reduce text-heavy documents.
 - HEIC support depends on browser and decoder compatibility.
@@ -151,6 +161,12 @@ YYPDFTools/
 ## Contributing
 
 Issues and pull requests are welcome. When changing features, please verify all three languages, light and dark themes, keyboard behavior, and both desktop and mobile layouts.
+
+Run the tests from the project directory with Node.js 22 or later.
+
+```sh
+node --test tests/*.test.mjs
+```
 
 ---
 
